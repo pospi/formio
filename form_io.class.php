@@ -6,6 +6,9 @@
  * This class takes lists of variables, with given types, and performs
  * form rendering, JSON output, JSON submission and HTTP form submission on them.
  * It also performs data validation where appropriate.
+ *
+ * Copyright (c) 2010 Web Services, Dept. of Education and Training
+ * @author	Sam Pospischil <sam.pospischil@deta.qld.gov.au>
  */
 
 class FormIO implements ArrayAccess
