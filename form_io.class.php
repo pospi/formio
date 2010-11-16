@@ -53,9 +53,9 @@ class FormIO implements ArrayAccess
 	
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
-		FormIO::T_TEXT		=> '<label for="{$name}">{$desc}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"} />',
-		FormIO::T_EMAIL		=> '<label for="{$name}">{$desc}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"} />',
-		FormIO::T_PASSWORD	=> '<label for="{$name}">{$desc}</label><input type="password" name="{$name}" id="{$form}_{$name}"{$classes? class="$classes"} />',
+		FormIO::T_TEXT		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"} />',
+		FormIO::T_EMAIL		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"} />',
+		FormIO::T_PASSWORD	=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}"{$classes? class="$classes"} />',
 		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$form}_{$name}" value="{$value}"{$classes? class="$classes"} />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
@@ -155,6 +155,20 @@ class FormIO implements ArrayAccess
 		return $this->dataValidators[$k];
 	}
 	
+	// Determine if a validator is being run for a particular data key
+	public function hasValidator($k, $validatorName)
+	{
+		if (!is_array($this->dataValidators[$k])) {
+			return false;
+		}
+		foreach ($this->dataValidators[$k] as $validator) {
+			if ($validator == $validatorName || $validator['func'] == $validatorName) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public function setDataType($k, $type)
 	{
 		$this->dataTypes[$k] = $type;
@@ -169,6 +183,9 @@ class FormIO implements ArrayAccess
 	 */
 	public function addValidator($k, $validatorName, $params = array(), $customFunc = false)
 	{
+		if (!isset($this->dataValidators[$k])) {
+			$this->dataValidators[$k] = array();
+		}
 		if (sizeof($params) || $customFunc) {
 			$validatorName = array(
 				'func'		=> $validatorName,
@@ -176,7 +193,7 @@ class FormIO implements ArrayAccess
 				'external'	=> $customFunc
 			);
 		}
-		$this->dataValidators[$k] = $validatorName;
+		$this->dataValidators[$k][] = $validatorName;
 	}
 	
 	// Allows you to add an error message to the form from external scripts
@@ -208,7 +225,7 @@ class FormIO implements ArrayAccess
 		
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
-			$validator = isset($this->dataValidators[$k]) ? $this->dataValidators[$k] : null;
+			$validators = isset($this->dataValidators[$k]) ? $this->dataValidators[$k] : null;
 			
 			if (isset(FormIO::$builder[$fieldType])) {
 				$form .= $this->replaceInputVars(FormIO::$builder[$fieldType], array(
@@ -219,6 +236,7 @@ class FormIO implements ArrayAccess
 							'desc'		=> (isset($this->labels[$k]) ? $this->labels[$k] : false),
 							'classes'	=> false,
 							'maxlen'	=> false,
+							'required'	=> $this->hasValidator($k, 'requiredValidator'),
 						));
 			} else {
 				trigger_error("Unsupported field type: $fieldType", E_USER_WARNING);
@@ -342,7 +360,7 @@ class FormIO implements ArrayAccess
 	//	Callbacks for validation
 	
 	private function requiredValidator($key) {
-		return isset($this->data[$key]);
+		return isset($this->data[$key]) && $this->data[$key] !== '';
 	}
 	
 	private function equalValidator($key, $expected) {
