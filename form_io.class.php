@@ -42,6 +42,7 @@ class FormIO implements ArrayAccess
 	const T_HIDDEN	= 20;			// input[type=hidden]
 	const T_READONLY = 21;			// a bit like a hidden input, only we show the variable
 	const T_DROPDOWN = 22;			// select
+	const T_DROPOPTION = 34;		// single <select> option element. Not useful by itself - used by T_DROPDOWN
 	const T_CHECKBOX = 23;			// single checkbox (also used by T_CHECKGROUP)
 	const T_RADIO	= 33;			// single radio button. Not useful by itself - used by T_RADIOGROUP
 	const T_RADIOGROUP = 24;		// list of radio buttons
@@ -60,6 +61,9 @@ class FormIO implements ArrayAccess
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" /></div>',
+		
+		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}">{$options}</select></div>',
+		FormIO::T_DROPOPTION=> '<option value="{$value}"{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
 		
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
 		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="multiple{$alt? alt}"><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}</fieldset>',
@@ -237,7 +241,7 @@ class FormIO implements ArrayAccess
 	 * @param	string	$k			field name to add an option for
 	 * @param	string	$optionVal	the value this option will have
 	 * @param	mixed	$optionText either the option's description (as text);
-	 * 								or array of desc(string) and optional disabled(bool), checked(bool) and selected(bool) properties
+	 * 								or array of desc(string) and optional disabled(bool), checked(bool) properties
 	 * @param	mixed	$dependentField @see FormIO::addFieldDependency()
 	 */
 	public function addFieldOption($k, $optionVal, $optionText, $dependentField = null)
@@ -315,40 +319,42 @@ class FormIO implements ArrayAccess
 			foreach ($this->dataAttributes[$k] as $attr => $attrVal) {
 				$inputVars[$attr] = $attrVal;
 			}
-			// set data behaviour for form JavaScript, and any type-specific attributes
+			// set data behaviour for form JavaScript, and any other type-specific attributes
 			switch ($fieldType) {
-				case FormIO::T_HIDDEN:
+				case FormIO::T_HIDDEN:		// these field types don't increment the striper
 				case FormIO::T_OUTDENT:
-					--$spin;			// these field types don't increment the striper
+					--$spin;
 					break;
-				case FormIO::T_INDENT:
+				case FormIO::T_INDENT:		// these field types reset the striper
 				case FormIO::T_SECTIONBREAK:
-					$spin = 1;			// these field types reset the striper
+					$spin = 1;
 					break;
-				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
-				case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
-				case FormIO::T_CREDITCARD:	$inputVars['behaviour'] = 'credit'; break;
-				case FormIO::T_ALPHA:		$inputVars['behaviour'] = 'alpha'; break;
-				case FormIO::T_NUMERIC:		$inputVars['behaviour'] = 'numeric'; break;
-				case FormIO::T_CURRENCY:	$inputVars['behaviour'] = 'currency'; break;
-				case FormIO::T_DATE:		$inputVars['behaviour'] = 'date'; break;
-				case FormIO::T_TIME:		$inputVars['behaviour'] = 'time'; break;
-				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
-				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
 				case FormIO::T_DATERANGE:
 					$inputVars['value']		= $value[0];
 					$inputVars['valueEnd']	= $value[1];
 					break;
-				case FormIO::T_RADIOGROUP:
+				case FormIO::T_RADIOGROUP:	// these field types contain subelements
 				case FormIO::T_CHECKGROUP:
-					// Use radiogroup string for both
-					$builderString = FormIO::$builder[FormIO::T_RADIOGROUP];
+				case FormIO::T_DROPDOWN:
+					// determine subfield output format
+					switch ($fieldType) {
+						case FormIO::T_RADIOGROUP:
+							$subFieldType = FormIO::T_RADIO;
+							break;
+						case FormIO::T_CHECKGROUP:
+							$builderString = FormIO::$builder[FormIO::T_RADIOGROUP]; // Use radiogroup string for checkgroup as well
+							$subFieldType = FormIO::T_CHECKBOX;
+							break;
+						case FormIO::T_DROPDOWN:
+							$subFieldType = FormIO::T_DROPOPTION;
+							break;
+					}
 					
 					// Unset value and get ready to build options
 					unset($inputVars['value']);
 					$inputVars['options'] = '';
-					$subFieldType = $fieldType == FormIO::T_RADIOGROUP ? FormIO::T_RADIO : FormIO::T_CHECKBOX;
 					
+					// Build field sub-elements
 					foreach ($this->dataOptions[$k] as $optVal => $desc) {
 						$radioVars = array(
 							'name'		=> $k,
@@ -364,6 +370,17 @@ class FormIO implements ArrayAccess
 						$inputVars['options'] .= $this->replaceInputVars(FormIO::$builder[$subFieldType], $radioVars);
 					}
 					break;
+				// these field types are normal text inputs that have extra clientside behaviours
+				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
+				case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
+				case FormIO::T_CREDITCARD:	$inputVars['behaviour'] = 'credit'; break;
+				case FormIO::T_ALPHA:		$inputVars['behaviour'] = 'alpha'; break;
+				case FormIO::T_NUMERIC:		$inputVars['behaviour'] = 'numeric'; break;
+				case FormIO::T_CURRENCY:	$inputVars['behaviour'] = 'currency'; break;
+				case FormIO::T_DATE:		$inputVars['behaviour'] = 'date'; break;
+				case FormIO::T_TIME:		$inputVars['behaviour'] = 'time'; break;
+				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
+				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
 			}
 			
 			// add row striping
