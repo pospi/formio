@@ -54,19 +54,20 @@ class FormIO implements ArrayAccess
 	
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
-		FormIO::T_PASSWORD	=> '<div class="{$alt?alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" /></div>',
+		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" /></div>',
 		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
+		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
-		FormIO::T_DATERANGE	=> '<div class="daterange{$alt? alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" /></div>',
+		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" /></div>',
 		
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
-		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="checkbox multiple{$alt? alt}"><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}</fieldset>',
+		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="multiple{$alt? alt}"><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}</fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
-		FormIO::T_TEXT		=> '<div class="{$alt?alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} /></div>',
+		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} /></div>',
 	);
 	
 	// default error messages for builtin validator methods
@@ -292,7 +293,7 @@ class FormIO implements ArrayAccess
 			$form .= '</div>' . "\n";
 		}
 		
-		$spin = 0;
+		$spin = 1;
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
 			
@@ -316,6 +317,14 @@ class FormIO implements ArrayAccess
 			}
 			// set data behaviour for form JavaScript, and any type-specific attributes
 			switch ($fieldType) {
+				case FormIO::T_HIDDEN:
+				case FormIO::T_OUTDENT:
+					--$spin;			// these field types don't increment the striper
+					break;
+				case FormIO::T_INDENT:
+				case FormIO::T_SECTIONBREAK:
+					$spin = 1;			// these field types reset the striper
+					break;
 				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
 				case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
 				case FormIO::T_CREDITCARD:	$inputVars['behaviour'] = 'credit'; break;
