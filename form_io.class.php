@@ -94,7 +94,7 @@ class FormIO implements ArrayAccess
 	// Validation functions should simply return true or false
 	private $dataValidators = array();
 	private $dataTypes = array();
-	private $labels = array();
+	private $dataAttributes = array();		// any extra attributes to add to HTML output - maxlen, classes, desc
 	
 	//==========================================================================
 	
@@ -115,7 +115,7 @@ class FormIO implements ArrayAccess
 	public function addField($name, $displayText, $type, $value = null)
 	{
 		$this->data[$name] = $value;
-		$this->labels[$name] = $displayText;
+		$this->dataAttributes[$name] = array('desc' => $displayText);
 		$this->setDataType($name, $type);
 	}
 	
@@ -242,8 +242,8 @@ class FormIO implements ArrayAccess
 				'value'		=> $value,
 				'required'	=> $this->hasValidator($k, 'requiredValidator'),
 			);
-			if (isset($this->labels[$k])) {
-				$inputVars['desc'] = $this->labels[$k];
+			if (isset($this->dataAttributes[$k]['desc'])) {
+				$inputVars['desc'] = $this->dataAttributes[$k]['desc'];
 			}
 			// set data behaviour for form JavaScript
 			switch ($fieldType) {
@@ -300,7 +300,7 @@ class FormIO implements ArrayAccess
 	
 	private function getReadableFieldName($k)
 	{
-		return isset($this->labels[$k]) ? $this->labels[$k] : $k ;
+		return isset($this->dataAttributes[$k]['desc']) ? $this->dataAttributes[$k]['desc'] : $k;
 	}
 	
 	//==========================================================================
