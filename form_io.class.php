@@ -156,6 +156,11 @@ class FormIO implements ArrayAccess
 		return $this->dataValidators[$k];
 	}
 	
+	public function getAttributes($k)
+	{
+		return $this->dataAttributes[$k];
+	}
+	
 	// Determine if a validator is being run for a particular data key
 	public function hasValidator($k, $validatorName)
 	{
@@ -195,6 +200,17 @@ class FormIO implements ArrayAccess
 			);
 		}
 		$this->dataValidators[$k][] = $validatorName;
+	}
+	
+	/**
+	 * Adds an attribute to a field. Use this for presentational things like CSS class names, maxlen attributes etc.
+	 * You can add anything you like in here, but they will only be output if present in the form builder strings
+	 * for the field type being processed. Also note that adding elements here linearly slows the performance of
+	 * rendering the field in question.
+	 */
+	public function addAttribute($k, $attr, $value)
+	{
+		$this->dataAttributes[$k][$attr] = $value;
 	}
 	
 	// Allows you to add an error message to the form from external scripts
@@ -242,8 +258,9 @@ class FormIO implements ArrayAccess
 				'value'		=> $value,
 				'required'	=> $this->hasValidator($k, 'requiredValidator'),
 			);
-			if (isset($this->dataAttributes[$k]['desc'])) {
-				$inputVars['desc'] = $this->dataAttributes[$k]['desc'];
+			// Add labels, extra css class names etc
+			foreach ($this->dataAttributes[$k] as $attr => $attrVal) {
+				$inputVars[$attr] = $attrVal;
 			}
 			// set data behaviour for form JavaScript
 			switch ($fieldType) {
@@ -258,8 +275,6 @@ class FormIO implements ArrayAccess
 				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
 				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
 			}
-			// :TODO:
-			//	classes, maxlen
 			
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
 		}
