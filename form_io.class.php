@@ -1,15 +1,15 @@
 <?php
-/**
- * Form I/O
- *
- * A class to handle input & output as it applies to the webserver's HTTP gateway.
- * This class takes lists of variables, with given types, and performs
- * form rendering, JSON output, JSON submission and HTTP form submission on them.
- * It also performs data validation where appropriate.
- *
- * Copyright (c) 2010 Web Services, Dept. of Education and Training
- * @author	Sam Pospischil <sam.pospischil@deta.qld.gov.au>
- */
+ /*===============================================================================
+	form I/O handler
+	----------------------------------------------------------------------------
+	A class to handle input & output as it applies to the webserver's HTTP gateway.
+	This class takes lists of variables, with given types, and performs
+	form rendering, JSON output, JSON submission and HTTP form submission on them.
+	It also performs data validation where appropriate.
+	----------------------------------------------------------------------------
+	@author		Sam Pospischil <pospi@spadgos.com>
+	@date		2010-11-01
+  ===============================================================================*/
 
 class FormIO implements ArrayAccess
 {
