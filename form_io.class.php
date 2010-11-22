@@ -53,12 +53,13 @@ class FormIO implements ArrayAccess
 	
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
-		FormIO::T_TEXT		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"} />',
-		FormIO::T_EMAIL		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"} />',
 		FormIO::T_PASSWORD	=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}"{$classes? class="$classes"} />',
 		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$form}_{$name}" value="{$value}"{$classes? class="$classes"} />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
+		
+		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
+		FormIO::T_TEXT		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"}{$behaviour? data-fio-type="$behaviour"} />',
 	);
 	
 	// default error messages for builtin validator methods
@@ -227,21 +228,40 @@ class FormIO implements ArrayAccess
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
 			$validators = isset($this->dataValidators[$k]) ? $this->dataValidators[$k] : null;
 			
-			if (isset(FormIO::$builder[$fieldType])) {
-				$form .= $this->replaceInputVars(FormIO::$builder[$fieldType], array(
-							// :TODO: optimise this properties array to only process required properties for each field type
-							'form'		=> $this->name,
-							'name'		=> $k,
-							'value'		=> $value,
-							'desc'		=> (isset($this->labels[$k]) ? $this->labels[$k] : false),
-							'classes'	=> false,
-							'maxlen'	=> false,
-							'required'	=> $this->hasValidator($k, 'requiredValidator'),
-						));
+			// check for specific field type output string
+			if (!isset(FormIO::$builder[$fieldType])) {
+				$builderString = FormIO::$builder[FormIO::T_TEXT];
 			} else {
-				trigger_error("Unsupported field type: $fieldType", E_USER_WARNING);
+				$builderString = FormIO::$builder[$fieldType];
 			}
-			$form .= "\n";
+			
+			// build input property list. We optimise this array as much as possible, as each item present requires extra processing.
+			$inputVars = array(
+				'form'		=> $this->name,
+				'name'		=> $k,
+				'value'		=> $value,
+				'required'	=> $this->hasValidator($k, 'requiredValidator'),
+			);
+			if (isset($this->labels[$k])) {
+				$inputVars['desc'] = $this->labels[$k];
+			}
+			// set data behaviour for form JavaScript
+			switch ($fieldType) {
+				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
+				case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
+				case FormIO::T_CREDITCARD:	$inputVars['behaviour'] = 'credit'; break;
+				case FormIO::T_ALPHA:		$inputVars['behaviour'] = 'alpha'; break;
+				case FormIO::T_NUMERIC:		$inputVars['behaviour'] = 'numeric'; break;
+				case FormIO::T_CURRENCY:	$inputVars['behaviour'] = 'currency'; break;
+				case FormIO::T_DATE:		$inputVars['behaviour'] = 'date'; break;
+				case FormIO::T_TIME:		$inputVars['behaviour'] = 'time'; break;
+				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
+				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
+			}
+			// :TODO:
+			//	classes, maxlen
+			
+			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
 		}
 		
 		return $form . "</form>\n";
@@ -258,18 +278,20 @@ class FormIO implements ArrayAccess
 			$this->lastBuilderReplacement = $value;
 			
 			$str = preg_replace_callback(
-						'/\{\$(' . $property . ')(\?(.+))?\}/',
+						'/\{\$(' . $property . ')(\?([^\}]+))?\}/',
 						array($this, 'formInputBuildCallback'),
 						$str
 					);
 		}
+		// remove any properties we didn't process
+		$str = preg_replace('/\{\$([^\}]+)\}/', '', $str);
 		return $str;
 	}
 	
 	// Callback for replaceInputVars(), used to replace variables in submatches with their own values
 	private function formInputBuildCallback($matches)
 	{
-		if (isset($matches[3]) && !empty($this->lastBuilderReplacement)) {
+		if (isset($matches[3]) && isset($this->lastBuilderReplacement)) {
 			return preg_replace('/\$' . $matches[1] . '/', $this->lastBuilderReplacement, $matches[3]);
 		} else {
 			return $this->lastBuilderReplacement;
