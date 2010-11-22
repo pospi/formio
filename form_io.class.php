@@ -106,6 +106,7 @@ class FormIO implements ArrayAccess
 	private $dataAttributes = array();		// any extra attributes to add to HTML output - maxlen, classes, desc
 	
 	//==========================================================================
+	//	Important stuff
 	
 	/**
 	 * Form constructor. We give it a method, action, enctype and name
@@ -131,8 +132,6 @@ class FormIO implements ArrayAccess
 		}
 	}
 	
-	// :TODO: simplified mutators for adding various non-field types
-	
 	/**
 	 * Imports a data map from some other array. This does not erase existing values
 	 * unless the source array overrides those properties.
@@ -152,6 +151,9 @@ class FormIO implements ArrayAccess
 		}
 		$this->data = array_merge($this->data, $assoc);
 	}
+	
+	//==========================================================================
+	//	Accessors
 	
 	public function getErrors()
 	{
@@ -186,6 +188,9 @@ class FormIO implements ArrayAccess
 		}
 		return false;
 	}
+	
+	//==========================================================================
+	//	Mutators
 	
 	public function setDataType($k, $type)
 	{
@@ -231,11 +236,31 @@ class FormIO implements ArrayAccess
 	 * @param	string	$k			field name to add an option for
 	 * @param	string	$optionVal	the value this option will have
 	 * @param	mixed	$optionText either the option's description (as text);
-	 * 								or array of desc(string), disabled(bool) and checked(bool) properties
+	 * 								or array of desc(string) and optional disabled(bool), checked(bool) and selected(bool) properties
+	 * @param	mixed	$dependentField @see FormIO::addFieldDependency()
 	 */
-	public function addFieldOption($k, $optionVal, $optionText)
+	public function addFieldOption($k, $optionVal, $optionText, $dependentField = null)
 	{
 		$this->dataOptions[$k][$optionVal] = $optionText;
+		if ($dependentField !== null) {
+			$this->addFieldDependency($k, $optionVal, $dependentField);
+		}
+	}
+	
+	/**
+	 * Adds a dependency between one field and another. This sets up the javascript
+	 * to toggle visibility of a field when the value of another changes.
+	 *
+	 * @param	string	$k				field to add the dependency to
+	 * @param	mixed	$expectedValue	when the value of field $k is $expectedValue, $dependentField will be visible. Otherwise, it won't.
+	 * @param	mixed	$dependentField	field name or array of field names to toggle when the value of field $k changes
+	 */
+	public function addFieldDependency($k, $expectedValue, $dependentField)
+	{
+		if (!isset($this->dataDepends[$k])) {
+			$this->dataDepends[$k] = array();
+		}
+		$this->dataDepends[$k][$expectedValue] = $dependentField;
 	}
 	
 	// Allows you to add an error message to the form from external scripts
@@ -243,6 +268,8 @@ class FormIO implements ArrayAccess
 	{
 		$this->errors[] = $msg;
 	}
+	
+	// :TODO: simplified mutators for adding various non-field types
 	
 	//==========================================================================
 	//	Rendering
@@ -267,7 +294,6 @@ class FormIO implements ArrayAccess
 		
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
-			$validators = isset($this->dataValidators[$k]) ? $this->dataValidators[$k] : null;
 			
 			// check for specific field type output string
 			if (!isset(FormIO::$builder[$fieldType])) {
@@ -344,8 +370,12 @@ class FormIO implements ArrayAccess
 	private function replaceInputVars($str, $varsMap)
 	{
 		foreach ($varsMap as $property => $value) {
-			$this->lastBuilderReplacement = $value;
+			if (!$value) {
+				$str = preg_replace('/\{\$' . $property . '.*\}/U', '', $str);
+				continue;
+			}
 			
+			$this->lastBuilderReplacement = $value;
 			$str = preg_replace_callback(
 						'/\{\$(' . $property . ')(\?(.+))?\}/U',
 						array($this, 'formInputBuildCallback'),
@@ -353,7 +383,7 @@ class FormIO implements ArrayAccess
 					);
 		}
 		// remove any properties we didn't process
-		$str = preg_replace('/\{\$(.+)\}/U', '', $str);
+		$str = preg_replace('/\{\$.+\}/U', '', $str);
 		return $str;
 	}
 	
@@ -451,6 +481,20 @@ class FormIO implements ArrayAccess
 	//	Callbacks for validation
 	
 	private function requiredValidator($key) {
+		// check for dependent fields first
+		foreach ($this->dataDepends as $masterField => $dependencies) {
+			foreach ($dependencies as $postValue => $targetFields) {
+				if ($key == $targetFields || in_array($key, $targetFields)		// field is dependant on another field's submission
+				  && $this->data[$masterField] != $postValue) {					// and value for master field means this field is hidden
+					
+					// we should erase the field's value so it doesnt show if the user happens to have filled it out and changed their mind
+					$this->data[$key] = null;
+					// since this field is hidden by a dependency, it does not need to be checked
+					return true;
+				}
+			}
+		}
+			
 		return isset($this->data[$key]) && $this->data[$key] !== '';
 	}
 	
