@@ -42,7 +42,8 @@ class FormIO implements ArrayAccess
 	const T_HIDDEN	= 20;			// input[type=hidden]
 	const T_READONLY = 21;			// a bit like a hidden input, only we show the variable
 	const T_DROPDOWN = 22;			// select
-	const T_CHECKBOX = 23;			// single checkbox
+	const T_CHECKBOX = 23;			// single checkbox (also used by T_CHECKGROUP)
+	const T_RADIO	= 33;			// single radio button. Not useful by itself - used by T_RADIOGROUP
 	const T_RADIOGROUP = 24;		// list of radio buttons
 	const T_CHECKGROUP = 25;		// list of checkboxes
 	const T_SURVEY	= 26;			// :TODO:
@@ -57,9 +58,15 @@ class FormIO implements ArrayAccess
 		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$form}_{$name}" value="{$value}"{$classes? class="$classes"} />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
+		FormIO::T_DATERANGE	=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}"{$classes? class="$classes"} data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}"{$classes? class="$classes"} data-fio-type="date" />',
+		
+		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
+		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="checkbox multiple"><legend>{$desc}{$required? <span class="required">(required)</span>}</legend>{$options}</fieldset>',
+		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
+		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
-		FormIO::T_TEXT		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"}{$behaviour? data-fio-type="$behaviour"} />',
+		FormIO::T_TEXT		=> '<label for="{$name}">{$desc}{$required? <span class="required">(required)</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$classes? class="$classes"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />',
 	);
 	
 	// default error messages for builtin validator methods
@@ -93,7 +100,9 @@ class FormIO implements ArrayAccess
 	//		- a numeric array comprising multiple string or associative ones	(multiple validators, performed in turn)
 	// Validation functions should simply return true or false
 	private $dataValidators = array();
-	private $dataTypes = array();
+	private $dataTypes = array();			// indicates data type for each field
+	private $dataDepends = array();			// :TODO:
+	private $dataOptions = array();			// input options for checkbox, radio, dropdown etc types
 	private $dataAttributes = array();		// any extra attributes to add to HTML output - maxlen, classes, desc
 	
 	//==========================================================================
@@ -117,6 +126,9 @@ class FormIO implements ArrayAccess
 		$this->data[$name] = $value;
 		$this->dataAttributes[$name] = array('desc' => $displayText);
 		$this->setDataType($name, $type);
+		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
+			$this->dataOptions[$name] = array();
+		}
 	}
 	
 	// :TODO: simplified mutators for adding various non-field types
@@ -213,6 +225,19 @@ class FormIO implements ArrayAccess
 		$this->dataAttributes[$k][$attr] = $value;
 	}
 	
+	/**
+	 * Add an option for a multiple field type field (select, radiogroup etc)
+	 *
+	 * @param	string	$k			field name to add an option for
+	 * @param	string	$optionVal	the value this option will have
+	 * @param	mixed	$optionText either the option's description (as text);
+	 * 								or array of desc(string), disabled(bool) and checked(bool) properties
+	 */
+	public function addFieldOption($k, $optionVal, $optionText)
+	{
+		$this->dataOptions[$k][$optionVal] = $optionText;
+	}
+	
 	// Allows you to add an error message to the form from external scripts
 	public function addError($msg)
 	{
@@ -262,7 +287,7 @@ class FormIO implements ArrayAccess
 			foreach ($this->dataAttributes[$k] as $attr => $attrVal) {
 				$inputVars[$attr] = $attrVal;
 			}
-			// set data behaviour for form JavaScript
+			// set data behaviour for form JavaScript, and any type-specific attributes
 			switch ($fieldType) {
 				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
 				case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
@@ -274,6 +299,35 @@ class FormIO implements ArrayAccess
 				case FormIO::T_TIME:		$inputVars['behaviour'] = 'time'; break;
 				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
 				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
+				case FormIO::T_DATERANGE:
+					$inputVars['value']		= $value[0];
+					$inputVars['valueEnd']	= $value[1];
+					break;
+				case FormIO::T_RADIOGROUP:
+				case FormIO::T_CHECKGROUP:
+					// Use radiogroup string for both
+					$builderString = FormIO::$builder[FormIO::T_RADIOGROUP];
+					
+					// Unset value and get ready to build options
+					unset($inputVars['value']);
+					$inputVars['options'] = '';
+					$subFieldType = $fieldType == FormIO::T_RADIOGROUP ? FormIO::T_RADIO : FormIO::T_CHECKBOX;
+					
+					foreach ($this->dataOptions[$k] as $optVal => $desc) {
+						$radioVars = array(
+							'name'		=> $k,
+							'value'		=> $optVal,
+						);
+						if (is_array($desc)) {
+							$radioVars['desc'] = $desc['desc'];
+							if (isset($desc['disabled']))	$radioVars['disabled']	= $desc['disabled'];
+							if (isset($desc['checked']))	$radioVars['checked']	= $desc['checked'];
+						} else {
+							$radioVars['desc'] = $desc;
+						}
+						$inputVars['options'] .= $this->replaceInputVars(FormIO::$builder[$subFieldType], $radioVars);
+					}
+					break;
 			}
 			
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
@@ -293,13 +347,13 @@ class FormIO implements ArrayAccess
 			$this->lastBuilderReplacement = $value;
 			
 			$str = preg_replace_callback(
-						'/\{\$(' . $property . ')(\?([^\}]+))?\}/',
+						'/\{\$(' . $property . ')(\?(.+))?\}/U',
 						array($this, 'formInputBuildCallback'),
 						$str
 					);
 		}
 		// remove any properties we didn't process
-		$str = preg_replace('/\{\$([^\}]+)\}/', '', $str);
+		$str = preg_replace('/\{\$(.+)\}/U', '', $str);
 		return $str;
 	}
 	
