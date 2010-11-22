@@ -1,0 +1,188 @@
+/*
+Based on CLEAN FORM
+http://www.mattvarone.com/web-design/clean-accesible-form-foundation/
+*/
+
+/* General */
+
+form.clean {
+	text-align:left;
+	position:relative;
+}
+
+form.clean div.row, form.clean fieldset {
+	clear: left;
+	padding: 0.5em;
+	margin: 0;
+}
+
+form.clean .alt {
+	background: #EFF8FF;
+}
+
+form.clean label {  
+	padding:0;
+	margin:0.3em 0;
+}
+
+form.clean fieldset {
+	border:1px solid #ddd;
+	margin-bottom: 1em;
+}
+
+form.clean fieldset legend {
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 0;											/* IE */
+}
+@-moz-document url-prefix() {							/* Gecko override */
+	form.clean fieldset legend {
+		padding: 0 0.25em;
+	}
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit override */
+	form.clean fieldset legend {
+		padding: 0 0.25em;
+	}	
+}
+		 
+form.clean label, form.clean .multiple legend {
+	font-weight:bold;
+	position: relative;
+	font-size: 1em;
+}
+
+form.clean input {
+	width:70%;
+	line-height:1.5em;
+	padding:0.15em;
+}
+
+form.clean input, form.clean textarea, form.clean select {
+	display:block;
+	font-size:1em;
+	border:1px solid #bbb;
+	padding:0.15em;
+	margin-right:1em
+}
+
+form.clean textarea, form.clean select {
+	width: 50%;
+}
+
+form.clean textarea {
+	height: 8em;
+}
+
+form.clean .multiple {
+	border: 0;
+	padding: 0 0.25em 0.5em 0.25em;
+	margin-bottom: 0;
+}
+
+form.clean .multiple label, form.clean .multiple input {
+	display:inline;
+}
+
+
+form.clean .multiple input {
+	width:auto;
+	border:none;
+	margin:0 0.3em 0 0;
+	cursor:pointer;
+}
+
+form.clean .multiple label {
+	float:left;
+	width:29%;
+	overflow:hidden;
+	padding: 0 0 0 1%;
+	margin: 0 3% 0 0;
+	font-weight: normal;
+	white-space: nowrap;
+}
+
+form.clean .multiple legend {
+	padding: 0.5em 0.25em 0.5em 0;
+	margin-left: -0.25em;								/* IE */
+}
+@-moz-document url-prefix() {							/* Gecko override */
+	form.clean .multiple legend {
+		margin-left: 0.25em;
+	}
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit override */
+	form.clean .multiple legend {
+		margin-left: 0.25em;
+	}	
+}
+
+/* Type-specific */
+
+form.clean .daterange input {
+	width: auto;
+	display: inline;
+	margin: 0;
+}
+
+/* Button */
+
+form.clean button, form.clean input[type=submit], form.clean input[type=reset] {
+	margin:0.3em 0;
+	border:1px solid #ccc;
+	background-color:#eee;
+	font-size:1em;
+	cursor:pointer;
+	padding:0.5em;
+	width: auto;
+	display: inline;
+}
+
+form.clean button:hover, form.clean input[type=submit]:hover, form.clean input[type=reset]:hover {
+	background-color:#C2D6EF;
+	border:1px solid #000;
+	color:#000;
+}
+
+form.clean button:active, form.clean input[type=submit]:active, form.clean input[type=reset]:active {
+	background-color:#333;
+	color:white;
+	border:1px solid #000;
+}
+
+/* information */
+
+form.clean .preamble {
+	margin-bottom:1em;
+	padding-bottom:0.5em;
+	border-bottom:0.1em solid #ddd;
+}
+
+form.clean .preamble h2 {
+	color:#00889e;
+	font-weight:bold;
+	font-size:1.2em;
+	margin-bottom:1em
+}
+
+form.clean .preamble p {
+	text-align:justify
+}
+
+form.clean .required {
+	color:#ff3838;
+	font-weight:bold;
+	font-size:0.8em;
+	position: absolute;
+	left: -0.75em;
+	top: -0.5em;
+}
+
+form.clean .multiple legend .required {
+	top: 0.25em;
+}
+
+form.clean .err {
+	color:#AF3636;
+	font-weight:bold;
+}
