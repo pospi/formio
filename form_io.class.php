@@ -638,10 +638,11 @@ class FormIO implements ArrayAccess
 	private function dateArrayValidator($key) {
 		if (isset($this->data[$key]) && is_array($this->data[$key])) {
 			foreach ($this->data[$key] as $k => $v) {
-				if (!preg_match(FormIO::dateRegex, $v)) {
+				if (false === preg_match(FormIO::dateRegex, $v)) {
 					return false;
 				}
 			}
+			return true;
 		}
 		return false;
 	}
