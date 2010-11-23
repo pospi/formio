@@ -5,6 +5,7 @@
 	form behaviours
 	
 	@depends	JQuery 1.4.4
+	@depends	JQuery UI 1.8.6
 	----------------------------------------------------------------------------
 	@author		Sam Pospischil <pospi@spadgos.com>
 	@date		2010-11-23
