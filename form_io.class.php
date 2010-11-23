@@ -637,10 +637,17 @@ class FormIO implements ArrayAccess
 	
 	private function dateArrayValidator($key) {
 		if (isset($this->data[$key]) && is_array($this->data[$key])) {
-			foreach ($this->data[$key] as $k => $v) {
-				if (false === preg_match(FormIO::dateRegex, $v)) {
-					return false;
-				}
+			if (false === preg_match(FormIO::dateRegex, $this->data[$key][0], $matches1)
+			  || false === preg_match(FormIO::dateRegex, $this->data[$key][1], $matches2)) {
+				return false;
+			}
+			// also swap the values if they are in the wrong order
+			if (($matches1[3] > $matches2[3])
+			 || ($matches1[3] >= $matches2[3] && $matches1[2] > $matches2[2])
+			 || ($matches1[3] >= $matches2[3] && $matches1[2] >= $matches2[2] && $matches1[1] > $matches2[1])) {
+				$temp = $this->data[$key][0];
+				$this->data[$key][0] = $this->data[$key][1];
+				$this->data[$key][1] = $temp;
 			}
 			return true;
 		}
