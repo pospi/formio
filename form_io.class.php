@@ -52,6 +52,8 @@ class FormIO implements ArrayAccess
 	const T_BUTTON	= 28;
 	const T_SUBMIT	= 29;
 	const T_RESET	= 30;
+	const T_CAPTCHA	= 35;			// reCAPTCHA plugin
+	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into
 	
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
@@ -507,8 +509,8 @@ class FormIO implements ArrayAccess
 		foreach ($validators as $dataKey => $validator) {
 			$dataKey = $overrideDataKey === null ? $dataKey : $overrideDataKey;
 			
-			if ($this->fieldHiddenByDependency($dataKey)) {
-				// if field is being hidden, it's not required so it is nullified and ignored
+			if (!array_key_exists($dataKey, $this->data) || $this->fieldHiddenByDependency($dataKey)) {
+				// if field is being hidden or isn't present, it's not required so it is nullified and ignored
 				continue;
 			}
 			
