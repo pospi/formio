@@ -84,7 +84,12 @@ class FormIO implements ArrayAccess
 		'maxLengthValidator'=> "$1 must not be longer than $2 characters",
 		'inArrayValidator'	=> "$1 must be one of $2",
 		'regexValidator'	=> "$1 was not in the correct format",
+		'dateValidator'		=> "$1 must be a valid date in dd/mm/yyyy format",
+		'dateArrayValidator'=> "$1 contains invalid dates not in dd/mm/yyyy format",
 	);
+	
+	// misc constants used for validation
+	const dateRegex = '/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/';
 	
 	private $lastBuilderReplacement;		// form builder hack for preg_replace_callback not being able to accept extra parameters
 	
@@ -624,6 +629,21 @@ class FormIO implements ArrayAccess
 	
 	private function regexValidator($key, $regex) {
 		return preg_match($regex, $this->data[$key]);
+	}
+	
+	private function dateValidator($key) {
+		return $this->regexValidator($key, FormIO::dateRegex);
+	}
+	
+	private function dateArrayValidator($key) {
+		if (isset($this->data[$key]) && is_array($this->data[$key])) {
+			foreach ($this->data[$key] as $k => $v) {
+				if (!preg_match(FormIO::dateRegex, $v)) {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 	
 	//==========================================================================
