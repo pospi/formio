@@ -77,7 +77,7 @@ class FormIO implements ArrayAccess
 	// default error messages for builtin validator methods
 	private static $defaultErrors = array(
 		'requiredValidator'	=> "Required field '$1' not found",
-		'arrayRequiredValidator' => "Required field '$1' not complete",
+		'arrayRequiredValidator' => "Required field '$1' not completed",
 		'equalValidator'	=> "$1 must be equal to $2",
 		'notEqualValidator'	=> "$1 must not be equal to $2",
 		'minLengthValidator'=> "$1 must be at least $2 characters",
@@ -324,6 +324,11 @@ class FormIO implements ArrayAccess
 				'value'		=> $value,
 				'required'	=> ($this->hasValidator($k, 'requiredValidator') || $this->hasValidator($k, 'arrayRequiredValidator')),
 			);
+			// Add validation parameter output for JS
+			$params = $this->getValidatorParams($k);
+			if ($params) {
+				$inputVars['validation'] = $params;
+			}
 			// Add labels, extra css class names etc
 			foreach ($this->dataAttributes[$k] as $attr => $attrVal) {
 				$inputVars[$attr] = $attrVal;
@@ -454,6 +459,25 @@ class FormIO implements ArrayAccess
 			$depends[] = "$fieldVal=" . implode(';', $visibleFields);
 		}
 		return implode('&', $depends);
+	}
+	
+	// for use in data-fio-validation field attributes
+	private function getValidatorParams($k)
+	{
+		if (!is_array($this->dataValidators[$k])) {
+			return null;
+		}
+		$params = array();
+		foreach ($this->dataValidators[$k] as $validator) {
+			if (!is_array($validator)) {
+				continue;		// parameterless validator
+			} else {
+				if (isset($validator['params'])) {
+					$params[] = $validator['func'] . '=' . implode(';', $validator['params']);
+				}
+			}
+		}
+		return sizeof($params) ? implode('&', $params) : '';
 	}
 	
 	//==========================================================================
