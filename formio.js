@@ -53,11 +53,25 @@ $(document).ready(function() {
 		return selected;
 	};
 	
+	var restripeForm = function(form)
+	{
+		var rows = form.find('.row:visible');
+		
+		var spin = 1;
+		rows.each(function() {
+			$(this).removeClass('alt');
+			if (++spin % 2 == 0) {
+				$(this).addClass('alt');
+			}
+		});
+	};
+	
+	// :TODO: handle complex conditions better. At present all are executed in order
 	var checkDependencies = function(el)
 	{
 		var current = getFieldValue(el);
-		
-		var formId = el.closest('form.clean').attr('id');
+		var formModified = false;
+		var formId = el.closest('form.clean');
 		
 		$.each(fieldDependencies[el.attr('id')], function(value, visible) {
 			var hide = true;
@@ -70,13 +84,20 @@ $(document).ready(function() {
 			});
 			
 			$.each(visible, function(unused, hideEl) {
-				if (hide) {
-					getFieldRowElement($('#' + formId + '_' + hideEl)).hide();
-				} else {
-					getFieldRowElement($('#' + formId + '_' + hideEl)).show();
+				var row = getFieldRowElement($('#' + formId.attr('id') + '_' + hideEl));
+				if (hide && row.is(':visible')) {
+					row.hide();
+					formModified = true;
+				} else if (!row.is(':visible')) {
+					row.show();
+					formModified = true;
 				}
 			});
 		});
+		
+		if (formModified) {
+			restripeForm(formId);
+		}
 	};
 	
 	//==========================================================================
