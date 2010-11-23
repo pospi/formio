@@ -77,6 +77,7 @@ class FormIO implements ArrayAccess
 	// default error messages for builtin validator methods
 	private static $defaultErrors = array(
 		'requiredValidator'	=> "Required field '$1' not found",
+		'arrayRequiredValidator' => "Required field '$1' not complete",
 		'equalValidator'	=> "$1 must be equal to $2",
 		'notEqualValidator'	=> "$1 must not be equal to $2",
 		'minLengthValidator'=> "$1 must be at least $2 characters",
@@ -265,6 +266,9 @@ class FormIO implements ArrayAccess
 		if (!isset($this->dataDepends[$k])) {
 			$this->dataDepends[$k] = array();
 		}
+		if (!is_array($dependentField)) {
+			$dependentField = array($dependentField);
+		}
 		$this->dataDepends[$k][$expectedValue] = $dependentField;
 	}
 	
@@ -283,6 +287,11 @@ class FormIO implements ArrayAccess
 	{
 		require_once(DET_CLASSES . 'json_parser.class.php');
 		return JSONParser::encode($this->data);
+	}
+	
+	public function getQueryString()
+	{
+		return http_build_query($this->data);
 	}
 	
 	public function getForm()
@@ -454,6 +463,11 @@ class FormIO implements ArrayAccess
 		foreach ($validators as $dataKey => $validator) {
 			$dataKey = $overrideDataKey === null ? $dataKey : $overrideDataKey;
 			
+			if ($this->fieldHiddenByDependency($dataKey)) {
+				// if field is being hidden, it's not required so it is nullified and ignored
+				continue;
+			}
+			
 			$valid = true;
 			$externalValidator = false;
 			
@@ -507,25 +521,46 @@ class FormIO implements ArrayAccess
 		return $str;
 	}
 	
-	//==========================================================================
-	//	Callbacks for validation
-	
-	private function requiredValidator($key) {
-		// check for dependent fields first
+	/**
+	 * Determine if the field is being hidden by a dependency rule and the value of another field
+	 *
+	 * Also erases field values when being hidden
+	 */
+	private function fieldHiddenByDependency($key)
+	{
 		foreach ($this->dataDepends as $masterField => $dependencies) {
 			foreach ($dependencies as $postValue => $targetFields) {
-				if ($key == $targetFields || in_array($key, $targetFields)		// field is dependant on another field's submission
+				if (in_array($key, $targetFields)								// field is dependant on another field's submission
 				  && $this->data[$masterField] != $postValue) {					// and value for master field means this field is hidden
-					
+
 					// we should erase the field's value so it doesnt show if the user happens to have filled it out and changed their mind
 					$this->data[$key] = null;
-					// since this field is hidden by a dependency, it does not need to be checked
+					
 					return true;
 				}
 			}
 		}
-			
+		return false;
+	}
+	
+	//==========================================================================
+	//	Callbacks for validation
+	
+	private function requiredValidator($key) {
 		return isset($this->data[$key]) && $this->data[$key] !== '';
+	}
+	
+	// @param	array	$requiredKeys	a list of array keys which are required. When omitted, all keys are checked.
+	private function arrayRequiredValidator($key, $requiredKeys = null) {
+		if (isset($this->data[$key]) && is_array($this->data[$key])) {
+			foreach ($this->data[$key] as $k => $v) {
+				if ((is_array($requiredKeys) && in_array($k, $requiredKeys) && empty($v)) || (!is_array($requiredKeys) && empty($v))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	private function equalValidator($key, $expected) {
