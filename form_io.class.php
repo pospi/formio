@@ -62,11 +62,11 @@ class FormIO implements ArrayAccess
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" /></div>',
 		
-		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}">{$options}</select></div>',
+		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}">{$options}</select></div>',
 		FormIO::T_DROPOPTION=> '<option value="{$value}"{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
 		
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
-		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="multiple{$alt? alt}"><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}</fieldset>',
+		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}</fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		
@@ -322,7 +322,7 @@ class FormIO implements ArrayAccess
 				'form'		=> $this->name,
 				'name'		=> $k,
 				'value'		=> $value,
-				'required'	=> $this->hasValidator($k, 'requiredValidator'),
+				'required'	=> ($this->hasValidator($k, 'requiredValidator') || $this->hasValidator($k, 'arrayRequiredValidator')),
 			);
 			// Add labels, extra css class names etc
 			foreach ($this->dataAttributes[$k] as $attr => $attrVal) {
@@ -357,6 +357,11 @@ class FormIO implements ArrayAccess
 						case FormIO::T_DROPDOWN:
 							$subFieldType = FormIO::T_DROPOPTION;
 							break;
+					}
+					
+					// dependencies for javascript
+					if (isset($this->dataDepends[$k])) {
+						$inputVars['dependencies'] = $this->getDependencyString($k);
 					}
 					
 					// Unset value and get ready to build options
@@ -439,6 +444,16 @@ class FormIO implements ArrayAccess
 	private function getReadableFieldName($k)
 	{
 		return isset($this->dataAttributes[$k]['desc']) ? $this->dataAttributes[$k]['desc'] : $k;
+	}
+	
+	// for use in data-fio-depends field attributes
+	private function getDependencyString($k)
+	{
+		$depends = array();
+		foreach ($this->dataDepends[$k] as $fieldVal => $visibleFields) {
+			$depends[] = "$fieldVal=" . implode(';', $visibleFields);
+		}
+		return implode('&', $depends);
 	}
 	
 	//==========================================================================
