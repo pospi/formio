@@ -263,6 +263,41 @@ class FormIO implements ArrayAccess
 			);
 		}
 		$this->dataValidators[$k][] = $validatorName;
+		
+		return true;
+	}
+	
+	// Removes a validator from a field if it is found to exist. Returns true if one was erased.
+	public function removeValidator($k, $validatorName)
+	{
+		if (!is_array($this->dataValidators[$k])) {
+			return false;
+		}
+		foreach ($this->dataValidators[$k] as $i => $validator) {
+			if ($validator == $validatorName || $validator['func'] == $validatorName) {
+				unset($this->dataValidators[$k][$i]);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Set some fields to be required. Simply pass as many field names to the function as you desire.
+	 */
+	public function setRequired()
+	{
+		$a = func_get_args();
+		foreach ($a as $fieldName) {
+			switch ($this->dataTypes[$fieldName]) {
+				case FormIO::T_DATERANGE:
+					$this->addValidator($fieldName, 'arrayRequiredValidator', array(array(0, 1)), false);
+					break;
+				default:
+					$this->addValidator($fieldName, 'requiredValidator', array(), false);
+					break;
+			}
+		}
 	}
 	
 	/**
