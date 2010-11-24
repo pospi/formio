@@ -100,10 +100,10 @@ class FormIO implements ArrayAccess
 	);
 	
 	// misc constants used for validation
-	const dateRegex		= '/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})/';					// capture: day, month, year
+	const dateRegex		= '/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/';					// capture: day, month, year
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
-	const currencyRegex	= '/^\s*\$?(\d+)(\.(\d{0,2}))?/';							// capture: dollars, , cents
+	const currencyRegex	= '/^\s*\$?(\d+)(\.(\d{0,2}))?\s*$/';							// capture: dollars, , cents
 	
 	//===============================================================================================/\
 	
@@ -586,6 +586,9 @@ class FormIO implements ArrayAccess
 				continue;
 			}
 			
+			// run requiredValidator first, since any other validation need only run if the data is present
+			$dataSubmitted = $this->requiredValidator($dataKey);
+			
 			$valid = true;
 			$externalValidator = false;
 			
@@ -604,7 +607,12 @@ class FormIO implements ArrayAccess
 			if (!isset($func)) {						// array of validators to be performed in sequence - recurse.
 				$valid = $this->handleValidations($validator, $dataKey);
 			} else {
-				$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
+				// only perform validation if data has been sent
+				if (!$externalValidator && $func == 'requiredValidator') {
+					$valid = $dataSubmitted;
+				} else if ($dataSubmitted) {
+					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
+				}
 				
 				if (!$valid) {
 					if (isset($this->errors[$dataKey])) {
@@ -686,30 +694,18 @@ class FormIO implements ArrayAccess
 	}
 	
 	private function notEqualValidator($key, $unexpected) {
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		return !isset($this->data[$key]) || $this->data[$key] != $unexpected;
 	}
 	
 	private function minLengthValidator($key, $length) {
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		return strlen($this->data[$key]) >= $length;
 	}
 	
 	private function maxLengthValidator($key, $length) {
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		return strlen($this->data[$key]) <= $length;
 	}
 	
 	private function inArrayValidator($key, $allowable) {
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		return in_array($this->data[$key], $allowable);
 	}
 	
@@ -718,9 +714,6 @@ class FormIO implements ArrayAccess
 	}
 	
 	private function dateValidator($key) {					// also sets stored data to DD/MM/YYYY format
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		preg_match(FormIO::dateRegex, $this->data[$key], $matches);
 		$success = sizeof($matches) == 4;
 		if ($success) {
@@ -730,23 +723,14 @@ class FormIO implements ArrayAccess
 	}
 	
 	private function emailValidator($key) {
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		return $this->regexValidator($key, FormIO::emailRegex);
 	}
 	
 	private function phoneValidator($key) {
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		return $this->regexValidator($key, FormIO::phoneRegex);
 	}
 	
 	private function currencyValidator($key) {				// also sets stored data to float representation
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		preg_match(FormIO::currencyRegex, $this->data[$key], $matches);
 		$success = sizeof($matches) > 0;
 		if ($success) {
@@ -756,9 +740,6 @@ class FormIO implements ArrayAccess
 	}
 	
 	private function urlValidator($key) {					// allows http, https & ftp *only*. Also ensures stored data has scheme present
-		// If it's not been sent, this validation is fine
-		if (!$this->requiredValidator($key)) return true;
-		
 		if (false == $bits = parse_url($this->data[$key])) {
 			return false;
 		}
