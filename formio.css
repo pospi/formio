@@ -121,10 +121,15 @@ form.clean .multiple legend {
 
 /* Type-specific */
 
-form.clean .daterange input {
+form.clean .daterange input, form.clean .datetime input, form.clean .datetime select {
 	width: auto;
 	display: inline;
 	margin: 0;
+}
+
+form.clean input.time {
+	text-align: right;
+	width: 9em;
 }
 
 /* Button */

@@ -63,6 +63,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$form}_{$name}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$form}_{$name}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$form}_{$name}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -91,6 +92,7 @@ class FormIO implements ArrayAccess
 		'inArrayValidator'	=> "$1 must be one of $2",
 		'regexValidator'	=> "$1 was not in the correct format",
 		'dateValidator'		=> "$1 must be a valid date in dd/mm/yyyy format",
+		'dateTimeValidator'	=> "$1 must be formatted as dd/mm/yyyy, in 12 hour format",
 		'dateRangeValidator'=> "$1 contains invalid dates not in dd/mm/yyyy format",
 		'emailValidator'	=> "$1 must be a valid email address",
 		'phoneValidator'	=> "$1 must be a valid phone number. Phone numbers must contain numbers, spaces and brackets only, and may start with a plus sign",
@@ -100,10 +102,11 @@ class FormIO implements ArrayAccess
 	);
 	
 	// misc constants used for validation
-	const dateRegex		= '/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/';					// capture: day, month, year
+	const dateRegex		= '/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s*$/';						// capture: day, month, year
+	const timeRegex		= '/^\s*(\d{1,2}):(\d{2})(:(\d{2}))?\s*$/';								// capture: hr, min, , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
-	const currencyRegex	= '/^\s*\$?(\d+)(\.(\d{0,2}))?\s*$/';							// capture: dollars, , cents
+	const currencyRegex	= '/^\s*\$?(\d+)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
 	
 	//===============================================================================================/\
 	
@@ -236,6 +239,8 @@ class FormIO implements ArrayAccess
 				$this->addValidator($k, 'dateValidator', array(), false); break;
 			case FormIO::T_DATERANGE:
 				$this->addValidator($k, 'dateRangeValidator', array(), false); break;
+			case FormIO::T_DATETIME:
+				$this->addValidator($k, 'dateTimeValidator', array(), false); break;
 			case FormIO::T_CAPTCHA:
 				$this->addValidator($k, 'captchaValidator', array(), false);
 				$this->addValidator($k, 'requiredValidator', array(), false); break;
@@ -292,7 +297,8 @@ class FormIO implements ArrayAccess
 		foreach ($a as $fieldName) {
 			switch ($this->dataTypes[$fieldName]) {
 				case FormIO::T_DATERANGE:
-					$this->addValidator($fieldName, 'arrayRequiredValidator', array(array(0, 1)), false);
+				case FormIO::T_DATETIME:
+					$this->addValidator($fieldName, 'arrayRequiredValidator', array(), false);
 					break;
 				default:
 					$this->addValidator($fieldName, 'requiredValidator', array(), false);
@@ -425,6 +431,12 @@ class FormIO implements ArrayAccess
 				case FormIO::T_DATERANGE:
 					$inputVars['value']		= $value[0];
 					$inputVars['valueEnd']	= $value[1];
+					break;
+				case FormIO::T_DATETIME:
+					$inputVars['value']		= $value[0];
+					$inputVars['valueTime']	= $value[1];
+					$inputVars['pm']		= $value[2] == 'pm';
+					$inputVars['am']		= $value[2] != 'pm';
 					break;
 				case FormIO::T_RADIOGROUP:	// these field types contain subelements
 				case FormIO::T_CHECKGROUP:
@@ -710,12 +722,15 @@ class FormIO implements ArrayAccess
 	}
 	
 	private function regexValidator($key, $regex) {
-		return preg_match($regex, $this->data[$key]);
+		return preg_match($regex, $this->data[$key]) !== false;
 	}
 	
 	private function dateValidator($key) {					// also sets stored data to DD/MM/YYYY format
 		preg_match(FormIO::dateRegex, $this->data[$key], $matches);
 		$success = sizeof($matches) == 4;
+		if ($matches[1] > 31 || $matches[2] > 12) {
+			return false;
+		}
 		if ($success) {
 			$this->data[$key] = str_pad($matches[1], 2, '0', STR_PAD_LEFT) . '/' . str_pad($matches[2], 2, '0', STR_PAD_LEFT) . '/' . str_pad($matches[3], 4, '20', STR_PAD_LEFT);
 		}
@@ -765,6 +780,11 @@ class FormIO implements ArrayAccess
 			  || false === preg_match(FormIO::dateRegex, $this->data[$key][1], $matches2))) {
 				return false;
 			}
+			
+			if ($matches1[1] > 31 || $matches1[2] > 12 || $matches2[1] > 31 || $matches2[2] > 12) {
+				return false;
+			}
+			
 			// also swap the values if they are in the wrong order
 			if (($matches1[3] > $matches2[3])
 			 || ($matches1[3] >= $matches2[3] && $matches1[2] > $matches2[2])
@@ -776,6 +796,36 @@ class FormIO implements ArrayAccess
 			return true;
 		}
 		return true;		// not set, so validate as OK and let requiredValidator pick it up
+	}
+	
+	private function dateTimeValidator($key) {
+		if (isset($this->data[$key]) && is_array($this->data[$key])) {
+			// either both or none must be set
+			if (empty($this->data[$key][0]) ^ empty($this->data[$key][1])) {
+				return false;
+			}
+			
+			$dateOk = preg_match(FormIO::dateRegex, $this->data[$key][0], $dateMatches);
+			$timeOk = preg_match(FormIO::timeRegex, $this->data[$key][1], $timeMatches);
+			
+			if (false === $dateOk || false == $timeOk) {
+				return false;
+			}
+			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 11 || $timeMatches[2] > 59) {
+				return false;
+			}
+			
+			$this->data[$key] = array(
+								str_pad($dateMatches[1], 2, '0', STR_PAD_LEFT) . '/'
+								. str_pad($dateMatches[2], 2, '0', STR_PAD_LEFT) . '/'
+								. str_pad($dateMatches[3], 4, '20', STR_PAD_LEFT)
+							,	str_pad($timeMatches[1], 2, '0', STR_PAD_LEFT) . ':'
+								. str_pad($timeMatches[2], 2, '0', STR_PAD_LEFT)
+								. (isset($timeMatches[4]) ? ':' . str_pad($timeMatches[4], 2, '0', STR_PAD_LEFT) : '')
+							,	$this->data[$key][2]
+							);
+		}
+		return true;
 	}
 	
 	//==========================================================================
