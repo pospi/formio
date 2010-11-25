@@ -73,6 +73,8 @@ class FormIO implements ArrayAccess
 		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="row multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
+		
+		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -107,6 +109,10 @@ class FormIO implements ArrayAccess
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
+	
+	// reCAPTCHA parameters for T_CAPTCHA. Recommend you set these from your own scripts.
+	public $reCAPTCHA_pub	= '';
+	public $reCAPTCHA_priv	= '';
 
 	//===============================================================================================/\
 
@@ -150,19 +156,6 @@ class FormIO implements ArrayAccess
 	}
 
 	/**
-	 * Add a field to this form
-	 */
-	public function addField($name, $displayText, $type, $value = null)
-	{
-		$this->data[$name] = $value;
-		$this->dataAttributes[$name] = array('desc' => $displayText);
-		$this->setDataType($name, $type);
-		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
-			$this->dataOptions[$name] = array();
-		}
-	}
-
-	/**
 	 * Imports a data map from some other array. This does not erase existing values
 	 * unless the source array overrides those properties.
 	 * Best used when importing variables from $_POST, $_GET etc
@@ -181,6 +174,134 @@ class FormIO implements ArrayAccess
 		}
 		$this->data = array_merge($this->data, $assoc);
 	}
+
+	//==========================================================================
+	//	Form building
+
+	/**
+	 * Add a field to this form
+	 */
+	public function addField($name, $displayText, $type, $value = null)
+	{
+		$this->data[$name] = $value;
+		$this->dataAttributes[$name] = array('desc' => $displayText);
+		$this->setDataType($name, $type);
+		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
+			$this->dataOptions[$name] = array();
+		}
+	}
+
+	/**
+	 * Set some fields to be required. Simply pass as many field names to the function as you desire.
+	 */
+	public function setRequired()
+	{
+		$a = func_get_args();
+		foreach ($a as $fieldName) {
+			switch ($this->dataTypes[$fieldName]) {
+				case FormIO::T_DATERANGE:
+				case FormIO::T_DATETIME:
+					$this->addValidator($fieldName, 'arrayRequiredValidator', array(), false);
+					break;
+				default:
+					$this->addValidator($fieldName, 'requiredValidator', array(), false);
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Adds a validator to a field
+	 * @param	string	$k				data key in form data to apply validator to
+	 * @param	string	$validatorName	name of validation function to run
+	 * @param	array	$params			extra parameters to pass to the validation callback (value is always parameter 0)
+	 * @param	bool	$customFunc		if true, look in the global namespace for this function. otherwise it is a method of the FormIO class.
+	 */
+	public function addValidator($k, $validatorName, $params = array(), $customFunc = true)
+	{
+		$this->removeValidator($k, $validatorName);		// remove it if it exists, so we can use the most recently applied parameters
+
+		if (!isset($this->dataValidators[$k])) {
+			$this->dataValidators[$k] = array();
+		}
+		if (sizeof($params) || $customFunc) {
+			$validatorName = array(
+				'func'		=> $validatorName,
+				'params'	=> $params,
+				'external'	=> $customFunc
+			);
+		}
+		$this->dataValidators[$k][] = $validatorName;
+
+		return true;
+	}
+
+	/**
+	 * Adds an attribute to a field. Use this for presentational things like CSS class names, maxlen attributes etc.
+	 * You can add anything you like in here, but they will only be output if present in the form builder strings
+	 * for the field type being processed. Also note that adding elements here linearly slows the performance of
+	 * rendering the field in question.
+	 */
+	public function addAttribute($k, $attr, $value)
+	{
+		$this->dataAttributes[$k][$attr] = $value;
+	}
+
+	// Allows you to add an error message to the form from external scripts
+	public function addError($dataKey, $msg)
+	{
+		if (isset($this->errors[$dataKey])) {
+			if (!is_array($this->errors[$dataKey])) {
+				$this->errors[$dataKey] = array($this->errors[$dataKey]);
+			}
+			$this->errors[$dataKey][] = $msg;
+		} else {
+			$this->errors[$dataKey] = $msg;
+		}
+	}
+
+	/**
+	 * Add an option for a multiple field type field (select, radiogroup etc)
+	 *
+	 * @param	string	$k			field name to add an option for
+	 * @param	string	$optionVal	the value this option will have
+	 * @param	mixed	$optionText either the option's description (as text);
+	 * 								or array of desc(string) and optional disabled(bool), checked(bool) properties
+	 * @param	mixed	$dependentField @see FormIO::addFieldDependency()
+	 */
+	public function addFieldOption($k, $optionVal, $optionText, $dependentField = null)
+	{
+		$this->dataOptions[$k][$optionVal] = $optionText;
+		if ($dependentField !== null) {
+			$this->addFieldDependency($k, $optionVal, $dependentField);
+		}
+	}
+
+	/**
+	 * Adds a dependency between one field and another. This sets up the javascript
+	 * to toggle visibility of a field when the value of another changes.
+	 *
+	 * @param	string	$k				field to add the dependency to
+	 * @param	mixed	$expectedValue	when the value of field $k is $expectedValue, $dependentField will be visible. Otherwise, it won't.
+	 * @param	mixed	$dependentField	field name or array of field names to toggle when the value of field $k changes
+	 */
+	public function addFieldDependency($k, $expectedValue, $dependentField)
+	{
+		if (!isset($this->dataDepends[$k])) {
+			$this->dataDepends[$k] = array();
+		}
+		if (!is_array($dependentField)) {
+			$dependentField = array($dependentField);
+		}
+		$this->dataDepends[$k][$expectedValue] = $dependentField;
+	}
+	
+	public function setAutocompleteURL($k, $url)
+	{
+		$this->addAttribute($k, 'searchurl', $url);
+	}
+
+	// :TODO: simplified mutators for adding various non-field types
 
 	//==========================================================================
 	//	Accessors
@@ -220,7 +341,7 @@ class FormIO implements ArrayAccess
 	}
 
 	//==========================================================================
-	//	Mutators
+	//	Other mutators
 
 	public function setDataType($k, $type)
 	{
@@ -247,32 +368,6 @@ class FormIO implements ArrayAccess
 		}
 	}
 
-	/**
-	 * Adds a validator to a field
-	 * @param	string	$k				data key in form data to apply validator to
-	 * @param	string	$validatorName	name of validation function to run
-	 * @param	array	$params			extra parameters to pass to the validation callback (value is always parameter 0)
-	 * @param	bool	$customFunc		if true, look in the global namespace for this function. otherwise it is a method of the FormIO class.
-	 */
-	public function addValidator($k, $validatorName, $params = array(), $customFunc = true)
-	{
-		$this->removeValidator($k, $validatorName);		// remove it if it exists, so we can use the most recently applied parameters
-
-		if (!isset($this->dataValidators[$k])) {
-			$this->dataValidators[$k] = array();
-		}
-		if (sizeof($params) || $customFunc) {
-			$validatorName = array(
-				'func'		=> $validatorName,
-				'params'	=> $params,
-				'external'	=> $customFunc
-			);
-		}
-		$this->dataValidators[$k][] = $validatorName;
-
-		return true;
-	}
-
 	// Removes a validator from a field if it is found to exist. Returns true if one was erased.
 	public function removeValidator($k, $validatorName)
 	{
@@ -287,80 +382,6 @@ class FormIO implements ArrayAccess
 		}
 		return false;
 	}
-
-	/**
-	 * Set some fields to be required. Simply pass as many field names to the function as you desire.
-	 */
-	public function setRequired()
-	{
-		$a = func_get_args();
-		foreach ($a as $fieldName) {
-			switch ($this->dataTypes[$fieldName]) {
-				case FormIO::T_DATERANGE:
-				case FormIO::T_DATETIME:
-					$this->addValidator($fieldName, 'arrayRequiredValidator', array(), false);
-					break;
-				default:
-					$this->addValidator($fieldName, 'requiredValidator', array(), false);
-					break;
-			}
-		}
-	}
-
-	/**
-	 * Adds an attribute to a field. Use this for presentational things like CSS class names, maxlen attributes etc.
-	 * You can add anything you like in here, but they will only be output if present in the form builder strings
-	 * for the field type being processed. Also note that adding elements here linearly slows the performance of
-	 * rendering the field in question.
-	 */
-	public function addAttribute($k, $attr, $value)
-	{
-		$this->dataAttributes[$k][$attr] = $value;
-	}
-
-	/**
-	 * Add an option for a multiple field type field (select, radiogroup etc)
-	 *
-	 * @param	string	$k			field name to add an option for
-	 * @param	string	$optionVal	the value this option will have
-	 * @param	mixed	$optionText either the option's description (as text);
-	 * 								or array of desc(string) and optional disabled(bool), checked(bool) properties
-	 * @param	mixed	$dependentField @see FormIO::addFieldDependency()
-	 */
-	public function addFieldOption($k, $optionVal, $optionText, $dependentField = null)
-	{
-		$this->dataOptions[$k][$optionVal] = $optionText;
-		if ($dependentField !== null) {
-			$this->addFieldDependency($k, $optionVal, $dependentField);
-		}
-	}
-
-	/**
-	 * Adds a dependency between one field and another. This sets up the javascript
-	 * to toggle visibility of a field when the value of another changes.
-	 *
-	 * @param	string	$k				field to add the dependency to
-	 * @param	mixed	$expectedValue	when the value of field $k is $expectedValue, $dependentField will be visible. Otherwise, it won't.
-	 * @param	mixed	$dependentField	field name or array of field names to toggle when the value of field $k changes
-	 */
-	public function addFieldDependency($k, $expectedValue, $dependentField)
-	{
-		if (!isset($this->dataDepends[$k])) {
-			$this->dataDepends[$k] = array();
-		}
-		if (!is_array($dependentField)) {
-			$dependentField = array($dependentField);
-		}
-		$this->dataDepends[$k][$expectedValue] = $dependentField;
-	}
-
-	// Allows you to add an error message to the form from external scripts
-	public function addError($msg)
-	{
-		$this->errors[] = $msg;
-	}
-
-	// :TODO: simplified mutators for adding various non-field types
 
 	//==========================================================================
 	//	Rendering
@@ -626,14 +647,7 @@ class FormIO implements ArrayAccess
 				}
 
 				if (!$valid) {
-					if (isset($this->errors[$dataKey])) {
-						if (!is_array($this->errors[$dataKey])) {
-							$this->errors[$dataKey] = array($this->errors[$dataKey]);
-						}
-						$this->errors[$dataKey][] = FormIO::errorString($func, $params);
-					} else {
-						$this->errors[$dataKey] = FormIO::errorString($func, $params);
-					}
+					$this->addError($dataKey, FormIO::errorString($func, $params));
 				}
 			}
 
