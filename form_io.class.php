@@ -106,7 +106,7 @@ class FormIO implements ArrayAccess
 	const timeRegex		= '/^\s*(\d{1,2}):(\d{2})(:(\d{2}))?\s*$/';								// capture: hr, min, , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
-	const currencyRegex	= '/^\s*\$?(\d+)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
+	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
 
 	//===============================================================================================/\
 
@@ -754,18 +754,14 @@ class FormIO implements ArrayAccess
 	}
 
 	private function urlValidator($key) {					// allows http, https & ftp *only*. Also performs url normalisation
+		$this->data[$key] = $this->normaliseURL($this->data[$key]);
+		
 		if (false == $bits = parse_url($this->data[$key])) {
 			return false;
 		}
-		
-		$hostOk = (!empty($bits['host']) && ctype_alpha(substr($bits['host'], 0, 1)))
-				|| (sizeof($bits) == 1 && isset($bits['path']) && preg_match('/\.\w{2,4}$/', $bits['path']));
-		
-		if (!$hostOk) {
+		if (empty($bits['host']) || !ctype_alpha(substr($bits['host'], 0, 1))) {
 			return false;
 		}
-
-		$this->data[$key] = $this->normaliseURL($this->data[$key], $bits);
 
 		return (empty($bits['scheme']) || $bits['scheme'] == 'http' || $bits['scheme'] == 'https' || $bits['scheme'] == 'ftp');
 	}
@@ -809,6 +805,7 @@ class FormIO implements ArrayAccess
 				return false;
 			}
 			if (empty($this->data[$key][0])) {		// none set, nothing being sent
+				$this->data[$key] = array();
 				return true;
 			}
 
@@ -838,7 +835,7 @@ class FormIO implements ArrayAccess
 	//		These will be returned to the user, so don't use them for 'modifying
 	//		the value', if that differentiation makes sense.
 	
-	private function normaliseDate($d, $m, $y) {					// dd/mm/yyyy
+	private function normaliseDate($d, $m, $y) {				// dd/mm/yyyy
 		$yearPadStr = '20';
 		if ($y < 100 && $y > 69) {
 			$yearPadStr = '19';
@@ -847,17 +844,17 @@ class FormIO implements ArrayAccess
 		return str_pad($d, 2, '0', STR_PAD_LEFT) . '/' . str_pad($m, 2, '0', STR_PAD_LEFT) . '/' . str_pad($y, 4, $yearPadStr, STR_PAD_LEFT);
 	}
 	
-	private function normaliseTime($h, $m, $s = null) {				// hh:mm(:ss)
+	private function normaliseTime($h, $m, $s = null) {			// hh:mm(:ss)
 		return str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($m, 2, '0', STR_PAD_LEFT) . ($s !== null ? ':' . str_pad($s, 2, '0', STR_PAD_LEFT) : '');
 	}
 	
-	private function normaliseCurrency($d, $c = null) {				// d.cc
-		return intval($d) + ($c !== null ? intval($c) / 100 : 0);
+	private function normaliseCurrency($d, $c = 0) {			// $d.cc
+		return '$' . intval($d) . '.' . str_pad($c, 2, '0', STR_PAD_RIGHT);
 	}
 	
-	private function normaliseURL($str, $parsed) {					// ensures a scheme is present
-		if (empty($parsed['scheme'])) {
-			$str = 'http://' . $str;
+	private function normaliseURL($str) {						// ensures a scheme is present
+		if (!preg_match('/^\w+:\/\//', $str)) {
+			return 'http://' . $str;
 		}
 		return $str;
 	}
