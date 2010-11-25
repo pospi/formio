@@ -22,7 +22,7 @@ class FormIO implements ArrayAccess
 	const T_IMAGE	= 5;
 	const T_INDENT	= 31;		// starts a <fieldset>
 	const T_OUTDENT	= 32;		// ends a <fieldset>
-	
+
 	// form input types
 	const T_TEXT	= 6;
 		// All these indented types actually output normal text fields and are driven by JS and serverside validation
@@ -54,7 +54,7 @@ class FormIO implements ArrayAccess
 	const T_RESET	= 30;
 	const T_CAPTCHA	= 35;			// reCAPTCHA plugin
 	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into
-	
+
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
 		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -65,53 +65,53 @@ class FormIO implements ArrayAccess
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$form}_{$name}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$form}_{$name}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$form}_{$name}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		
+
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DROPOPTION=> '<option value="{$value}"{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
-		
+
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
 		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="row multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
-		
+
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 	);
-	
+
 	//===============================================================================================\/
 	//	Stuff you might want to change
-	
+
 	// default error messages for builtin validator methods
 	private static $defaultErrors = array(
 		'requiredValidator'	=> "This field is required",
 		'arrayRequiredValidator' => "All elements are required",
-		'equalValidator'	=> "$1 must be equal to $2",
-		'notEqualValidator'	=> "$1 must not be equal to $2",
-		'minLengthValidator'=> "$1 must be at least $2 characters",
-		'maxLengthValidator'=> "$1 must not be longer than $2 characters",
-		'inArrayValidator'	=> "$1 must be one of $2",
-		'regexValidator'	=> "$1 was not in the correct format",
-		'dateValidator'		=> "$1 must be a valid date in dd/mm/yyyy format",
-		'dateTimeValidator'	=> "$1 must be formatted as dd/mm/yyyy, in 12 hour format",
-		'dateRangeValidator'=> "$1 contains invalid dates not in dd/mm/yyyy format",
-		'emailValidator'	=> "$1 must be a valid email address",
-		'phoneValidator'	=> "$1 must be a valid phone number. Phone numbers must contain numbers, spaces and brackets only, and may start with a plus sign",
-		'urlValidator'		=> "$1 must be a valid URL",
-		'currencyValidator'	=> "$1 should be written as dollars and cents",
+		'equalValidator'	=> "You must select $2",
+		'notEqualValidator'	=> "Must not be equal to $2",
+		'minLengthValidator'=> "Must be at least $2 characters",
+		'maxLengthValidator'=> "Must not be longer than $2 characters",
+		'inArrayValidator'	=> "Must be one of $2",
+		'regexValidator'	=> "Incorrect format",
+		'dateValidator'		=> "Requires a valid date in dd/mm/yyyy format",
+		'dateTimeValidator'	=> "Requires a valid date (dd/mm/yyyy), time (hh:mm) and time of day",
+		'dateRangeValidator'=> "Dates must be in dd/mm/yyyy format",
+		'emailValidator'	=> "Invalid email address",
+		'phoneValidator'	=> "Invalid phone number. Phone numbers must contain numbers, spaces and brackets only, and may start with a plus sign.",
+		'urlValidator'		=> "Invalid URL",
+		'currencyValidator'	=> "Enter amount in dollars and cents",
 		'captchaValidator'	=> "The text entered did not match the verification image",
 	);
-	
+
 	// misc constants used for validation
 	const dateRegex		= '/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s*$/';						// capture: day, month, year
 	const timeRegex		= '/^\s*(\d{1,2}):(\d{2})(:(\d{2}))?\s*$/';								// capture: hr, min, , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
 	const currencyRegex	= '/^\s*\$?(\d+)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
-	
+
 	//===============================================================================================/\
-	
+
 	private $lastBuilderReplacement;		// form builder hack for preg_replace_callback not being able to accept extra parameters
-	
+
 	// Form stuff
 	private $name;		// unique html ID for this form
 	private $action;
@@ -119,7 +119,7 @@ class FormIO implements ArrayAccess
 	private $multipart;	// if true, render with enctype="multipart/form-data"
 	private $preamble;	// HTML to output at top of form :TODO:
 	private $suffix;	// HTML to output at bottom of form :TODO:
-	
+
 	// Field stuff
 	private $data;
 	private $errors;		// data validation errors, filled by call to validate()
@@ -134,10 +134,10 @@ class FormIO implements ArrayAccess
 	private $dataDepends = array();			// :TODO:
 	private $dataOptions = array();			// input options for checkbox, radio, dropdown etc types
 	private $dataAttributes = array();		// any extra attributes to add to HTML output - maxlen, classes, desc
-	
+
 	//==========================================================================
 	//	Important stuff
-	
+
 	/**
 	 * Form constructor. We give it a method, action, enctype and name
 	 */
@@ -148,7 +148,7 @@ class FormIO implements ArrayAccess
 		$this->method = $method == "GET" ? "GET" : "POST";
 		$this->multipart = $multipart;
 	}
-	
+
 	/**
 	 * Add a field to this form
 	 */
@@ -161,12 +161,12 @@ class FormIO implements ArrayAccess
 			$this->dataOptions[$name] = array();
 		}
 	}
-	
+
 	/**
 	 * Imports a data map from some other array. This does not erase existing values
 	 * unless the source array overrides those properties.
 	 * Best used when importing variables from $_POST, $_GET etc
-	 * 
+	 *
 	 * @param	array	$assoc			Associative data array to import
 	 * @param	bool	$allowAdditions	if true, we can set values that weren't initially declared on the form
 	 */
@@ -181,30 +181,30 @@ class FormIO implements ArrayAccess
 		}
 		$this->data = array_merge($this->data, $assoc);
 	}
-	
+
 	//==========================================================================
 	//	Accessors
-	
+
 	public function getErrors()
 	{
 		return $this->errors;
 	}
-	
+
 	public function getDataType($k)
 	{
 		return $this->dataTypes[$k];
 	}
-	
+
 	public function getValidators($k)
 	{
 		return $this->dataValidators[$k];
 	}
-	
+
 	public function getAttributes($k)
 	{
 		return $this->dataAttributes[$k];
 	}
-	
+
 	// Determine if a validator is being run for a particular data key
 	public function hasValidator($k, $validatorName)
 	{
@@ -218,10 +218,10 @@ class FormIO implements ArrayAccess
 		}
 		return false;
 	}
-	
+
 	//==========================================================================
 	//	Mutators
-	
+
 	public function setDataType($k, $type)
 	{
 		$this->dataTypes[$k] = $type;
@@ -246,7 +246,7 @@ class FormIO implements ArrayAccess
 				$this->addValidator($k, 'requiredValidator', array(), false); break;
 		}
 	}
-	
+
 	/**
 	 * Adds a validator to a field
 	 * @param	string	$k				data key in form data to apply validator to
@@ -257,7 +257,7 @@ class FormIO implements ArrayAccess
 	public function addValidator($k, $validatorName, $params = array(), $customFunc = true)
 	{
 		$this->removeValidator($k, $validatorName);		// remove it if it exists, so we can use the most recently applied parameters
-		
+
 		if (!isset($this->dataValidators[$k])) {
 			$this->dataValidators[$k] = array();
 		}
@@ -269,10 +269,10 @@ class FormIO implements ArrayAccess
 			);
 		}
 		$this->dataValidators[$k][] = $validatorName;
-		
+
 		return true;
 	}
-	
+
 	// Removes a validator from a field if it is found to exist. Returns true if one was erased.
 	public function removeValidator($k, $validatorName)
 	{
@@ -287,7 +287,7 @@ class FormIO implements ArrayAccess
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Set some fields to be required. Simply pass as many field names to the function as you desire.
 	 */
@@ -306,7 +306,7 @@ class FormIO implements ArrayAccess
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds an attribute to a field. Use this for presentational things like CSS class names, maxlen attributes etc.
 	 * You can add anything you like in here, but they will only be output if present in the form builder strings
@@ -317,7 +317,7 @@ class FormIO implements ArrayAccess
 	{
 		$this->dataAttributes[$k][$attr] = $value;
 	}
-	
+
 	/**
 	 * Add an option for a multiple field type field (select, radiogroup etc)
 	 *
@@ -334,7 +334,7 @@ class FormIO implements ArrayAccess
 			$this->addFieldDependency($k, $optionVal, $dependentField);
 		}
 	}
-	
+
 	/**
 	 * Adds a dependency between one field and another. This sets up the javascript
 	 * to toggle visibility of a field when the value of another changes.
@@ -353,50 +353,49 @@ class FormIO implements ArrayAccess
 		}
 		$this->dataDepends[$k][$expectedValue] = $dependentField;
 	}
-	
+
 	// Allows you to add an error message to the form from external scripts
 	public function addError($msg)
 	{
 		$this->errors[] = $msg;
 	}
-	
+
 	// :TODO: simplified mutators for adding various non-field types
-	
+
 	//==========================================================================
 	//	Rendering
-	
+
 	public function getJSON()
 	{
-		require_once(DET_CLASSES . 'json_parser.class.php');
 		return JSONParser::encode($this->data);
 	}
-	
+
 	public function getQueryString()
 	{
 		return http_build_query($this->data);
 	}
-	
+
 	public function getForm()
 	{
 		$form = "<form id=\"$this->name\" class=\"clean\" method=\"$this->method\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
-		
+
 		if (sizeof($this->errors) || isset($this->preamble)) {
 			$form .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
 			$form .= "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n";
 			$form .= '</div>' . "\n";
 		}
-		
+
 		$spin = 1;
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
-			
+
 			// check for specific field type output string
 			if (!isset(FormIO::$builder[$fieldType])) {
 				$builderString = FormIO::$builder[FormIO::T_TEXT];
 			} else {
 				$builderString = FormIO::$builder[$fieldType];
 			}
-			
+
 			// build input property list. We optimise this array as much as possible, as each item present requires extra processing.
 			$inputVars = array(
 				'form'		=> $this->name,
@@ -454,16 +453,16 @@ class FormIO implements ArrayAccess
 							$subFieldType = FormIO::T_DROPOPTION;
 							break;
 					}
-					
+
 					// dependencies for javascript
 					if (isset($this->dataDepends[$k])) {
 						$inputVars['dependencies'] = $this->getDependencyString($k);
 					}
-					
+
 					// Unset value and get ready to build options
 					unset($inputVars['value']);
 					$inputVars['options'] = '';
-					
+
 					// Build field sub-elements
 					foreach ($this->dataOptions[$k] as $optVal => $desc) {
 						$radioVars = array(
@@ -492,16 +491,16 @@ class FormIO implements ArrayAccess
 				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
 				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
 			}
-			
+
 			// add row striping
 			$inputVars['alt'] = ++$spin % 2 == 0;
-			
+
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
 		}
-		
+
 		return $form . "</form>\n";
 	}
-	
+
 	/**
 	 * Builds an input by replacing our custom-style string substitutions.
 	 * {$varName} is replaced by $value, whilst {$varName?test="$varName"}
@@ -514,7 +513,7 @@ class FormIO implements ArrayAccess
 				$str = preg_replace('/\{\$' . $property . '.*\}/U', '', $str);
 				continue;
 			}
-			
+
 			$this->lastBuilderReplacement = $value;
 			$str = preg_replace_callback(
 						'/\{\$(' . $property . ')(\?(.+))?\}/U',
@@ -526,7 +525,7 @@ class FormIO implements ArrayAccess
 		$str = preg_replace('/\{\$.+\}/U', '', $str);
 		return $str;
 	}
-	
+
 	// Callback for replaceInputVars(), used to replace variables in submatches with their own values
 	private function formInputBuildCallback($matches)
 	{
@@ -536,12 +535,12 @@ class FormIO implements ArrayAccess
 			return $this->lastBuilderReplacement;
 		}
 	}
-	
+
 	private function getReadableFieldName($k)
 	{
 		return isset($this->dataAttributes[$k]['desc']) ? $this->dataAttributes[$k]['desc'] : $k;
 	}
-	
+
 	// for use in data-fio-depends field attributes
 	private function getDependencyString($k)
 	{
@@ -551,7 +550,7 @@ class FormIO implements ArrayAccess
 		}
 		return implode('&', $depends);
 	}
-	
+
 	// for use in data-fio-validation field attributes
 	private function getValidatorParams($k)
 	{
@@ -570,10 +569,10 @@ class FormIO implements ArrayAccess
 		}
 		return sizeof($params) ? implode('&', $params) : '';
 	}
-	
+
 	//==========================================================================
 	//	Validation
-	
+
 	/**
 	 * Validate our data and return a boolean as to whether everything is ok
 	 * Specific error messages can be retrieved via getErrors()
@@ -585,25 +584,25 @@ class FormIO implements ArrayAccess
 		$this->errors = array();
 		return $this->handleValidations($this->dataValidators);
 	}
-	
+
 	private function handleValidations($validators, $overrideDataKey = null)
 	{
 		$allValid = true;
-		
+
 		foreach ($validators as $dataKey => $validator) {
 			$dataKey = $overrideDataKey === null ? $dataKey : $overrideDataKey;
-			
+
 			if (!array_key_exists($dataKey, $this->data) || $this->fieldHiddenByDependency($dataKey)) {
 				// if field is being hidden or isn't present, it's not required so it is nullified and ignored
 				continue;
 			}
-			
+
 			// run requiredValidator first, since any other validation need only run if the data is present
 			$dataSubmitted = $this->requiredValidator($dataKey);
-			
+
 			$valid = true;
 			$externalValidator = false;
-			
+
 			if (is_string($validator)) {				// single validator, no extra parameters
 				$func = $validator;
 				$params = array($dataKey);
@@ -615,7 +614,7 @@ class FormIO implements ArrayAccess
 					$externalValidator = true;
 				}
 			}
-			
+
 			if (!isset($func)) {						// array of validators to be performed in sequence - recurse.
 				$valid = $this->handleValidations($validator, $dataKey);
 			} else {
@@ -625,7 +624,7 @@ class FormIO implements ArrayAccess
 				} else if ($dataSubmitted) {
 					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
 				}
-				
+
 				if (!$valid) {
 					if (isset($this->errors[$dataKey])) {
 						if (!is_array($this->errors[$dataKey])) {
@@ -637,15 +636,15 @@ class FormIO implements ArrayAccess
 					}
 				}
 			}
-			
+
 			if (!$valid) {
 				$allValid = false;
 			}
 		}
-		
+
 		return $allValid;
 	}
-	
+
 	// :WARNING: will break if more than 10 substitutions are required ($10 will be replaced as $1, etc)
 	// not a requried fix yet as I really cant see a validator needing that many parameters passed
 	private function errorString($callbackName, $params)
@@ -658,7 +657,7 @@ class FormIO implements ArrayAccess
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * Determine if the field is being hidden by a dependency rule and the value of another field
 	 *
@@ -673,21 +672,21 @@ class FormIO implements ArrayAccess
 
 					// we should erase the field's value so it doesnt show if the user happens to have filled it out and changed their mind
 					$this->data[$key] = null;
-					
+
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	//==========================================================================
 	//	Callbacks for validation
-	
+
 	private function requiredValidator($key) {
 		return isset($this->data[$key]) && $this->data[$key] !== '';
 	}
-	
+
 	// @param	array	$requiredKeys	a list of array keys which are required. When omitted, all keys are checked.
 	private function arrayRequiredValidator($key, $requiredKeys = null) {
 		if (isset($this->data[$key]) && is_array($this->data[$key])) {
@@ -700,91 +699,96 @@ class FormIO implements ArrayAccess
 		}
 		return false;
 	}
-	
+
 	private function equalValidator($key, $expected) {
 		return isset($this->data[$key]) && $this->data[$key] == $expected;
 	}
-	
+
 	private function notEqualValidator($key, $unexpected) {
 		return !isset($this->data[$key]) || $this->data[$key] != $unexpected;
 	}
-	
+
 	private function minLengthValidator($key, $length) {
 		return strlen($this->data[$key]) >= $length;
 	}
-	
+
 	private function maxLengthValidator($key, $length) {
 		return strlen($this->data[$key]) <= $length;
 	}
-	
+
 	private function inArrayValidator($key, $allowable) {
 		return in_array($this->data[$key], $allowable);
 	}
-	
+
 	private function regexValidator($key, $regex) {
-		return preg_match($regex, $this->data[$key]) !== false;
+		return preg_match($regex, $this->data[$key]) > 0;
 	}
-	
-	private function dateValidator($key) {					// also sets stored data to DD/MM/YYYY format
+
+	private function dateValidator($key) {					// performs date normalisation
 		preg_match(FormIO::dateRegex, $this->data[$key], $matches);
 		$success = sizeof($matches) == 4;
 		if ($matches[1] > 31 || $matches[2] > 12) {
 			return false;
 		}
 		if ($success) {
-			$this->data[$key] = str_pad($matches[1], 2, '0', STR_PAD_LEFT) . '/' . str_pad($matches[2], 2, '0', STR_PAD_LEFT) . '/' . str_pad($matches[3], 4, '20', STR_PAD_LEFT);
+			$this->data[$key] = $this->normaliseDate($matches[1], $matches[2], $matches[3]);
 		}
 		return $success != false;
 	}
-	
+
 	private function emailValidator($key) {
 		return $this->regexValidator($key, FormIO::emailRegex);
 	}
-	
+
 	private function phoneValidator($key) {
-		return $this->regexValidator($key, FormIO::phoneRegex);
+		return preg_match('/\d/', $this->data[$key]) && $this->regexValidator($key, FormIO::phoneRegex);
 	}
-	
-	private function currencyValidator($key) {				// also sets stored data to float representation
+
+	private function currencyValidator($key) {				// performs currency normalisation
 		preg_match(FormIO::currencyRegex, $this->data[$key], $matches);
 		$success = sizeof($matches) > 0;
 		if ($success) {
-			$this->data[$key] = intval($matches[1]) + (isset($matches[3]) ? intval($matches[3]) / 100 : 0);
+			$this->data[$key] = $this->normaliseCurrency($matches[1], (isset($matches[3]) ? $matches[3] : null));
 		}
 		return $success != false;
 	}
-	
-	private function urlValidator($key) {					// allows http, https & ftp *only*. Also ensures stored data has scheme present
+
+	private function urlValidator($key) {					// allows http, https & ftp *only*. Also performs url normalisation
 		if (false == $bits = parse_url($this->data[$key])) {
 			return false;
 		}
-		if (empty($bits['host']) || !ctype_alpha(substr($bits['host'], 0, 1))) {
+		
+		$hostOk = (!empty($bits['host']) && ctype_alpha(substr($bits['host'], 0, 1)))
+				|| (sizeof($bits) == 1 && isset($bits['path']) && preg_match('/\.\w{2,4}$/', $bits['path']));
+		
+		if (!$hostOk) {
 			return false;
 		}
-		
-		if (empty($bits['scheme'])) {
-			$this->data[$key] = 'http://' . $this->data[$key];
-		}
-		
+
+		$this->data[$key] = $this->normaliseURL($this->data[$key], $bits);
+
 		return (empty($bits['scheme']) || $bits['scheme'] == 'http' || $bits['scheme'] == 'https' || $bits['scheme'] == 'ftp');
 	}
-	
+
 	private function captchaValidator($key) {
-		
+
 	}
-	
-	private function dateRangeValidator($key) {
+
+	private function dateRangeValidator($key) {			// performs date normalisation
 		if (isset($this->data[$key]) && is_array($this->data[$key])) {
 			if ((!empty($this->data[$key][0]) || !empty($this->data[$key][1]))
-			  && (false === preg_match(FormIO::dateRegex, $this->data[$key][0], $matches1)
-			  || false === preg_match(FormIO::dateRegex, $this->data[$key][1], $matches2))) {
+			  && (!preg_match(FormIO::dateRegex, $this->data[$key][0], $matches1)
+			  || !preg_match(FormIO::dateRegex, $this->data[$key][1], $matches2))) {
 				return false;
 			}
-			
+
 			if ($matches1[1] > 31 || $matches1[2] > 12 || $matches2[1] > 31 || $matches2[2] > 12) {
 				return false;
 			}
 			
+			$this->data[$key][0] = $this->normaliseDate($matches1[1], $matches1[2], $matches1[3]);
+			$this->data[$key][1] = $this->normaliseDate($matches2[1], $matches2[2], $matches2[3]);
+
 			// also swap the values if they are in the wrong order
 			if (($matches1[3] > $matches2[3])
 			 || ($matches1[3] >= $matches2[3] && $matches1[2] > $matches2[2])
@@ -797,40 +801,67 @@ class FormIO implements ArrayAccess
 		}
 		return true;		// not set, so validate as OK and let requiredValidator pick it up
 	}
-	
-	private function dateTimeValidator($key) {
+
+	private function dateTimeValidator($key) {			// performs date and time normalisation
 		if (isset($this->data[$key]) && is_array($this->data[$key])) {
 			// either both or none must be set
 			if (empty($this->data[$key][0]) ^ empty($this->data[$key][1])) {
 				return false;
 			}
-			
+
 			$dateOk = preg_match(FormIO::dateRegex, $this->data[$key][0], $dateMatches);
 			$timeOk = preg_match(FormIO::timeRegex, $this->data[$key][1], $timeMatches);
-			
-			if (false === $dateOk || false == $timeOk) {
+
+			if (!$dateOk || !$timeOk) {
 				return false;
 			}
-			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 11 || $timeMatches[2] > 59) {
+			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || $timeMatches[2] > 59) {
 				return false;
 			}
-			
+
 			$this->data[$key] = array(
-								str_pad($dateMatches[1], 2, '0', STR_PAD_LEFT) . '/'
-								. str_pad($dateMatches[2], 2, '0', STR_PAD_LEFT) . '/'
-								. str_pad($dateMatches[3], 4, '20', STR_PAD_LEFT)
-							,	str_pad($timeMatches[1], 2, '0', STR_PAD_LEFT) . ':'
-								. str_pad($timeMatches[2], 2, '0', STR_PAD_LEFT)
-								. (isset($timeMatches[4]) ? ':' . str_pad($timeMatches[4], 2, '0', STR_PAD_LEFT) : '')
-							,	$this->data[$key][2]
+								$this->normaliseDate($dateMatches[1], $dateMatches[2], $dateMatches[3]),
+								$this->normaliseTime($timeMatches[1], $timeMatches[2], (isset($timeMatches[4]) ? $timeMatches[4] : null)),
+								$this->data[$key][2]
 							);
 		}
 		return true;
 	}
+
+	//==========================================================================
+	//	Data normalisers
+	//		Run from within validators, these functions ensure that an input
+	//		variable is in the expected input format.
+	//		These will be returned to the user, so don't use them for 'modifying
+	//		the value', if that differentiation makes sense.
 	
+	private function normaliseDate($d, $m, $y) {					// dd/mm/yyyy
+		$yearPadStr = '20';
+		if ($y < 100 && $y > 69) {
+			$yearPadStr = '19';
+		}
+		
+		return str_pad($d, 2, '0', STR_PAD_LEFT) . '/' . str_pad($m, 2, '0', STR_PAD_LEFT) . '/' . str_pad($y, 4, $yearPadStr, STR_PAD_LEFT);
+	}
+	
+	private function normaliseTime($h, $m, $s = null) {				// hh:mm(:ss)
+		return str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($m, 2, '0', STR_PAD_LEFT) . ($s !== null ? ':' . str_pad($s, 2, '0', STR_PAD_LEFT) : '');
+	}
+	
+	private function normaliseCurrency($d, $c = null) {				// d.cc
+		return intval($d) + ($c !== null ? intval($c) / 100 : 0);
+	}
+	
+	private function normaliseURL($str, $parsed) {					// ensures a scheme is present
+		if (empty($parsed['scheme'])) {
+			$str = 'http://' . $str;
+		}
+		return $str;
+	}
+
 	//==========================================================================
 	//	Array implementation to access form variables directly
-	
+
 	public function offsetSet($offset, $value)
 	{
         if (is_null($offset)) {
