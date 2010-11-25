@@ -132,6 +132,11 @@ form.clean input.time {
 	width: 9em;
 }
 
+form.clean #recaptcha_widget_div {
+	width: 70%;
+	margin-left: 25%;
+}
+
 /* Button */
 
 form.clean button, form.clean input[type=submit], form.clean input[type=reset] {

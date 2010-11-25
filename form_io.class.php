@@ -75,6 +75,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		
 		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CAPTCHA	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label>{$captcha}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -113,6 +114,8 @@ class FormIO implements ArrayAccess
 	// reCAPTCHA parameters for T_CAPTCHA. Recommend you set these from your own scripts.
 	public $reCAPTCHA_pub	= '';
 	public $reCAPTCHA_priv	= '';
+	public $reCAPTCHA_inc	= 'recaptchalib.php';				// this should point to the reCAPTCHA php include file
+	public $reCAPTCHA_session_var = '__formIO_reCAPTCHA_ok';	// once we have authenticated as human, this will be stored in session so we don't have to do it again
 
 	//===============================================================================================/\
 
@@ -203,6 +206,8 @@ class FormIO implements ArrayAccess
 				case FormIO::T_DATETIME:
 					$this->addValidator($fieldName, 'arrayRequiredValidator', array(), false);
 					break;
+				case FormIO::T_CAPTCHA:
+					break;		// :NOTE: captcha's dont need to be required as they implicitly are already
 				default:
 					$this->addValidator($fieldName, 'requiredValidator', array(), false);
 					break;
@@ -363,8 +368,7 @@ class FormIO implements ArrayAccess
 			case FormIO::T_DATETIME:
 				$this->addValidator($k, 'dateTimeValidator', array(), false); break;
 			case FormIO::T_CAPTCHA:
-				$this->addValidator($k, 'captchaValidator', array(), false);
-				$this->addValidator($k, 'requiredValidator', array(), false); break;
+				$this->addValidator($k, 'captchaValidator', array(), false); break;
 		}
 	}
 
@@ -457,6 +461,13 @@ class FormIO implements ArrayAccess
 					$inputVars['valueTime']	= $value[1];
 					$inputVars['pm']		= $value[2] == 'pm';
 					$inputVars['am']		= $value[2] != 'pm';
+					break;
+				case FormIO::T_CAPTCHA:
+					if (isset($_SESSION[$this->reCAPTCHA_session_var])) {
+						continue 2;								// already verified as human, so don't output the field anymore
+					}
+					require_once($this->reCAPTCHA_inc);
+					$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
 					break;
 				case FormIO::T_RADIOGROUP:	// these field types contain subelements
 				case FormIO::T_CHECKGROUP:
@@ -639,10 +650,10 @@ class FormIO implements ArrayAccess
 			if (!isset($func)) {						// array of validators to be performed in sequence - recurse.
 				$valid = $this->handleValidations($validator, $dataKey);
 			} else {
-				// only perform validation if data has been sent
+				// only perform validation if data has been sent, or we are checking a required fieldtype (captcha)
 				if (!$externalValidator && $func == 'requiredValidator') {
 					$valid = $dataSubmitted;
-				} else if ($dataSubmitted) {
+				} else if ($dataSubmitted || (!$externalValidator && $func == 'captchaValidator')) {
 					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
 				}
 
@@ -780,8 +791,19 @@ class FormIO implements ArrayAccess
 		return (empty($bits['scheme']) || $bits['scheme'] == 'http' || $bits['scheme'] == 'https' || $bits['scheme'] == 'ftp');
 	}
 
-	private function captchaValidator($key) {
-
+	private function captchaValidator($key) {				// stores result in session, if available. We only need to authenticate as human once.
+		if (isset($_SESSION[$this->reCAPTCHA_session_var])) {
+			return $_SESSION[$this->reCAPTCHA_session_var];
+		}
+		require_once($this->reCAPTCHA_inc);
+		$resp = recaptcha_check_answer($this->reCAPTCHA_priv,
+                                $_SERVER["REMOTE_ADDR"],
+                                $_POST["recaptcha_challenge_field"],
+                                $_POST["recaptcha_response_field"]);
+		if (session_id() && $resp->is_valid) {
+			$_SESSION[$this->reCAPTCHA_session_var] = true;
+		}
+		return $resp->is_valid;
 	}
 
 	private function dateRangeValidator($key) {			// performs date normalisation
