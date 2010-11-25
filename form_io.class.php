@@ -808,6 +808,9 @@ class FormIO implements ArrayAccess
 			if (empty($this->data[$key][0]) ^ empty($this->data[$key][1])) {
 				return false;
 			}
+			if (empty($this->data[$key][0])) {		// none set, nothing being sent
+				return true;
+			}
 
 			$dateOk = preg_match(FormIO::dateRegex, $this->data[$key][0], $dateMatches);
 			$timeOk = preg_match(FormIO::timeRegex, $this->data[$key][1], $timeMatches);
