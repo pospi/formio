@@ -53,6 +53,7 @@ class FormIO implements ArrayAccess
 	const T_SUBMIT	= 29;
 	const T_RESET	= 30;
 	const T_CAPTCHA	= 35;			// reCAPTCHA plugin
+	const T_CAPTCHA2 = 37;			// SecurImage plugin. DO NOT use this as the field type, instead use T_CAPTCHA and set FormIO::$captchaType accordingly
 	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into
 
 	// form builder strings for different element types :TODO: finish implementation
@@ -76,6 +77,7 @@ class FormIO implements ArrayAccess
 		
 		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CAPTCHA	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label>{$captcha}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CAPTCHA2	=> '<div class="row{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" class="captcha" /> <a class="reload" href="javascript: void(0);">Reload image</a> {$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -111,11 +113,21 @@ class FormIO implements ArrayAccess
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
 	
-	// reCAPTCHA parameters for T_CAPTCHA. Recommend you set these from your own scripts.
+	// parameters for T_CAPTCHA. Recommend you set these from your own scripts.
+	
+	public $captchaType		= 'securimage';			// must be 'securimage' or 'recaptcha'
+	// Some notes on captcha types and requirements:
+	//	- reCAPTCHA requires that your form be submitted via POST, and that socket connections
+	//	  to external sites are possible. This may be an issue from behind a proxy server.
+	//	- SecurImage requires that GD be installed and running on your server. It also requires sessions to be enabled.
+	// All captchas attempt to use the session to store validation status - this way, a user only need authenticate once.
+	
+	public $CAPTCHA_session_var = '__formIO_CAPTCHA_ok';		// once we have authenticated as human, this will be stored in session so we don't have to do it again
 	public $reCAPTCHA_pub	= '';
 	public $reCAPTCHA_priv	= '';
-	public $reCAPTCHA_inc	= 'recaptchalib.php';				// this should point to the reCAPTCHA php include file
-	public $reCAPTCHA_session_var = '__formIO_reCAPTCHA_ok';	// once we have authenticated as human, this will be stored in session so we don't have to do it again
+	public $reCAPTCHA_inc	= 'recaptcha/recaptchalib.php';		// this should point to the reCAPTCHA php include file
+	public $securImage_inc	= 'securimage/securimage.php';		// this should point to the SecurImage php include file
+	public $securImage_img	= 'securimage/securimage_show.php';	// this should point to the SecurImage php image generation file
 
 	//===============================================================================================/\
 
@@ -368,6 +380,9 @@ class FormIO implements ArrayAccess
 			case FormIO::T_DATETIME:
 				$this->addValidator($k, 'dateTimeValidator', array(), false); break;
 			case FormIO::T_CAPTCHA:
+				if ($this->captchaType == 'recaptcha') {
+					$this->method = 'POST';						// force using POST submission for reCAPTCHA
+				}
 				$this->addValidator($k, 'captchaValidator', array(), false); break;
 		}
 	}
@@ -463,11 +478,20 @@ class FormIO implements ArrayAccess
 					$inputVars['am']		= $value[2] != 'pm';
 					break;
 				case FormIO::T_CAPTCHA:
-					if (isset($_SESSION[$this->reCAPTCHA_session_var])) {
+					if (!empty($_SESSION[$this->CAPTCHA_session_var])) {
 						continue 2;								// already verified as human, so don't output the field anymore
 					}
-					require_once($this->reCAPTCHA_inc);
-					$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
+					switch ($this->captchaType) {
+						case 'recaptcha':
+							require_once($this->reCAPTCHA_inc);
+							$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
+							break;
+						case 'securimage':
+							require_once($this->securImage_inc);
+							$inputVars['captchaImage'] = $this->securImage_img;
+							$builderString = FormIO::$builder[FormIO::T_CAPTCHA2];
+							break;
+					}
 					break;
 				case FormIO::T_RADIOGROUP:	// these field types contain subelements
 				case FormIO::T_CHECKGROUP:
@@ -792,18 +816,31 @@ class FormIO implements ArrayAccess
 	}
 
 	private function captchaValidator($key) {				// stores result in session, if available. We only need to authenticate as human once.
-		if (isset($_SESSION[$this->reCAPTCHA_session_var])) {
-			return $_SESSION[$this->reCAPTCHA_session_var];
+		if (isset($_SESSION[$this->CAPTCHA_session_var])) {
+			return $_SESSION[$this->CAPTCHA_session_var];
 		}
-		require_once($this->reCAPTCHA_inc);
-		$resp = recaptcha_check_answer($this->reCAPTCHA_priv,
+		$ok = false;
+		switch ($this->captchaType) {
+			case 'recaptcha':
+				require_once($this->reCAPTCHA_inc);
+				$resp = recaptcha_check_answer($this->reCAPTCHA_priv,
                                 $_SERVER["REMOTE_ADDR"],
                                 $_POST["recaptcha_challenge_field"],
                                 $_POST["recaptcha_response_field"]);
-		if (session_id() && $resp->is_valid) {
-			$_SESSION[$this->reCAPTCHA_session_var] = true;
+				$ok = $resp->is_valid;
+				break;
+			case 'securimage':
+				require_once($this->securImage_inc);
+				$securimage = new Securimage();
+				if ($securimage->check($this->data[$key])) {
+					$ok = true;
+				}
+				break;
 		}
-		return $resp->is_valid;
+		if (session_id() && $ok) {
+			$_SESSION[$this->CAPTCHA_session_var] = true;
+		}
+		return $ok;
 	}
 
 	private function dateRangeValidator($key) {			// performs date normalisation

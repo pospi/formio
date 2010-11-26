@@ -137,6 +137,11 @@ form.clean #recaptcha_widget_div {
 	margin-left: 25%;
 }
 
+form.clean .captcha {
+	margin-left: 25%;
+	vertical-align: middle;
+}
+
 /* Button */
 
 form.clean button, form.clean input[type=submit], form.clean input[type=reset] {
