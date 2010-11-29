@@ -109,6 +109,14 @@ $(document).ready(function() {
 		el.datepicker({'dateFormat' : 'dd/mm/yy'});
 	};
 	
+	var initSecurImageField = function(el)		// adds 'reload image' behaviour
+	{
+		el.find('.reload').click(function() {
+			var img = el.find('.captcha').get(0);
+			img.src = img.src.match(/^[^\?]*/i)[0] + '?r=' + Math.random();
+		});
+	};
+	
 	var initDependencies = function(el)
 	{
 		var dependencies = {};
@@ -135,6 +143,7 @@ $(document).ready(function() {
 	
 	var setupRoutines = {
 		"[data-fio-type='date']"	: initDateField,
+		"[data-fio-type='securimage']" : initSecurImageField,
 		"[data-fio-depends]"		: initDependencies
 	};
 	
