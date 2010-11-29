@@ -514,12 +514,12 @@ class FormIO implements ArrayAccess
 					if (isset($this->dataDepends[$k])) {
 						$inputVars['dependencies'] = $this->getDependencyString($k);
 					}
-
-					// Unset value and get ready to build options
-					unset($inputVars['value']);
-					$inputVars['options'] = '';
-
+					
+					// determine if a value has been sent
+					$valueSent = isset($this->data[$k]) && $this->data[$k] !== '';
+					
 					// Build field sub-elements
+					$inputVars['options'] = '';
 					foreach ($this->dataOptions[$k] as $optVal => $desc) {
 						$radioVars = array(
 							'name'		=> $k,
@@ -527,13 +527,19 @@ class FormIO implements ArrayAccess
 						);
 						if (is_array($desc)) {
 							$radioVars['desc'] = $desc['desc'];
-							if (isset($desc['disabled']))	$radioVars['disabled']	= $desc['disabled'];
-							if (isset($desc['checked']))	$radioVars['checked']	= $desc['checked'];
+							if (isset($desc['disabled']))				$radioVars['disabled']	= $desc['disabled'];
+							if (isset($desc['checked']) && !$valueSent)	$radioVars['checked']	= $desc['checked'];
 						} else {
 							$radioVars['desc'] = $desc;
 						}
+						// determine whether option should be selected if it hasn't explicitly been set
+						if ($valueSent && $inputVars['value'] == $optVal) {
+							$radioVars['checked'] = true;
+						}
 						$inputVars['options'] .= $this->replaceInputVars(FormIO::$builder[$subFieldType], $radioVars);
 					}
+					// Unset value, we don't use it for these field types
+					unset($inputVars['value']);
 					break;
 				// these field types are normal text inputs that have extra clientside behaviours
 				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
