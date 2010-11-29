@@ -132,6 +132,8 @@ class FormIO implements ArrayAccess
 	//===============================================================================================/\
 
 	private $lastBuilderReplacement;		// form builder hack for preg_replace_callback not being able to accept extra parameters
+	private $lastAddedField;				// name of the last added field is stored here, for field attribute method chaining
+	private $autoNameCounter;				// used for presentational field types where the field name doesn't matter and we don't want to have to specify it
 
 	// Form stuff
 	private $name;		// unique html ID for this form
@@ -195,6 +197,8 @@ class FormIO implements ArrayAccess
 
 	/**
 	 * Add a field to this form
+	 *
+	 * :CHAINABLE:
 	 */
 	public function addField($name, $displayText, $type, $value = null)
 	{
@@ -204,14 +208,23 @@ class FormIO implements ArrayAccess
 		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
 			$this->dataOptions[$name] = array();
 		}
+		
+		$this->lastAddedField = $name;
+		return $this;
 	}
 
 	/**
-	 * Set some fields to be required. Simply pass as many field names to the function as you desire.
+	 * Set some fields to be required. Either pass as many field names to the function as you
+	 * desire, or call immediately after adding the field, with no parameters.
+	 * 
+	 * :CHAINABLE:
 	 */
 	public function setRequired()
 	{
 		$a = func_get_args();
+		if (!sizeof($a)) {
+			$a[] = $this->lastAddedField;
+		}
 		foreach ($a as $fieldName) {
 			switch ($this->dataTypes[$fieldName]) {
 				case FormIO::T_DATERANGE:
@@ -225,6 +238,7 @@ class FormIO implements ArrayAccess
 					break;
 			}
 		}
+		return $this;
 	}
 
 	/**
@@ -233,6 +247,8 @@ class FormIO implements ArrayAccess
 	 * @param	string	$validatorName	name of validation function to run
 	 * @param	array	$params			extra parameters to pass to the validation callback (value is always parameter 0)
 	 * @param	bool	$customFunc		if true, look in the global namespace for this function. otherwise it is a method of the FormIO class.
+	 *
+	 * :CHAINABLE:
 	 */
 	public function addValidator($k, $validatorName, $params = array(), $customFunc = true)
 	{
@@ -250,7 +266,15 @@ class FormIO implements ArrayAccess
 		}
 		$this->dataValidators[$k][] = $validatorName;
 
-		return true;
+		return $this;
+	}
+	
+	/**
+	 * convenience :CHAINABLE: version of the above (no fieldname required). Use like $form->addField(...)->validateWith(...)->addField(......
+	 */
+	public function validateWith($validatorName, $params = array(), $customFunc = true)
+	{
+		return $this->addValidator($this->lastAddedField, $validatorName, $params, $customFunc);
 	}
 
 	/**
@@ -258,10 +282,21 @@ class FormIO implements ArrayAccess
 	 * You can add anything you like in here, but they will only be output if present in the form builder strings
 	 * for the field type being processed. Also note that adding elements here linearly slows the performance of
 	 * rendering the field in question.
+	 * If called with 2 parameters, the last added field is used as the key.
+	 * 
+	 * :CHAINABLE:
 	 */
-	public function addAttribute($k, $attr, $value)
+	public function addAttribute()
 	{
+		$a = func_get_args();
+		if (sizeof($a) < 3) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $attr, $value) = $a;
+		
 		$this->dataAttributes[$k][$attr] = $value;
+		
+		return $this;
 	}
 
 	// Allows you to add an error message to the form from external scripts
@@ -285,6 +320,8 @@ class FormIO implements ArrayAccess
 	 * @param	mixed	$optionText either the option's description (as text);
 	 * 								or array of desc(string) and optional disabled(bool), checked(bool) properties
 	 * @param	mixed	$dependentField @see FormIO::addFieldDependency()
+	 *
+	 * :CHAINABLE:
 	 */
 	public function addFieldOption($k, $optionVal, $optionText, $dependentField = null)
 	{
@@ -292,6 +329,15 @@ class FormIO implements ArrayAccess
 		if ($dependentField !== null) {
 			$this->addFieldDependency($k, $optionVal, $dependentField);
 		}
+		return $this;
+	}
+	
+	/**
+	 * convenience :CHAINABLE: version of the above (no fieldname required). Use like $form->addField(...)->addOption(...)->addOption(...)->addField(......
+	 */
+	public function addOption($optionVal, $optionText, $dependentField = null)
+	{
+		return $this->addFieldOption($this->lastAddedField, $optionVal, $optionText, $dependentField);
 	}
 
 	/**
@@ -301,9 +347,17 @@ class FormIO implements ArrayAccess
 	 * @param	string	$k				field to add the dependency to
 	 * @param	mixed	$expectedValue	when the value of field $k is $expectedValue, $dependentField will be visible. Otherwise, it won't.
 	 * @param	mixed	$dependentField	field name or array of field names to toggle when the value of field $k changes
+	 * 
+	 * :CHAINABLE:
 	 */
-	public function addFieldDependency($k, $expectedValue, $dependentField)
+	public function addFieldDependency()
 	{
+		$a = func_get_args();
+		if (sizeof($a) < 3) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $expectedValue, $dependentField) = $a;
+		
 		if (!isset($this->dataDepends[$k])) {
 			$this->dataDepends[$k] = array();
 		}
@@ -311,14 +365,38 @@ class FormIO implements ArrayAccess
 			$dependentField = array($dependentField);
 		}
 		$this->dataDepends[$k][$expectedValue] = $dependentField;
+		return $this;
 	}
 	
-	public function setAutocompleteURL($k, $url)
+	// :CHAINABLE:
+	public function setAutocompleteURL()
 	{
-		$this->addAttribute($k, 'searchurl', $url);
+		$a = func_get_args();
+		if (sizeof($a) < 2) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $url) = $a;
+		
+		return $this->addAttribute($k, 'searchurl', $url);
 	}
 
-	// :TODO: simplified mutators for adding various non-field types
+	// simplified mutators for adding various non-field types
+	
+	public function startFieldset($title) {
+		return $this->addField('fs' . $this->autoNameCounter++, $title, FormIO::T_INDENT);
+	}
+	
+	public function endFieldset() {
+		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_OUTDENT);
+	}
+	
+	public function addSubmitButton($text) {
+		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
+	}
+	
+	public function addResetButton($text) {
+		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
+	}
 
 	//==========================================================================
 	//	Accessors
