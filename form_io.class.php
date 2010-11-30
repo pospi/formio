@@ -6,6 +6,15 @@
 	This class takes lists of variables, with given types, and performs
 	form rendering, JSON output, JSON submission and HTTP form submission on them.
 	It also performs data validation where appropriate.
+	
+	Full use of the Form's advanced controls requires that you include formio.js
+	(and formio.css) on pages which use your form. You will also need to have
+	jQuery and jQueryUI loaded, as these are used to handle the various form controls.
+	
+	Most form building methods are can be chained - these are denoted by the tag
+	:CHAINABLE:. Most of these may be called independently, using the field name
+	as first parameter - or chained, whereby the first parameter is filled by the
+	name of the field last added to the form object.
 	----------------------------------------------------------------------------
 	@author		Sam Pospischil <pospi@spadgos.com>
 	@date		2010-11-01
@@ -54,7 +63,7 @@ class FormIO implements ArrayAccess
 	const T_RESET	= 30;
 	const T_CAPTCHA	= 35;			// reCAPTCHA plugin
 	const T_CAPTCHA2 = 37;			// SecurImage plugin. DO NOT use this as the field type, instead use T_CAPTCHA and set FormIO::$captchaType accordingly
-	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into
+	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into. If you wish to restrict to a range of values, check this yourself and use addError()
 
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
@@ -368,7 +377,13 @@ class FormIO implements ArrayAccess
 		return $this;
 	}
 	
-	// :CHAINABLE:
+	/**
+	 * Sets the autocomplete data URL for an autocomplete field. This falls through
+	 * to the jQuery UI autocomplete control, so the URL will have ?term=[input text]
+	 * appended to it.
+	 *
+	 * :CHAINABLE:
+	 */
 	public function setAutocompleteURL()
 	{
 		$a = func_get_args();

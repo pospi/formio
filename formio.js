@@ -109,6 +109,11 @@ $(document).ready(function() {
 		el.datepicker({'dateFormat' : 'dd/mm/yy'});
 	};
 	
+	var initAutoCompleteField = function(el)
+	{
+		el.autocomplete({'source' : el.data('fio-searchurl')});
+	};
+	
 	var initSecurImageField = function(el)		// adds 'reload image' behaviour
 	{
 		el.find('.reload').click(function() {
@@ -144,6 +149,7 @@ $(document).ready(function() {
 	var setupRoutines = {
 		"[data-fio-type='date']"	: initDateField,
 		"[data-fio-type='securimage']" : initSecurImageField,
+		"[data-fio-searchurl]"		: initAutoCompleteField,
 		"[data-fio-depends]"		: initDependencies
 	};
 	
