@@ -46,7 +46,7 @@ form.clean label, form.clean .multiple legend {
 
 form.clean input {
 	width:70%;
-	line-height:1.5em;
+	line-height:1em;
 	padding:0.15em;
 }
 
@@ -55,7 +55,7 @@ form.clean input, form.clean textarea, form.clean select {
 	font-size:1em;
 	border:1px solid #bbb;
 	padding:0.15em;
-	margin-right:1em
+	margin-right:1em;
 }
 
 form.clean textarea, form.clean select {
@@ -134,7 +134,7 @@ form.clean .currency span {
 	position: absolute;
 	left: 0.3em;
 	top: 0.15em;
-	line-height:2em;								/* IE & webkit only (see overrides at bottom) */
+	line-height:2em;								/* IE only (see overrides at bottom) */
 }
 
 /* Button */
@@ -229,5 +229,8 @@ form.clean .preamble .err {
 	}
 	form.clean fieldset legend {
 		padding: 0 0.25em;
+	}
+	form.clean .currency span {
+		line-height:1.5em;
 	}
 }
