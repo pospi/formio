@@ -35,19 +35,9 @@ form.clean fieldset {
 form.clean fieldset legend {
 	font-size: 1.2em;
 	font-weight: bold;
-	padding: 0;											/* IE */
+	padding: 0;											/* IE only (see overrides at bottom) */
 }
-@-moz-document url-prefix() {							/* Gecko override */
-	form.clean fieldset legend {
-		padding: 0 0.25em;
-	}
-}
-@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit override */
-	form.clean fieldset legend {
-		padding: 0 0.25em;
-	}	
-}
-		 
+
 form.clean label, form.clean .multiple legend {
 	font-weight:bold;
 	position: relative;
@@ -106,17 +96,7 @@ form.clean .multiple label {
 
 form.clean .multiple legend {
 	padding: 0.5em 0.25em 0.5em 0;
-	margin-left: -0.25em;								/* IE */
-}
-@-moz-document url-prefix() {							/* Gecko override */
-	form.clean .multiple legend {
-		margin-left: 0.25em;
-	}
-}
-@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit override */
-	form.clean .multiple legend {
-		margin-left: 0.25em;
-	}	
+	margin-left: -0.25em;								/* IE only (see overrides at bottom) */
 }
 
 /* Type-specific */
@@ -140,6 +120,21 @@ form.clean #recaptcha_widget_div {
 form.clean .captcha {
 	margin-left: 25%;
 	vertical-align: middle;
+}
+
+form.clean .currency {
+	position: relative;
+}
+
+form.clean .currency input {
+	padding-left: 1em;
+}
+
+form.clean .currency span {
+	position: absolute;
+	left: 0.3em;
+	top: 0.15em;
+	line-height:2em;								/* IE & webkit only (see overrides at bottom) */
 }
 
 /* Button */
@@ -213,4 +208,26 @@ form.clean p.hint, form.clean p.err {
 form.clean .preamble .err {
 	margin: 0.5em 0;
 	font-size: 1em;
+}
+
+/* Browser-specific style overrides (by which I mean hacks) */
+
+@-moz-document url-prefix() {							/* Gecko overrides */
+	form.clean .multiple legend {
+		margin-left: 0.25em;
+	}
+	form.clean fieldset legend {
+		padding: 0 0.25em;
+	}
+	form.clean .currency span {
+		line-height:1.2em;
+	}
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit overrides */
+	form.clean .multiple legend {
+		margin-left: 0.25em;
+	}
+	form.clean fieldset legend {
+		padding: 0 0.25em;
+	}
 }
