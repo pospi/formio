@@ -94,6 +94,13 @@ class FormIO implements ArrayAccess
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 	);
+	
+	// This contains an array of all field types which are presentational only.
+	// Used by FormIO::getData() to filter the returned array
+	private static $presentational = array(
+		FormIO::T_RAW, FormIO::T_HEADER, FormIO::T_SUBHEADER, FormIO::T_PARAGRAPH, FormIO::T_SECTIONBREAK,
+		FormIO::T_IMAGE, FormIO::T_INDENT, FormIO::T_OUTDENT, FormIO::T_BUTTON, FormIO::T_RESET, FormIO::T_CAPTCHA
+	);
 
 	//===============================================================================================\/
 	//	Stuff you might want to change
@@ -419,7 +426,22 @@ class FormIO implements ArrayAccess
 	//==========================================================================
 	//	Accessors
 	
-	public function getData()
+	/**
+	 * Retrieves all the form's data, as an array. Non-input field types are filtered from the output.
+	 * You may choose to also retrieve submit button values by passing true to the function.
+	 */
+	public function getData($includeSubmit = false)
+	{
+		$data = $this->data;
+		foreach ($data as $k => $v) {
+			if (in_array($this->dataTypes[$k], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$k] == FormIO::T_SUBMIT)) {
+				unset($data[$k]);
+			}
+		}
+		return $data;
+	}
+	
+	public function getRawData()
 	{
 		return $this->data;
 	}
@@ -1037,6 +1059,28 @@ class FormIO implements ArrayAccess
 			return 'http://' . $str;
 		}
 		return $str;
+	}
+
+	//==========================================================================
+	//	Miscellaneous
+	
+	public static function dateTimeToMySQL($val)
+	{
+		@list($hr, $min, $sec) = explode(':', $val[1]);
+		if ($val[2] == 'pm') {
+			if ($hr != 12) {
+				$hr += 12;
+			}
+		} else if ($hr == 12) {
+			$hr = '00';
+		}
+		return FormIO::dateToMySQL($val[0]) . ' ' . $hr . ':' . $min . ':' . ($sec ? $sec : '00');
+	}
+	
+	public static function dateToMySQL($val)
+	{
+		$bits = explode('/', $val);
+		return $bits[2] . '-' . $bits[1] . '-' . $bits[0];
 	}
 
 	//==========================================================================
