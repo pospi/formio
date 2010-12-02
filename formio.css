@@ -44,7 +44,7 @@ form.clean label, form.clean .multiple legend {
 	font-size: 1em;
 }
 
-form.clean input {
+form.clean input, form.clean div.readonly {
 	width:70%;
 	line-height:1em;
 	padding:0.15em;
