@@ -487,6 +487,16 @@ class FormIO implements ArrayAccess
 	{
 		$this->action = $url;
 	}
+	
+	public function setPreamble($html)
+	{
+		$this->preamble = $html;
+	}
+	
+	public function setSuffix($html)
+	{
+		$this->suffix = $html;
+	}
 
 	public function setDataType($k, $type)
 	{
@@ -546,10 +556,11 @@ class FormIO implements ArrayAccess
 	public function getForm()
 	{
 		$form = "<form id=\"$this->name\" class=\"clean\" method=\"$this->method\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
-
-		if (sizeof($this->errors) || isset($this->preamble)) {
+		
+		$hasErrors = sizeof($this->errors) > 0;
+		if ($hasErrors || isset($this->preamble)) {
 			$form .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
-			$form .= "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n";
+			$form .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
 			$form .= '</div>' . "\n";
 		}
 
@@ -686,6 +697,11 @@ class FormIO implements ArrayAccess
 			$inputVars['alt'] = ++$spin % 2 == 0;
 
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
+		}
+		
+		if (isset($this->suffix)) {
+			$form .= '<div class="suffix">' . "\n" . (isset($this->suffix) ? $this->suffix : '') . "\n";
+			$form .= '</div>' . "\n";
 		}
 
 		return $form . "</form>\n";
