@@ -482,6 +482,11 @@ class FormIO implements ArrayAccess
 
 	//==========================================================================
 	//	Other mutators
+	
+	public function setFormAction($url)
+	{
+		$this->action = $url;
+	}
 
 	public function setDataType($k, $type)
 	{
@@ -1081,6 +1086,41 @@ class FormIO implements ArrayAccess
 	{
 		$bits = explode('/', $val);
 		return $bits[2] . '-' . $bits[1] . '-' . $bits[0];
+	}
+	
+	public static function mySQLDateTimeToForm($val)
+	{
+		$val = explode(' ', $val, 2);
+		list($h, $min, $s) = explode(':', $val[1]);
+		
+		if ($h === null || $min === null || $s === null) {
+			return '';
+		}
+		
+		$meridian = 'am';
+		if ($h > 11) {
+			$meridian = 'pm';
+			if ($h > 12) {
+				$h -= 12;
+			}
+		} else if ($h == 0) {
+			$h = 12;
+		}
+		
+		return array(
+			FormIO::mySQLDateToForm($val[0]),
+			"$h:$min" . (intval($s) > 0 ? ":$s" : ""),
+			$meridian
+		);
+	}
+	
+	public static function mySQLDateToForm($val)
+	{
+		list($y, $mth, $d) = explode('-', $val);
+		if ($y === null || $mth === null || $d === null) {
+			return '';
+		}
+		return "$d/$mth/$y";
 	}
 
 	//==========================================================================
