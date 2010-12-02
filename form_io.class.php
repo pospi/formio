@@ -415,6 +415,11 @@ class FormIO implements ArrayAccess
 
 	//==========================================================================
 	//	Accessors
+	
+	public function getData()
+	{
+		return $this->data;
+	}
 
 	public function getErrors()
 	{
@@ -664,7 +669,7 @@ class FormIO implements ArrayAccess
 	private function replaceInputVars($str, $varsMap)
 	{
 		foreach ($varsMap as $property => $value) {
-			if (!$value) {
+			if ($value === false || $value === null) {
 				$str = preg_replace('/\{\$' . $property . '.*\}/U', '', $str);
 				continue;
 			}
