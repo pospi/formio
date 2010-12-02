@@ -126,8 +126,13 @@ form.clean .currency {
 	position: relative;
 }
 
+form.clean input[type=text] {
+	padding-right: 1em;		/* this balances out the currency input's left padding... */
+}
+
 form.clean .currency input {
 	padding-left: 1em;
+	padding-right: 0;
 }
 
 form.clean .currency span {
