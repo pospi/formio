@@ -175,7 +175,7 @@ class FormIO implements ArrayAccess
 	// Validation functions should simply return true or false
 	private $dataValidators = array();
 	private $dataTypes = array();			// indicates data type for each field
-	private $dataDepends = array();			// :TODO:
+	private $dataDepends = array();			// defines which fields are dependent on the values of others
 	private $dataOptions = array();			// input options for checkbox, radio, dropdown etc types
 	private $dataAttributes = array();		// any extra attributes to add to HTML output - maxlen, classes, desc
 
@@ -417,6 +417,10 @@ class FormIO implements ArrayAccess
 		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_OUTDENT);
 	}
 	
+	/**
+	 * Note that this method doesn't allow you to choose a submit name, since it is most often not important.
+	 * If you wish to do this, call addField() directly.
+	 */
 	public function addSubmitButton($text) {
 		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
 	}
@@ -438,6 +442,12 @@ class FormIO implements ArrayAccess
 		foreach ($data as $k => $v) {
 			if (in_array($this->dataTypes[$k], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$k] == FormIO::T_SUBMIT)) {
 				unset($data[$k]);
+			} else if ($this->dataTypes[$k] == FormIO::T_DATE) {
+				$data[$k] = FormIO::dateToMySQL($v);
+			} else if ($this->dataTypes[$k] == FormIO::T_DATETIME) {
+				$data[$k] = FormIO::dateTimeToMySQL($v);
+			} else if ($this->dataTypes[$k] == FormIO::T_DATERANGE) {
+				$data[$k] = array(FormIO::dateToMySQL($v[0]), FormIO::dateToMySQL($v[1]));
 			}
 		}
 		return $data;
@@ -547,12 +557,12 @@ class FormIO implements ArrayAccess
 
 	public function getJSON()
 	{
-		return JSONParser::encode($this->data);
+		return JSONParser::encode($this->getData(true));
 	}
 
 	public function getQueryString()
 	{
-		return http_build_query($this->data);
+		return http_build_query($this->getData(true));
 	}
 
 	public function getForm()

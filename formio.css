@@ -132,7 +132,6 @@ form.clean input[type=text] {
 
 form.clean .currency input {
 	padding-left: 1em;
-	padding-right: 0;
 }
 
 form.clean .currency span {
@@ -140,6 +139,10 @@ form.clean .currency span {
 	left: 0.3em;
 	top: 0.15em;
 	line-height:2em;								/* IE only (see overrides at bottom) */
+}
+
+form.clean .currency input, form.clean .datetime input {
+	padding-right: 0.15em;
 }
 
 /* Button */
