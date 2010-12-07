@@ -1100,7 +1100,9 @@ class FormIO implements ArrayAccess
 	public static function dateTimeToMySQL($val)
 	{
 		@list($hr, $min, $sec) = explode(':', $val[1]);
-		if ($val[2] == 'pm') {
+		if ($hr === null || $min === null) {
+			return '';
+		} else if ($val[2] == 'pm') {
 			if ($hr != 12) {
 				$hr += 12;
 			}
@@ -1113,6 +1115,9 @@ class FormIO implements ArrayAccess
 	public static function dateToMySQL($val)
 	{
 		$bits = explode('/', $val);
+		if (!isset($bits[2])) {
+			return '';
+		}
 		return $bits[2] . '-' . $bits[1] . '-' . $bits[0];
 	}
 	
