@@ -1071,6 +1071,9 @@ class FormIO implements ArrayAccess
 	//		the value', if that differentiation makes sense.
 	
 	private function normaliseDate($d, $m, $y) {				// dd/mm/yyyy
+		if ($d === null || $m === null || $y === null) {
+			return '';
+		}
 		$yearPadStr = '20';
 		if ($y < 100 && $y > 69) {
 			$yearPadStr = '19';
