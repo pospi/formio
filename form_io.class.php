@@ -443,11 +443,11 @@ class FormIO implements ArrayAccess
 			if (in_array($this->dataTypes[$k], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$k] == FormIO::T_SUBMIT)) {
 				unset($data[$k]);
 			} else if ($this->dataTypes[$k] == FormIO::T_DATE) {
-				$data[$k] = FormIO::dateToMySQL($v);
+				$data[$k] = FormIO::dateToUnix($v);
 			} else if ($this->dataTypes[$k] == FormIO::T_DATETIME) {
-				$data[$k] = FormIO::dateTimeToMySQL($v);
+				$data[$k] = FormIO::dateTimeToUnix($v);
 			} else if ($this->dataTypes[$k] == FormIO::T_DATERANGE) {
-				$data[$k] = array(FormIO::dateToMySQL($v[0]), FormIO::dateToMySQL($v[1]));
+				$data[$k] = array(FormIO::dateToUnix($v[0]), FormIO::dateToUnix($v[1]));
 			}
 		}
 		return $data;
@@ -1100,63 +1100,53 @@ class FormIO implements ArrayAccess
 	//==========================================================================
 	//	Miscellaneous
 	
-	public static function dateTimeToMySQL($val)
+	public static function dateTimeToUnix($val)
 	{
 		@list($hr, $min, $sec) = explode(':', $val[1]);
 		if ($hr === null || $min === null) {
-			return '';
+			return null;
 		} else if ($val[2] == 'pm') {
 			if ($hr != 12) {
 				$hr += 12;
 			}
 		} else if ($hr == 12) {
-			$hr = '00';
+			$hr = 0;
 		}
-		return FormIO::dateToMySQL($val[0]) . ' ' . $hr . ':' . $min . ':' . ($sec ? $sec : '00');
+		return FormIO::dateToUnix($val[0]) + $hr*3600 + $min*60 + ($sec ? $sec : 0);
 	}
 	
-	public static function dateToMySQL($val)
+	public static function dateToUnix($val)
 	{
 		$bits = explode('/', $val);
 		if (!isset($bits[2])) {
-			return '';
+			return null;
 		}
-		return $bits[2] . '-' . $bits[1] . '-' . $bits[0];
+		return mktime(0, 0, 0, $bits[1], $bits[0], $bits[2]);
 	}
 	
-	public static function mySQLDateTimeToForm($val)
+	public static function timestampToDateTime($val)
 	{
-		$val = explode(' ', $val, 2);
-		list($h, $min, $s) = explode(':', $val[1]);
-		
-		if ($h === null || $min === null || $s === null) {
+		if (!$val) {
 			return '';
 		}
-		
-		$meridian = 'am';
-		if ($h > 11) {
-			$meridian = 'pm';
-			if ($h > 12) {
-				$h -= 12;
-			}
-		} else if ($h == 0) {
-			$h = 12;
+		$format = "h:i";
+		if ($secs = date('s', $val) && intval($secs) != 0) {
+			$format = $format . ":$secs";
 		}
 		
 		return array(
-			FormIO::mySQLDateToForm($val[0]),
-			"$h:$min" . (intval($s) > 0 ? ":$s" : ""),
-			$meridian
+			FormIO::timestampToDate($val),
+			date($format, $val),
+			date('a', $val)
 		);
 	}
 	
-	public static function mySQLDateToForm($val)
+	public static function timestampToDate($val)
 	{
-		list($y, $mth, $d) = explode('-', $val);
-		if ($y === null || $mth === null || $d === null) {
+		if (!$val) {
 			return '';
 		}
-		return "$d/$mth/$y";
+		return date("d/m/Y", $val);
 	}
 
 	//==========================================================================
