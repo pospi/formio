@@ -230,6 +230,16 @@ class FormIO implements ArrayAccess
 			$this->dataOptions[$name] = array();
 		}
 		
+		// convert timestamp values passed in for date-related fields
+		if ( ($type == FormIO::T_DATE || $type == FormIO::T_DATETIME)
+		  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
+			$this->data[$name] = $type == FormIO::T_DATE ? FormIO::timestampToDate($value) : FormIO::timestampToDateTime($value);
+		}
+		if ( $type == FormIO::T_DATERANGE
+		 && (is_array($value) && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0]))) && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))) ) {
+			$this->data[$name] = array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
+		}
+		
 		$this->lastAddedField = $name;
 		return $this;
 	}
@@ -1127,7 +1137,7 @@ class FormIO implements ArrayAccess
 	public static function timestampToDateTime($val)
 	{
 		if (!$val) {
-			return '';
+			return null;
 		}
 		$format = "h:i";
 		if ($secs = date('s', $val) && intval($secs) != 0) {
@@ -1144,7 +1154,7 @@ class FormIO implements ArrayAccess
 	public static function timestampToDate($val)
 	{
 		if (!$val) {
-			return '';
+			return null;
 		}
 		return date("d/m/Y", $val);
 	}
