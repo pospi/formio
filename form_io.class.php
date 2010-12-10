@@ -6,11 +6,11 @@
 	This class takes lists of variables, with given types, and performs
 	form rendering, JSON output, JSON submission and HTTP form submission on them.
 	It also performs data validation where appropriate.
-	
+
 	Full use of the Form's advanced controls requires that you include formio.js
 	(and formio.css) on pages which use your form. You will also need to have
 	jQuery and jQueryUI loaded, as these are used to handle the various form controls.
-	
+
 	Most form building methods are can be chained - these are denoted by the tag
 	:CHAINABLE:. Most of these may be called independently, using the field name
 	as first parameter - or chained, whereby the first parameter is filled by the
@@ -66,6 +66,7 @@ class FormIO implements ArrayAccess
 	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into. If you wish to restrict to a range of values, check this yourself and use addError()
 	const T_FILE = 38;
 	const T_SPACER = 39;			// does nothing. Use this to increment the row striper, etc
+	const T_PASSWORDCHANGE = 39;	// outputs two password inputs which must match to validate. :TODO: also does complexity check ?
 
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
@@ -79,14 +80,14 @@ class FormIO implements ArrayAccess
 		FormIO::T_SUBHEADER	=> '<h3 id="{$form}_{$name}">{$desc}</h3>',
 		FormIO::T_SECTIONBREAK => '</tbody><tbody>',
 		FormIO::T_IMAGE		=> '<img id="{$form}_{$name}" src="{$value}" alt="{$desc}" />',
-		
+
 		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$form}_{$name}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$form}_{$name}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$form}_{$name}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
 		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		
+
 		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$form}_{$name}" value="{$value}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -96,7 +97,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="row multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
-		
+
 		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CAPTCHA	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label>{$captcha}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CAPTCHA2	=> '<div class="row{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" class="captcha" /> <a class="reload" href="javascript: void(0);">Reload image</a> {$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -104,7 +105,7 @@ class FormIO implements ArrayAccess
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 	);
-	
+
 	// This contains an array of all field types which are presentational only.
 	// Used by FormIO::getData() to filter the returned array
 	private static $presentational = array(
@@ -141,16 +142,16 @@ class FormIO implements ArrayAccess
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
-	
+
 	// parameters for T_CAPTCHA. Recommend you set these from your own scripts.
-	
+
 	public $captchaType		= 'securimage';			// must be 'securimage' or 'recaptcha'
 	// Some notes on captcha types and requirements:
 	//	- reCAPTCHA requires that your form be submitted via POST, and that socket connections
 	//	  to external sites are possible. This may be an issue from behind a proxy server.
 	//	- SecurImage requires that GD be installed and running on your server. It also requires sessions to be enabled.
 	// All captchas attempt to use the session to store validation status - this way, a user only need authenticate once.
-	
+
 	public $CAPTCHA_session_var = '__formIO_CAPTCHA_ok';		// once we have authenticated as human, this will be stored in session so we don't have to do it again
 	public $reCAPTCHA_pub	= '';
 	public $reCAPTCHA_priv	= '';
@@ -237,7 +238,7 @@ class FormIO implements ArrayAccess
 		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
 			$this->dataOptions[$name] = array();
 		}
-		
+
 		// convert timestamp values passed in for date-related fields
 		if ( ($type == FormIO::T_DATE || $type == FormIO::T_DATETIME)
 		  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
@@ -247,7 +248,7 @@ class FormIO implements ArrayAccess
 		 && (is_array($value) && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0]))) && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))) ) {
 			$this->data[$name] = array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
 		}
-		
+
 		$this->lastAddedField = $name;
 		return $this;
 	}
@@ -255,7 +256,7 @@ class FormIO implements ArrayAccess
 	/**
 	 * Set some fields to be required. Either pass as many field names to the function as you
 	 * desire, or call immediately after adding the field, with no parameters.
-	 * 
+	 *
 	 * :CHAINABLE:
 	 */
 	public function setRequired()
@@ -307,7 +308,7 @@ class FormIO implements ArrayAccess
 
 		return $this;
 	}
-	
+
 	/**
 	 * convenience :CHAINABLE: version of the above (no fieldname required). Use like $form->addField(...)->validateWith(...)->addField(......
 	 */
@@ -322,7 +323,7 @@ class FormIO implements ArrayAccess
 	 * for the field type being processed. Also note that adding elements here linearly slows the performance of
 	 * rendering the field in question.
 	 * If called with 2 parameters, the last added field is used as the key.
-	 * 
+	 *
 	 * :CHAINABLE:
 	 */
 	public function addAttribute()
@@ -332,9 +333,9 @@ class FormIO implements ArrayAccess
 			array_unshift($a, $this->lastAddedField);
 		}
 		list($k, $attr, $value) = $a;
-		
+
 		$this->dataAttributes[$k][$attr] = $value;
-		
+
 		return $this;
 	}
 
@@ -370,7 +371,7 @@ class FormIO implements ArrayAccess
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * convenience :CHAINABLE: version of the above (no fieldname required). Use like $form->addField(...)->addOption(...)->addOption(...)->addField(......
 	 */
@@ -386,7 +387,7 @@ class FormIO implements ArrayAccess
 	 * @param	string	$k				field to add the dependency to
 	 * @param	mixed	$expectedValue	when the value of field $k is $expectedValue, $dependentField will be visible. Otherwise, it won't.
 	 * @param	mixed	$dependentField	field name or array of field names to toggle when the value of field $k changes
-	 * 
+	 *
 	 * :CHAINABLE:
 	 */
 	public function addFieldDependency()
@@ -396,7 +397,7 @@ class FormIO implements ArrayAccess
 			array_unshift($a, $this->lastAddedField);
 		}
 		list($k, $expectedValue, $dependentField) = $a;
-		
+
 		if (!isset($this->dataDepends[$k])) {
 			$this->dataDepends[$k] = array();
 		}
@@ -406,7 +407,7 @@ class FormIO implements ArrayAccess
 		$this->dataDepends[$k][$expectedValue] = $dependentField;
 		return $this;
 	}
-	
+
 	/**
 	 * Sets the autocomplete data URL for an autocomplete field. This falls through
 	 * to the jQuery UI autocomplete control, so the URL will have ?term=[input text]
@@ -420,10 +421,10 @@ class FormIO implements ArrayAccess
 			array_unshift($a, $this->lastAddedField);
 		}
 		list($k, $url) = $a;
-		
+
 		return $this->addAttribute($k, 'searchurl', $url);
 	}
-	
+
 	/**
 	 * Sets a field's hint text (simplified addAttribute() alias)
 	 * :CHAINABLE:
@@ -435,40 +436,40 @@ class FormIO implements ArrayAccess
 			array_unshift($a, $this->lastAddedField);
 		}
 		list($k, $hint) = $a;
-		
+
 		return $this->addAttribute($k, 'hint', $hint);
 	}
 
 	// simplified mutators for adding various non-field types. All are chainable.
-	
+
 	public function startFieldset($title) {
 		return $this->addField('__fs' . $this->autoNameCounter++, $title, FormIO::T_INDENT);
 	}
-	
+
 	public function endFieldset() {
 		return $this->addField('__fs' . $this->autoNameCounter++, '', FormIO::T_OUTDENT);
 	}
-	
+
 	public function addParagraph($html) {
 		return $this->addField('__p' . $this->autoNameCounter++, $html, FormIO::T_PARAGRAPH);
 	}
-	
+
 	public function addHeader($text) {
 		return $this->addField('__h' . $this->autoNameCounter++, $text, FormIO::T_HEADER);
 	}
-	
+
 	public function addSubHeader($text) {
 		return $this->addField('__h' . $this->autoNameCounter++, $text, FormIO::T_SUBHEADER);
 	}
-	
+
 	public function addSectionBreak() {
 		return $this->addField('__s' . $this->autoNameCounter++, '', FormIO::T_SECTIONBREAK);
 	}
-	
+
 	public function addImage($url, $altText) {
 		return $this->addField('__i' . $this->autoNameCounter++, $altText, FormIO::T_IMAGE, $url);
 	}
-	
+
 	// Incrementing the striper adds a spacer element internally. The last added field is not advanced.
 	public function incrementStriper() {
 		$lastField = $this->lastAddedField;
@@ -476,7 +477,7 @@ class FormIO implements ArrayAccess
 		$this->lastAddedField = $lastField;
 		return $this;
 	}
-	
+
 	/**
 	 * Note that this method doesn't allow you to choose a submit name, since it is most often not important.
 	 * If you wish to do this, call addField() directly.
@@ -484,14 +485,14 @@ class FormIO implements ArrayAccess
 	public function addSubmitButton($text) {
 		return $this->addField('btn' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
 	}
-	
+
 	public function addResetButton($text) {
 		return $this->addField('__btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
 	}
 
 	//==========================================================================
 	//	Accessors
-	
+
 	/**
 	 * Retrieves all the form's data, as an array. Non-input field types are filtered from the output.
 	 * You may choose to also retrieve submit button values by passing true to the function.
@@ -512,7 +513,7 @@ class FormIO implements ArrayAccess
 		}
 		return $data;
 	}
-	
+
 	public function getRawData()
 	{
 		return $this->data;
@@ -554,17 +555,17 @@ class FormIO implements ArrayAccess
 
 	//==========================================================================
 	//	Other mutators
-	
+
 	public function setFormAction($url)
 	{
 		$this->action = $url;
 	}
-	
+
 	public function setPreamble($html)
 	{
 		$this->preamble = $html;
 	}
-	
+
 	public function setSuffix($html)
 	{
 		$this->suffix = $html;
@@ -589,6 +590,8 @@ class FormIO implements ArrayAccess
 				$this->addValidator($k, 'dateRangeValidator', array(), false); break;
 			case FormIO::T_DATETIME:
 				$this->addValidator($k, 'dateTimeValidator', array(), false); break;
+			case FormIO::T_FILE:
+				$this->addValidator($k, 'fileUploadValidator', array(), false); $this->multipart = true; break;
 			case FormIO::T_CAPTCHA:
 				if ($this->captchaType == 'recaptcha') {
 					$this->method = 'POST';						// force using POST submission for reCAPTCHA
@@ -628,7 +631,7 @@ class FormIO implements ArrayAccess
 	public function getForm()
 	{
 		$form = "<form id=\"$this->name\" class=\"clean\" method=\"$this->method\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
-		
+
 		$hasErrors = sizeof($this->errors) > 0;
 		if ($hasErrors || isset($this->preamble)) {
 			$form .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
@@ -639,12 +642,12 @@ class FormIO implements ArrayAccess
 		$spin = 1;
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
-			
+
 			if ($fieldType == FormIO::T_SPACER) {
 				--$spin;
 				continue;
 			}
-			
+
 			// check for specific field type output string
 			if (!isset(FormIO::$builder[$fieldType])) {
 				$builderString = FormIO::$builder[FormIO::T_TEXT];
@@ -730,10 +733,10 @@ class FormIO implements ArrayAccess
 					if (isset($this->dataDepends[$k])) {
 						$inputVars['dependencies'] = $this->getDependencyString($k);
 					}
-					
+
 					// determine if a value has been sent
 					$valueSent = isset($this->data[$k]) && $this->data[$k] !== '';
-					
+
 					// Build field sub-elements
 					$inputVars['options'] = '';
 					foreach ($this->dataOptions[$k] as $optVal => $desc) {
@@ -775,7 +778,7 @@ class FormIO implements ArrayAccess
 
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
 		}
-		
+
 		if (isset($this->suffix)) {
 			$form .= '<div class="suffix">' . "\n" . (isset($this->suffix) ? $this->suffix : '') . "\n";
 			$form .= '</div>' . "\n";
@@ -1031,7 +1034,7 @@ class FormIO implements ArrayAccess
 
 	private function urlValidator($key) {					// allows http, https & ftp *only*. Also performs url normalisation
 		$this->data[$key] = $this->normaliseURL($this->data[$key]);
-		
+
 		if (false == $bits = parse_url($this->data[$key])) {
 			return false;
 		}
@@ -1081,7 +1084,7 @@ class FormIO implements ArrayAccess
 			if ($matches1[1] > 31 || $matches1[2] > 12 || $matches2[1] > 31 || $matches2[2] > 12) {
 				return false;
 			}
-			
+
 			$this->data[$key][0] = $this->normaliseDate($matches1[1], $matches1[2], $matches1[3]);
 			$this->data[$key][1] = $this->normaliseDate($matches2[1], $matches2[2], $matches2[3]);
 
@@ -1143,18 +1146,18 @@ class FormIO implements ArrayAccess
 		if ($y < 100 && $y > 69) {
 			$yearPadStr = '19';
 		}
-		
+
 		return str_pad($d, 2, '0', STR_PAD_LEFT) . '/' . str_pad($m, 2, '0', STR_PAD_LEFT) . '/' . str_pad($y, 4, $yearPadStr, STR_PAD_LEFT);
 	}
-	
+
 	private function normaliseTime($h, $m, $s = null) {			// hh:mm(:ss)
 		return str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($m, 2, '0', STR_PAD_LEFT) . ($s !== null ? ':' . str_pad($s, 2, '0', STR_PAD_LEFT) : '');
 	}
-	
+
 	private function normaliseCurrency($d, $c = 0) {			// $d.cc
 		return intval($d) . '.' . str_pad($c, 2, '0', STR_PAD_RIGHT);
 	}
-	
+
 	private function normaliseURL($str) {						// ensures a scheme is present
 		if (!preg_match('/^\w+:\/\//', $str)) {
 			return 'http://' . $str;
@@ -1164,7 +1167,7 @@ class FormIO implements ArrayAccess
 
 	//==========================================================================
 	//	Miscellaneous
-	
+
 	public static function dateTimeToUnix($val)
 	{
 		@list($hr, $min, $sec) = explode(':', $val[1]);
@@ -1179,7 +1182,7 @@ class FormIO implements ArrayAccess
 		}
 		return FormIO::dateToUnix($val[0]) + $hr*3600 + $min*60 + ($sec ? $sec : 0);
 	}
-	
+
 	public static function dateToUnix($val)
 	{
 		$bits = explode('/', $val);
@@ -1188,7 +1191,7 @@ class FormIO implements ArrayAccess
 		}
 		return mktime(0, 0, 0, $bits[1], $bits[0], $bits[2]);
 	}
-	
+
 	public static function timestampToDateTime($val)
 	{
 		if (!$val) {
@@ -1198,14 +1201,14 @@ class FormIO implements ArrayAccess
 		if ($secs = date('s', $val) && intval($secs) != 0) {
 			$format = $format . ":$secs";
 		}
-		
+
 		return array(
 			FormIO::timestampToDate($val),
 			date($format, $val),
 			date('a', $val)
 		);
 	}
-	
+
 	public static function timestampToDate($val)
 	{
 		if (!$val) {
