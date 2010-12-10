@@ -1,63 +1,72 @@
  /*===============================================================================
 	FormIO Setup javascript
 	----------------------------------------------------------------------------
-	Picks out data-fio-* attributes in a page's form elements and initialises 
-	form behaviours
-	
+	Picks out data-fio-* attributes in a page's form elements and initialises
+	form behaviours.
+
+	You can also call the script after load, targeting a specific element. The
+	syntax to do this is simply:
+		$('#my.element').formio();
+
 	@depends	JQuery 1.4.4
 	@depends	JQuery UI 1.8.6
 	----------------------------------------------------------------------------
 	@author		Sam Pospischil <pospi@spadgos.com>
 	@date		2010-11-23
   ===============================================================================*/
+
 (function($) {
+
 $(document).ready(function() {
-	
+	$('form.clean').formio();
+});
+
+$.fn.formio = function(method) {
 	//==========================================================================
 	//	Form globals & state
-	
+
 	var fieldDependencies = {};
-	
+
 	//==========================================================================
 	//	Callbacks & helpers
-	
+
 	var getFieldRowElement = function(el)
 	{
 		return el.closest('.row');
 	};
-	
+
 	var getFieldSubElements = function(el)
 	{
 		var type = el.get(0).nodeName.toLowerCase();
-		
+
 		if (type == 'fieldset') {		// radio group or check group
 			return el.find('input');
 		} else {						// dropdown list
 			return el.find('option');
 		}
 	};
-	
+
 	var getFieldValue = function(el)
 	{
 		var type = el.get(0).nodeName.toLowerCase();
-		
+
 		if (type == 'fieldset') {		// radio group or check group
 			el = el.find('input:checked');
 		} else {						// dropdown list
 			el = el.find('option:selected');
 		}
-		
+
 		var selected = [];
 		el.each(function(i) {
 			selected.push(this.value);
 		});
 		return selected;
 	};
-	
+
 	var restripeForm = function(form)
 	{
 		var rows = form.find('.row:visible');
-		
+
 		var spin = 1;
 		rows.each(function() {
 			$(this).removeClass('alt');
@@ -66,14 +75,14 @@ $(document).ready(function() {
 			}
 		});
 	};
-	
+
 	// :TODO: handle complex conditions better. At present all are executed in order
 	var checkDependencies = function(el)
 	{
 		var current = getFieldValue(el);
 		var formModified = false;
 		var formId = el.closest('form.clean');
-		
+
 		$.each(fieldDependencies[el.attr('id')], function(value, visible) {
 			var hide = true;
 			$.each(current, function(unused, activeValue) {
@@ -83,7 +92,7 @@ $(document).ready(function() {
 				}
 				return true;
 			});
-			
+
 			$.each(visible, function(unused, hideEl) {
 				var row = getFieldRowElement($('#' + formId.attr('id') + '_' + hideEl));
 				if (hide && row.is(':visible')) {
@@ -95,25 +104,25 @@ $(document).ready(function() {
 				}
 			});
 		});
-		
+
 		if (formModified) {
 			restripeForm(formId);
 		}
 	};
-	
+
 	//==========================================================================
 	//	Initialisation routines
-	
+
 	var initDateField = function(el)
 	{
 		el.datepicker({'dateFormat' : 'dd/mm/yy'});
 	};
-	
+
 	var initAutoCompleteField = function(el)
 	{
 		el.autocomplete({'source' : el.data('fio-searchurl')});
 	};
-	
+
 	var initSecurImageField = function(el)		// adds 'reload image' behaviour
 	{
 		el.find('.reload').click(function() {
@@ -121,7 +130,7 @@ $(document).ready(function() {
 			img.src = img.src.match(/^[^\?]*/i)[0] + '?r=' + Math.random();
 		});
 	};
-	
+
 	var initDependencies = function(el)
 	{
 		var dependencies = {};
@@ -131,43 +140,52 @@ $(document).ready(function() {
 			var parts = v.split('=');
 			dependencies[parts[0]] = parts[1].split(';');
 		});
-		
+
 		fieldDependencies[el.attr('id')] = dependencies;
-		
+
 		// setup change events
 		getFieldSubElements(el).change(function () {
 			checkDependencies(el);
 		});
-		
+
 		// also set initial visibility
 		checkDependencies(el);
 	};
-	
+
 	//==========================================================================
 	//	Element mapping
-	
+
 	var setupRoutines = {
 		"[data-fio-type='date']"	: initDateField,
 		"[data-fio-type='securimage']" : initSecurImageField,
 		"[data-fio-searchurl]"		: initAutoCompleteField,
 		"[data-fio-depends]"		: initDependencies
 	};
-	
-	//==========================================================================
-	//	Processing
-	
-	var forms = $('form.clean');
-	
-	// iterate selectors & init methods
-	forms.each(function(i, form) {
-		$.each(setupRoutines, function(selector, method) {
-			var ofInterest = $(selector, form);
-			
-			ofInterest.each(function(j) {
-				method($(this));
-			});
-		});
-	});
 
-});
+	var methods = {
+		init: function() {
+			// iterate selectors & init methods
+			return this.each(function(i, form) {
+				$.each(setupRoutines, function(selector, method) {
+					var ofInterest = $(selector, form);
+
+					ofInterest.each(function(j) {
+						method($(this));
+					});
+				});
+			});
+		}
+
+	};
+
+	// Run the appropriate behaviour
+    if ( methods[method] ) {
+      return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
+    } else if ( typeof method === 'object' || ! method ) {
+      return methods.init.apply( this, arguments );
+    } else {
+      $.error( 'Method ' +  method + ' does not exist in formIO' );
+    }
+};
+
 })(jQuery);
