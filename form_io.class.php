@@ -65,14 +65,22 @@ class FormIO implements ArrayAccess
 	const T_CAPTCHA2 = 37;			// SecurImage plugin. DO NOT use this as the field type, instead use T_CAPTCHA and set FormIO::$captchaType accordingly
 	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into. If you wish to restrict to a range of values, check this yourself and use addError()
 	const T_FILE = 38;
+	const T_SPACER = 39;			// does nothing. Use this to increment the row striper, etc
 
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
-		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
 		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
+		FormIO::T_RAW		=> '{$desc}',
+		FormIO::T_PARAGRAPH	=> '<p id="{$form}_{$name}">{$desc}</p>',
+		FormIO::T_HEADER	=> '<h1 id="{$form}_{$name}">{$desc}</h1>',
+		FormIO::T_SUBHEADER	=> '<h3 id="{$form}_{$name}">{$desc}</h3>',
+		FormIO::T_SECTIONBREAK => '</tbody><tbody>',
+		FormIO::T_IMAGE		=> '<img id="{$form}_{$name}" src="{$value}" alt="{$desc}" />',
+		
+		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$form}_{$name}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$form}_{$name}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$form}_{$name}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -403,7 +411,6 @@ class FormIO implements ArrayAccess
 	 * Sets the autocomplete data URL for an autocomplete field. This falls through
 	 * to the jQuery UI autocomplete control, so the URL will have ?term=[input text]
 	 * appended to it.
-	 *
 	 * :CHAINABLE:
 	 */
 	public function setAutocompleteURL()
@@ -416,15 +423,58 @@ class FormIO implements ArrayAccess
 		
 		return $this->addAttribute($k, 'searchurl', $url);
 	}
+	
+	/**
+	 * Sets a field's hint text (simplified addAttribute() alias)
+	 * :CHAINABLE:
+	 */
+	public function setHint()
+	{
+		$a = func_get_args();
+		if (sizeof($a) < 2) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $hint) = $a;
+		
+		return $this->addAttribute($k, 'hint', $hint);
+	}
 
-	// simplified mutators for adding various non-field types
+	// simplified mutators for adding various non-field types. All are chainable.
 	
 	public function startFieldset($title) {
-		return $this->addField('fs' . $this->autoNameCounter++, $title, FormIO::T_INDENT);
+		return $this->addField('__fs' . $this->autoNameCounter++, $title, FormIO::T_INDENT);
 	}
 	
 	public function endFieldset() {
-		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_OUTDENT);
+		return $this->addField('__fs' . $this->autoNameCounter++, '', FormIO::T_OUTDENT);
+	}
+	
+	public function addParagraph($html) {
+		return $this->addField('__p' . $this->autoNameCounter++, $html, FormIO::T_PARAGRAPH);
+	}
+	
+	public function addHeader($text) {
+		return $this->addField('__h' . $this->autoNameCounter++, $text, FormIO::T_HEADER);
+	}
+	
+	public function addSubHeader($text) {
+		return $this->addField('__h' . $this->autoNameCounter++, $text, FormIO::T_SUBHEADER);
+	}
+	
+	public function addSectionBreak() {
+		return $this->addField('__s' . $this->autoNameCounter++, '', FormIO::T_SECTIONBREAK);
+	}
+	
+	public function addImage($url, $altText) {
+		return $this->addField('__i' . $this->autoNameCounter++, $altText, FormIO::T_IMAGE, $url);
+	}
+	
+	// Incrementing the striper adds a spacer element internally. The last added field is not advanced.
+	public function incrementStriper() {
+		$lastField = $this->lastAddedField;
+		$this->addField('__n' . $this->autoNameCounter++, '', FormIO::T_SPACER);
+		$this->lastAddedField = $lastField;
+		return $this;
 	}
 	
 	/**
@@ -432,11 +482,11 @@ class FormIO implements ArrayAccess
 	 * If you wish to do this, call addField() directly.
 	 */
 	public function addSubmitButton($text) {
-		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
+		return $this->addField('btn' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
 	}
 	
 	public function addResetButton($text) {
-		return $this->addField('fs' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
+		return $this->addField('__btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
 	}
 
 	//==========================================================================
@@ -589,7 +639,12 @@ class FormIO implements ArrayAccess
 		$spin = 1;
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
-
+			
+			if ($fieldType == FormIO::T_SPACER) {
+				--$spin;
+				continue;
+			}
+			
 			// check for specific field type output string
 			if (!isset(FormIO::$builder[$fieldType])) {
 				$builderString = FormIO::$builder[FormIO::T_TEXT];

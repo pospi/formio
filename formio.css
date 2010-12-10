@@ -207,6 +207,10 @@ form.clean .err {
 	font-weight:bold;
 }
 
+form.clean p.hint {
+	color: #5F5F5F;
+}
+
 form.clean p.hint, form.clean p.err {
 	font-size: 0.7em;
 	clear: left;
