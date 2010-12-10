@@ -21,10 +21,10 @@ form.clean div.row, form.clean fieldset {
 }
 
 form.clean .alt {
-	background: #EFF8FF;
+	background: #D5ECFF;
 }
 
-form.clean label {  
+form.clean label {
 	padding:0;
 	margin:0.3em 0;
 	float: left;
@@ -130,7 +130,7 @@ form.clean .currency {
 	position: relative;
 }
 
-form.clean input[type=text] {
+form.clean input[type=text], form.clean input[type=password] {
 	padding-right: 1em;		/* this balances out the currency input's left padding... */
 }
 
@@ -216,7 +216,7 @@ form.clean p.hint {
 }
 
 form.clean p.hint, form.clean p.err {
-	font-size: 0.7em;
+	font-size: 0.8em;
 	clear: left;
 	margin: 0 0 0 25%;
 }
