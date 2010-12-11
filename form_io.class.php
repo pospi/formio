@@ -76,7 +76,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_RAW		=> '{$desc}',
 		FormIO::T_PARAGRAPH	=> '<p id="{$form}_{$name}">{$desc}</p>',
-		FormIO::T_HEADER	=> '<h1 id="{$form}_{$name}">{$desc}</h1>',
+		FormIO::T_HEADER	=> '<h2 id="{$form}_{$name}">{$desc}</h2>',
 		FormIO::T_SUBHEADER	=> '<h3 id="{$form}_{$name}">{$desc}</h3>',
 		FormIO::T_SECTIONBREAK => '</tbody><tbody>',
 		FormIO::T_IMAGE		=> '<img id="{$form}_{$name}" src="{$value}" alt="{$desc}" />',
@@ -110,7 +110,7 @@ class FormIO implements ArrayAccess
 	// Used by FormIO::getData() to filter the returned array
 	private static $presentational = array(
 		FormIO::T_RAW, FormIO::T_HEADER, FormIO::T_SUBHEADER, FormIO::T_PARAGRAPH, FormIO::T_SECTIONBREAK,
-		FormIO::T_IMAGE, FormIO::T_INDENT, FormIO::T_OUTDENT, FormIO::T_BUTTON, FormIO::T_RESET, FormIO::T_CAPTCHA
+		FormIO::T_IMAGE, FormIO::T_INDENT, FormIO::T_OUTDENT, FormIO::T_BUTTON, FormIO::T_RESET, FormIO::T_CAPTCHA, FormIO::T_CAPTCHA2
 	);
 
 	//===============================================================================================\/
@@ -272,6 +272,7 @@ class FormIO implements ArrayAccess
 					$this->addValidator($fieldName, 'arrayRequiredValidator', array(), false);
 					break;
 				case FormIO::T_CAPTCHA:
+				case FormIO::T_CAPTCHA2:
 					break;		// :NOTE: captcha's dont need to be required as they implicitly are already
 				default:
 					$this->addValidator($fieldName, 'requiredValidator', array(), false);
@@ -411,7 +412,7 @@ class FormIO implements ArrayAccess
 	/**
 	 * Sets the autocomplete data URL for an autocomplete field. This falls through
 	 * to the jQuery UI autocomplete control, so the URL will have ?term=[input text]
-	 * appended to it.
+	 * appended to it by default.
 	 * :CHAINABLE:
 	 */
 	public function setAutocompleteURL()
@@ -425,10 +426,8 @@ class FormIO implements ArrayAccess
 		return $this->addAttribute($k, 'searchurl', $url);
 	}
 
-	/**
-	 * Sets a field's hint text (simplified addAttribute() alias)
-	 * :CHAINABLE:
-	 */
+	// simplified mutators for adding common field attributes. All are chainable.
+
 	public function setHint()
 	{
 		$a = func_get_args();
@@ -591,11 +590,14 @@ class FormIO implements ArrayAccess
 			case FormIO::T_DATETIME:
 				$this->addValidator($k, 'dateTimeValidator', array(), false); break;
 			case FormIO::T_FILE:
-				$this->addValidator($k, 'fileUploadValidator', array(), false); $this->multipart = true; break;
+				$this->multipart = true;
+				$this->addValidator($k, 'fileUploadValidator', array(), false); break;
 			case FormIO::T_CAPTCHA:
 				if ($this->captchaType == 'recaptcha') {
 					$this->method = 'POST';						// force using POST submission for reCAPTCHA
 				}
+				$this->addValidator($k, 'captchaValidator', array(), false); break;
+			case FormIO::T_CAPTCHA2:
 				$this->addValidator($k, 'captchaValidator', array(), false); break;
 		}
 	}
@@ -618,14 +620,15 @@ class FormIO implements ArrayAccess
 	//==========================================================================
 	//	Rendering
 
-	public function getJSON()
+	public function getJSON($includeSubmit = false)
 	{
-		return JSONParser::encode($this->getData(true));
+		//JSONParser::encode
+		return json_encode($this->getData($includeSubmit));
 	}
 
-	public function getQueryString()
+	public function getQueryString($includeSubmit = false)
 	{
-		return http_build_query($this->getData(true));
+		return http_build_query($this->getData($includeSubmit));
 	}
 
 	public function getForm()
@@ -697,19 +700,17 @@ class FormIO implements ArrayAccess
 					$inputVars['am']		= $value[2] != 'pm';
 					break;
 				case FormIO::T_CAPTCHA:
+				case FormIO::T_CAPTCHA2:
 					if (!empty($_SESSION[$this->CAPTCHA_session_var])) {
 						continue 2;								// already verified as human, so don't output the field anymore
 					}
-					switch ($this->captchaType) {
-						case 'recaptcha':
-							require_once($this->reCAPTCHA_inc);
-							$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
-							break;
-						case 'securimage':
-							require_once($this->securImage_inc);
-							$inputVars['captchaImage'] = $this->securImage_img;
-							$builderString = FormIO::$builder[FormIO::T_CAPTCHA2];
-							break;
+					if ($this->captchaType == 'securimage' || $fieldType == FormIO::T_CAPTCHA2) {
+						require_once($this->securImage_inc);
+						$inputVars['captchaImage'] = $this->securImage_img;
+						$builderString = FormIO::$builder[FormIO::T_CAPTCHA2];
+					} else if ($this->captchaType == 'recaptcha') {
+						require_once($this->reCAPTCHA_inc);
+						$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
 					}
 					break;
 				case FormIO::T_RADIOGROUP:	// these field types contain subelements
@@ -1050,22 +1051,20 @@ class FormIO implements ArrayAccess
 			return $_SESSION[$this->CAPTCHA_session_var];
 		}
 		$ok = false;
-		switch ($this->captchaType) {
-			case 'recaptcha':
-				require_once($this->reCAPTCHA_inc);
-				$resp = recaptcha_check_answer($this->reCAPTCHA_priv,
-                                $_SERVER["REMOTE_ADDR"],
-                                $_POST["recaptcha_challenge_field"],
-                                $_POST["recaptcha_response_field"]);
-				$ok = $resp->is_valid;
-				break;
-			case 'securimage':
-				require_once($this->securImage_inc);
-				$securimage = new Securimage();
-				if ($securimage->check($this->data[$key])) {
-					$ok = true;
-				}
-				break;
+
+		if ($this->captchaType == 'securimage' || $fieldType == FormIO::T_CAPTCHA2) {
+			require_once($this->securImage_inc);
+			$securimage = new Securimage();
+			if ($securimage->check($this->data[$key])) {
+				$ok = true;
+			}
+		} else if ($this->captchaType == 'recaptcha') {
+			require_once($this->reCAPTCHA_inc);
+			$resp = recaptcha_check_answer($this->reCAPTCHA_priv,
+                            $_SERVER["REMOTE_ADDR"],
+                            $_POST["recaptcha_challenge_field"],
+                            $_POST["recaptcha_response_field"]);
+			$ok = $resp->is_valid;
 		}
 		if (session_id() && $ok) {
 			$_SESSION[$this->CAPTCHA_session_var] = true;

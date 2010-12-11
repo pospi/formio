@@ -10,6 +10,7 @@
 /* General */
 
 form.clean {
+	line-height: 1em;
 	text-align:left;
 	position:relative;
 }
