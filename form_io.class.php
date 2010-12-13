@@ -66,7 +66,7 @@ class FormIO implements ArrayAccess
 	const T_AUTOCOMPLETE = 36;		// a dropdown which polls a URL for possible values and can be freely entered into. If you wish to restrict to a range of values, check this yourself and use addError()
 	const T_FILE = 38;
 	const T_SPACER = 39;			// does nothing. Use this to increment the row striper, etc
-	const T_PASSWORDCHANGE = 39;	// outputs two password inputs which must match to validate. :TODO: also does complexity check ?
+	const T_PASSWORDCHANGE = 40;	// outputs two password inputs which must match to validate. :TODO: also does complexity check ?
 
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
@@ -481,11 +481,11 @@ class FormIO implements ArrayAccess
 	 * Note that this method doesn't allow you to choose a submit name, since it is most often not important.
 	 * If you wish to do this, call addField() directly.
 	 */
-	public function addSubmitButton($text) {
+	public function addSubmitButton($text = 'Submit') {
 		return $this->addField('btn' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
 	}
 
-	public function addResetButton($text) {
+	public function addResetButton($text = 'Reset') {
 		return $this->addField('__btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
 	}
 
