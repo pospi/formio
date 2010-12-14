@@ -283,7 +283,13 @@ class FormIO implements ArrayAccess
 	}
 
 	/**
-	 * Adds a validator to a field
+	 * Adds a validator to a field.
+	 * When run, validators are passed the following parameters before any extra validation params:
+	 *	Internal (class method) validators -
+	 *		data key, ...
+	 *	External validators -
+	 *		form object, data key, ...
+	 * 
 	 * @param	string	$k				data key in form data to apply validator to
 	 * @param	string	$validatorName	name of validation function to run
 	 * @param	array	$params			extra parameters to pass to the validation callback (value is always parameter 0)
@@ -343,6 +349,9 @@ class FormIO implements ArrayAccess
 	// Allows you to add an error message to the form from external scripts
 	public function addError($dataKey, $msg)
 	{
+		if (!$msg) {
+			return false;
+		}
 		if (isset($this->errors[$dataKey])) {
 			if (!is_array($this->errors[$dataKey])) {
 				$this->errors[$dataKey] = array($this->errors[$dataKey]);
@@ -351,6 +360,7 @@ class FormIO implements ArrayAccess
 		} else {
 			$this->errors[$dataKey] = $msg;
 		}
+		return true;
 	}
 
 	/**
@@ -495,10 +505,21 @@ class FormIO implements ArrayAccess
 	/**
 	 * Retrieves all the form's data, as an array. Non-input field types are filtered from the output.
 	 * You may choose to also retrieve submit button values by passing true to the function.
+	 *
+	 * @param	mixed	$param		- if boolean, return all the form's data with submit button values if true
+	 * 								- if string, return the specific data element converted to externally useful format
 	 */
-	public function getData($includeSubmit = false)
+	public function getData($param = false)
 	{
-		$data = $this->data;
+		$includeSubmit = false;
+		$flatten = false;
+		if (is_bool($param)) {
+			$data = $this->data;
+			$includeSubmit = $param;
+		} else {
+			$data = array($param => $this->data[$param]);
+			$flatten = true;
+		}
 		foreach ($data as $k => $v) {
 			if (in_array($this->dataTypes[$k], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$k] == FormIO::T_SUBMIT)) {
 				unset($data[$k]);
@@ -510,7 +531,7 @@ class FormIO implements ArrayAccess
 				$data[$k] = array(FormIO::dateToUnix($v[0]), FormIO::dateToUnix($v[1]));
 			}
 		}
-		return $data;
+		return $flatten ? $data[$param] : $data;
 	}
 
 	public function getRawData()
@@ -615,6 +636,11 @@ class FormIO implements ArrayAccess
 			}
 		}
 		return false;
+	}
+	
+	public function setFieldBuilderString($fieldType, $string)
+	{
+		FormIO::$builder[$fieldType] = $string;
 	}
 
 	//==========================================================================
@@ -909,6 +935,9 @@ class FormIO implements ArrayAccess
 				if (!$externalValidator && $func == 'requiredValidator') {
 					$valid = $dataSubmitted;
 				} else if ($dataSubmitted || (!$externalValidator && $func == 'captchaValidator')) {
+					if ($externalValidator) {
+						array_unshift($params, $this);
+					}
 					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
 				}
 
@@ -929,13 +958,16 @@ class FormIO implements ArrayAccess
 	// not a requried fix yet as I really cant see a validator needing that many parameters passed
 	private function errorString($callbackName, $params)
 	{
-		$str = FormIO::$defaultErrors[$callbackName];
-		$i = 1;
-		$params[0] = $this->getReadableFieldName($params[0]);
-		foreach ($params as $param) {
-			$str = str_replace('$' . $i++, $param, $str);
+		if (isset(FormIO::$defaultErrors[$callbackName])) {		// only the internal validators have an entry set in $defaultErrors
+			$str = FormIO::$defaultErrors[$callbackName];
+			$i = 1;
+			$params[0] = $this->getReadableFieldName($params[0]);
+			foreach ($params as $param) {
+				$str = str_replace('$' . $i++, $param, $str);
+			}
+			return $str;
 		}
-		return $str;
+		return null;
 	}
 
 	/**
