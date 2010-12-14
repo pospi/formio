@@ -119,12 +119,14 @@ form.clean input.time {
 
 form.clean #recaptcha_widget_div {
 	width: 70%;
-	margin-left: 25%;
 }
 
 form.clean .captcha {
-	margin-left: 25%;
 	vertical-align: middle;
+}
+
+form.clean #recaptcha_widget_div, form.clean .captcha {
+	margin-left: 25%;
 }
 
 form.clean .currency {
@@ -148,6 +150,16 @@ form.clean .currency span {
 
 form.clean .currency input, form.clean .datetime input {
 	padding-right: 0.15em;
+}
+
+form.clean .repeater {
+	float: right;
+	width: 74%;
+	margin-right: 1%;
+}
+
+form.clean .repeater input {
+	width: 95%;
 }
 
 /* Button */
