@@ -32,7 +32,7 @@ $.fn.formio = function(func) {
 
 	// Run the appropriate behaviour
     if (func !== undefined && typeof myForm[func] == 'function') {
-      return myForm[func].apply( t, Array.prototype.slice.call( arguments, 1 ));
+      return myForm[func].apply( myForm, Array.prototype.slice.call( arguments, 1 ));
     } else if (typeof func === 'object' || !func ) {
       init.apply( t, arguments );
       return t;
@@ -80,7 +80,23 @@ FormIO.prototype.options = {
 };
 	
 //==========================================================================
+//	Form methods
+
+// Accessor to return the FormIO object from within jQuery plugin -> $(...).formio('get');
+FormIO.prototype.get = function() {
+	return this;
+};
+
+FormIO.prototype.restripeForm = function()
+{
+	// :TODO: account for striper incrementation and resetting by various fieldtypes
+	this.elements.find('.row:visible').removeClass('alt');
+	this.elements.find('.row:visible:even').addClass('alt');
+};
+
+//==========================================================================
 //	Callbacks & helpers
+//		These functions run on targeted elements / inputs, not the form
 
 FormIO.prototype.getFieldRowElement = function(el)
 {
@@ -115,46 +131,40 @@ FormIO.prototype.getFieldValue = function(el)
 	return selected;
 };
 
-FormIO.prototype.restripeForm = function()
-{
-	var rows = this.elements.find('.row:visible');
-
-	var spin = 1;
-	rows.each(function() {
-		$(this).removeClass('alt');
-		if (++spin % 2 == 0) {
-			$(this).addClass('alt');
-		}
-	});
-};
-
 // :TODO: handle complex conditions better. At present all are executed in order
 FormIO.prototype.checkDependencies = function(el)
 {
 	var t = this;
 	var current = this.getFieldValue(el);
 	var formModified = false;
+	
+	var depends = $.extend({}, this.fieldDependencies[el.attr('id')]);
+	var affected = depends['__affected'];
+	delete depends['__affected'];
+	
+	$.each(affected, function(k, elId) {
+		t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + elId)).hide();
+		formModified = true;
+	});
 
-	$.each(this.fieldDependencies[el.attr('id')], function(value, visible) {
-		var hide = true;
-		$.each(current, function(unused, activeValue) {
-			if (value == activeValue) {
-				hide = false;
+	$.each(depends, function(value, visible) {
+		var show = false;
+		$.each(current, function(i, selected) {
+			if (value == selected) {
+				show = true;
 				return false;
 			}
-			return true;
 		});
-
-		$.each(visible, function(unused, hideEl) {
-			var row = t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + hideEl));
-			if (hide && row.is(':visible')) {
-				row.hide();
-				formModified = true;
-			} else if (!row.is(':visible')) {
-				row.show();
-				formModified = true;
-			}
-		});
+		
+		if (show) {
+			$.each(visible, function(unused, showEl) {
+				var row = t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + showEl));
+				if (!row.is(':visible')) {
+					row.show();
+					formModified = true;
+				}
+			});
+		}
 	});
 
 	if (formModified) {
@@ -163,7 +173,7 @@ FormIO.prototype.checkDependencies = function(el)
 };
 
 //==========================================================================
-//	Initialisation routines
+//	Initialisation routines.
 
 FormIO.prototype.initDateField = function(el)
 {
@@ -187,14 +197,20 @@ FormIO.prototype.initDependencies = function(el)
 {
 	var t = this;
 	var dependencies = {};
+	var affectedFields = [];
+	
 	var dependent = el.data('fio-depends');
 	dependent = dependent.split('&');
+	
 	$.each(dependent, function(unused, v) {
 		var parts = v.split('=');
-		dependencies[parts[0]] = parts[1].split(';');
+		var affected = parts[1].split(';');
+		dependencies[parts[0]] = affected;
+		affectedFields = affectedFields.concat(affected);
 	});
-
+	
 	this.fieldDependencies[el.attr('id')] = dependencies;
+	this.fieldDependencies[el.attr('id')]['__affected'] = affectedFields;
 
 	// setup change events
 	this.getFieldSubElements(el).change(function () {
