@@ -47,6 +47,7 @@ class FormIO implements ArrayAccess
 		const T_URL		= 16;
 	const T_DATETIME = 17;			// compound fields for date & time components
 	const T_DATERANGE = 18;			// two date fields
+	const T_TIMERANGE = 42;			// two datetime fields
 	const T_BIGTEXT	= 19;			// textarea
 	const T_HIDDEN	= 20;			// input[type=hidden]
 	const T_READONLY = 21;			// a bit like a hidden input, only we show the variable
@@ -186,6 +187,7 @@ class FormIO implements ArrayAccess
 	//		- a numeric array comprising multiple string or associative ones	(multiple validators, performed in turn)
 	// Validation functions should simply return true or false
 	private $dataValidators = array();
+	private $customValidatorErrors = array();	// any custom validation functions can have an error message set per-function, which go in here
 	private $dataTypes = array();			// indicates data type for each field
 	private $dataDepends = array();			// defines which fields are dependent on the values of others
 	private $dataOptions = array();			// input options for checkbox, radio, dropdown etc types
@@ -296,17 +298,22 @@ class FormIO implements ArrayAccess
 	 *
 	 * @param	string	$k				data key in form data to apply validator to
 	 * @param	string	$validatorName	name of validation function to run
+	 * @param	string	$errorMsg		A custom error message to return if this validator is unsuccessful.
+	 *									If you require multiple error messages to be set, use addError() from within the validator function itself.
 	 * @param	array	$params			extra parameters to pass to the validation callback (value is always parameter 0)
 	 * @param	bool	$customFunc		if true, look in the global namespace for this function. otherwise it is a method of the FormIO class.
 	 *
 	 * :CHAINABLE:
 	 */
-	public function addValidator($k, $validatorName, $params = array(), $customFunc = true)
+	public function addValidator($k, $validatorName, $params = array(), $customFunc = true, $errorMsg = null)
 	{
 		$this->removeValidator($k, $validatorName);		// remove it if it exists, so we can use the most recently applied parameters
 
 		if (!isset($this->dataValidators[$k])) {
 			$this->dataValidators[$k] = array();
+		}
+		if ($errorMsg) {
+			$this->customValidatorErrors[$validatorName] == $errorMsg;
 		}
 		if (sizeof($params) || $customFunc) {
 			$validatorName = array(
@@ -323,9 +330,9 @@ class FormIO implements ArrayAccess
 	/**
 	 * convenience :CHAINABLE: version of the above (no fieldname required). Use like $form->addField(...)->validateWith(...)->addField(......
 	 */
-	public function validateWith($validatorName, $params = array(), $customFunc = true)
+	public function validateWith($validatorName, $params = array(), $errorMsg = null, $customFunc = true)
 	{
-		return $this->addValidator($this->lastAddedField, $validatorName, $params, $customFunc);
+		return $this->addValidator($this->lastAddedField, $validatorName, $params, $customFunc, $errorMsg);
 	}
 
 	/**
@@ -509,6 +516,8 @@ class FormIO implements ArrayAccess
 	 *
 	 * If you wish to start your field with, say, 3 inputs visible - simply set the default
 	 * array to have 3 elements.
+	 *
+	 * :CHAINABLE:
 	 */
 	public function addRepeater($name, $description, $repeatedFieldType = FormIO::T_TEXT, $default = array()) {
 		$win = $this->addField($name, $description, FormIO::T_REPEATER, $default);
@@ -1049,7 +1058,7 @@ class FormIO implements ArrayAccess
 				}
 
 				if (!$valid) {
-					$this->addError($dataKey, FormIO::errorString($func, $params));
+					$this->addError($dataKey, $this->errorString($func, $params));
 				}
 			}
 
@@ -1067,14 +1076,17 @@ class FormIO implements ArrayAccess
 	{
 		if (isset(FormIO::$defaultErrors[$callbackName])) {		// only the internal validators have an entry set in $defaultErrors
 			$str = FormIO::$defaultErrors[$callbackName];
-			$i = 1;
-			$params[0] = $this->getReadableFieldName($params[0]);
-			foreach ($params as $param) {
-				$str = str_replace('$' . $i++, $param, $str);
-			}
-			return $str;
+		} else if (isset($this->customValidatorErrors[$callbackName])) {
+			$str = $this->customValidatorErrors[$callbackName];	// external validators can attempt to get theirs from the customValidatorErrors array
+		} else {
+			return null;
 		}
-		return null;
+		$i = 1;
+		$params[0] = $this->getReadableFieldName($params[0]);
+		foreach ($params as $param) {
+			$str = str_replace('$' . $i++, $param, $str);
+		}
+		return $str;
 	}
 
 	/**
@@ -1317,7 +1329,7 @@ class FormIO implements ArrayAccess
 					array_unshift($subParams, $subKey);
 					$valid = call_user_func_array(array($this, $validatorName), $subParams);
 					if (!$valid) {
-						$this->addError(array($key, $subKey), FormIO::errorString($func, $params));
+						$this->addError(array($key, $subKey), $this->errorString($func, $params));
 					}
 				}
 			}
