@@ -482,6 +482,10 @@ class FormIO implements ArrayAccess
 
 	// simplified mutators for adding various non-field types. All are chainable.
 
+	public function addHiddenField($name, $value) {
+		return $this->addField($name, '', FormIO::T_HIDDEN, $value);
+	}
+
 	public function startFieldset($title) {
 		return $this->addField('__fs' . $this->autoNameCounter++, $title, FormIO::T_INDENT);
 	}
@@ -506,8 +510,11 @@ class FormIO implements ArrayAccess
 		return $this->addField('__s' . $this->autoNameCounter++, '', FormIO::T_SECTIONBREAK);
 	}
 
-	public function addImage($url, $altText) {
-		return $this->addField('__i' . $this->autoNameCounter++, $altText, FormIO::T_IMAGE, $url);
+	public function addImage($url, $altText, $name = null) {
+		if (!$name) {
+			$name = '__i' . $this->autoNameCounter++;
+		}
+		return $this->addField($name, $altText, FormIO::T_IMAGE, $url);
 	}
 
 	/**
@@ -545,6 +552,14 @@ class FormIO implements ArrayAccess
 
 	public function addResetButton($text = 'Reset') {
 		return $this->addField('__btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
+	}
+
+	public function addButton($text, $javascript, $name = null) {
+		if (!$name) {
+			$name = '__btn' . $this->autoNameCounter++;
+		}
+		return $this->addField($name, '', FormIO::T_BUTTON, $text)
+					->addAttribute($name, 'js', $javascript);
 	}
 
 	//==========================================================================
