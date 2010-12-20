@@ -213,9 +213,16 @@ FormIO.prototype.initDependencies = function(el)
 	this.fieldDependencies[el.attr('id')]['__affected'] = affectedFields;
 
 	// setup change events
-	this.getFieldSubElements(el).change(function () {
-		t.checkDependencies(el);
-	});
+	var elType = el[0].tagName.toLowerCase();
+	if (elType == 'fieldset') {			// radiogroup and checklist
+		this.getFieldSubElements(el).change(function () {
+			t.checkDependencies(el);
+		});
+	} else {							// normal inputs (text, select etc)
+		el.change(function () {
+			t.checkDependencies(el);
+		});
+	}
 
 	// also set initial visibility
 	this.checkDependencies(el);

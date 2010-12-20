@@ -1206,9 +1206,9 @@ class FormIO implements ArrayAccess
 	}
 
 	// @param	array	$requiredKeys	a list of array keys which are required. When omitted, all keys are checked.
-	private function arrayRequiredValidator($key, $requiredKeys = null) {
+	private function arrayRequiredValidator($key, $requiredKeys = null, $overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
-		if (isset($data[$key]) && is_array($data[$key])) {
+		if (isset($data[$key]) && is_array($data[$key]) && sizeof($data[$key])) {
 			foreach ($data[$key] as $k => $v) {
 				if ((is_array($requiredKeys) && in_array($k, $requiredKeys) && empty($v)) || (!is_array($requiredKeys) && empty($v))) {
 					return false;
