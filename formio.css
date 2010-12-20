@@ -32,6 +32,9 @@ form.clean label {
 	width: 25%;
 }
 
+form.clean div.blck { position: relative; }
+form.clean div.blck label { position: absolute; }
+
 form.clean fieldset {
 	border:1px solid #ddd;
 	margin-bottom: 1em;
@@ -107,7 +110,7 @@ form.clean .multiple legend {
 /* Type-specific */
 
 form.clean .daterange input, form.clean .datetime input, form.clean .datetime select {
-	width: auto;
+	width: auto !important;
 	display: inline;
 	margin: 0;
 }
@@ -117,16 +120,8 @@ form.clean input.time {
 	width: 9em;
 }
 
-form.clean #recaptcha_widget_div {
-	width: 70%;
-}
-
-form.clean .captcha {
+form.clean .captcha img {
 	vertical-align: middle;
-}
-
-form.clean #recaptcha_widget_div, form.clean .captcha {
-	margin-left: 25%;
 }
 
 form.clean .currency {
@@ -152,14 +147,20 @@ form.clean .currency input, form.clean .datetime input {
 	padding-right: 0.15em;
 }
 
-form.clean .repeater {
-	float: right;
+form.clean .repeater, form.clean .captcha {
+	margin-left: 25%;
 	width: 74%;
 	margin-right: 1%;
 }
 
-form.clean .repeater input {
+form.clean .repeater input, form.clean .captcha input {
 	width: 95%;
+}
+form.clean .repeater label { display: none; }
+
+form.clean .repeater .row {
+	background: transparent;
+	padding-left: 0;
 }
 
 /* Button */
@@ -232,6 +233,11 @@ form.clean p.hint, form.clean p.err {
 	font-size: 0.8em;
 	clear: left;
 	margin: 0 0 0 25%;
+}
+
+form.clean .multiple p.hint, form.clean .multiple p.err {
+	padding: 1em 0 0 0;
+	margin-left: 0;
 }
 
 form.clean .preamble .err {

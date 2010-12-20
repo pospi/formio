@@ -168,6 +168,8 @@ class FormIO implements ArrayAccess
 	private $lastBuilderReplacement;		// form builder hack for preg_replace_callback not being able to accept extra parameters
 	private $lastAddedField;				// name of the last added field is stored here, for field attribute method chaining
 	private $autoNameCounter;				// used for presentational field types where the field name doesn't matter and we don't want to have to specify it
+	private $delaySubmission = false;		// this is used by fields which post back to the form in fallback mode to prevent validation
+	private $tabCounter;					// used by T_SECTIONBREAK to set field IDs for JavaScript
 
 	// Form stuff
 	private $name;		// unique html ID for this form
@@ -521,15 +523,18 @@ class FormIO implements ArrayAccess
 	 * Simplified function to add a repeater field. Function signature is much the same as
 	 * addField(), only the field type is the type of the field to be repeated.
 	 *
-	 * If you wish to start your field with, say, 3 inputs visible - simply set the default
-	 * array to have 3 elements.
+	 * @param	array	$default	an array of default values for this field. At least this many inputs will be drawn.
+	 * @param	int		$numInputs	the minimum total number of inputs to draw. Empty ones will be added until there are at least this many visible.
 	 *
 	 * :CHAINABLE:
 	 */
-	public function addRepeater($name, $description, $repeatedFieldType = FormIO::T_TEXT, $default = array()) {
+	public function addRepeater($name, $description, $repeatedFieldType = FormIO::T_TEXT, $default = array(), $numInputs = null) {
 		$win = $this->addField($name, $description, FormIO::T_REPEATER, $default);
 		if ($win) {
 			$this->setRepeaterType($repeatedFieldType);
+			if (intval($numInputs) > 0) {
+				$this->addAttribute($name, 'numinputs', intval($numInputs));
+			}
 		}
 		return $win;
 	}
@@ -760,15 +765,17 @@ class FormIO implements ArrayAccess
 
 	public function getForm()
 	{
-		$form = "<form id=\"$this->name\" class=\"clean\" method=\"$this->method\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
+		$form = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method) . "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
 
-		$hasErrors = sizeof($this->errors) > 0;
+		$hasErrors = !$this->delaySubmission && sizeof($this->errors) > 0;
 		if ($hasErrors || isset($this->preamble)) {
 			$form .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
 			$form .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
 			$form .= '</div>' . "\n";
 		}
 
+		$this->tabCounter = 1;
+		$form .= "<div id=\"{$this->name}_tab{$this->tabCounter}\">";
 
 		$spin = 1;
 		foreach ($this->data as $k => $value) {
@@ -830,6 +837,8 @@ class FormIO implements ArrayAccess
 
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
 		}
+
+		$form .= "</div>";
 
 		if (isset($this->suffix)) {
 			$form .= '<div class="suffix">' . "\n" . (isset($this->suffix) ? $this->suffix : '') . "\n";
@@ -1385,6 +1394,36 @@ class FormIO implements ArrayAccess
 	 */
 	private function repeaterValidator($key) {
 		$fieldType = $this->dataAttributes[$key]['fieldtype'];
+
+		// check for use of add/remove field buttons, and tell the form to ignore errors if so
+		if ($this->data[$key]['__remove']) {
+			if (!$this->dataAttributes[$key]['numinputs']) {
+				$this->dataAttributes[$key]['numinputs'] = 1;
+			}
+			$this->dataAttributes[$key]['numinputs']--;
+			$maxk = null;
+			foreach ($this->data[$key] as $k => $v) {
+				if (is_int($k) && $maxk < $k) {
+					$maxk = $k;
+				}
+			}
+			if ($maxk !== null) {
+				unset($this->data[$key][$maxk]);
+			}
+		} else if ($this->data[$key]['__add']) {
+			if (!$this->dataAttributes[$key]['numinputs']) {
+				$this->dataAttributes[$key]['numinputs'] = 1;
+			}
+			$this->dataAttributes[$key]['numinputs']++;
+			$this->data[$key][] = null;
+		}
+		if ($this->data[$key]['__add'] || $this->data[$key]['__remove']) {
+			unset($this->data[$key]['__remove']);
+			unset($this->data[$key]['__add']);
+			$this->delaySubmission = true;
+			return true;
+		}
+
 		foreach ($this->data[$key] as $subId => &$subValue) {
 			if (!$subValue) {
 				unset($this->data[$key][$subId]);

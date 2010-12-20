@@ -188,7 +188,7 @@ FormIO.prototype.initAutoCompleteField = function(el)
 FormIO.prototype.initSecurImageField = function(el)		// adds 'reload image' behaviour
 {
 	el.find('.reload').click(function() {
-		var img = el.find('.captcha').get(0);
+		var img = el.find('.captcha img').get(0);
 		img.src = img.src.match(/^[^\?]*/i)[0] + '?r=' + Math.random();
 	});
 };
