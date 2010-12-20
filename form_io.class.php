@@ -72,42 +72,42 @@ class FormIO implements ArrayAccess
 
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
-		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
-		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
+		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$id}" value="{$value}" />',
+		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$id}" value="{$value}" />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_RAW		=> '{$desc}',
-		FormIO::T_PARAGRAPH	=> '<p id="{$form}_{$name}">{$desc}</p>',
-		FormIO::T_HEADER	=> '<h2 id="{$form}_{$name}">{$desc}</h2>',
-		FormIO::T_SUBHEADER	=> '<h3 id="{$form}_{$name}">{$desc}</h3>',
-		FormIO::T_SECTIONBREAK => '</tbody><tbody>',
-		FormIO::T_IMAGE		=> '<img id="{$form}_{$name}" src="{$value}" alt="{$desc}" />',
+		FormIO::T_PARAGRAPH	=> '<p id="{$id}">{$desc}</p>',
+		FormIO::T_HEADER	=> '<h2 id="{$id}">{$desc}</h2>',
+		FormIO::T_SUBHEADER	=> '<h3 id="{$id}">{$desc}</h3>',
+		FormIO::T_SECTIONBREAK => '</div><div id="{$id}">',
+		FormIO::T_IMAGE		=> '<img id="{$id}" src="{$value}" alt="{$desc}" />',
 
-		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$form}_{$name}" value="{$value}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$id}" value="{$value}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
-		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$form}_{$name}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$form}_{$name}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$form}_{$name}" value="{$value}" />',
-		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$id}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$id}" value="{$value}" />',
+		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
-		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$form}_{$name}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$form}_{$name}"><label for="{$form}_{$name}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$form}_{$name}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$form}_{$name}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$form}_{$name}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_REPEATER	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><div class="repeater">{$inputs}</div><br clear="all" /><p class="hint">{$hint}</p></div>',
+		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="repeater">{$inputs}</div><p class="hint">{$hint}</p></div>',
 
-		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$form}_{$name}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DROPOPTION=> '<option value="{$value}"{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
 
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
-		FormIO::T_RADIOGROUP=> '<fieldset id="{$form}_{$name}" class="row multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
+		FormIO::T_RADIOGROUP=> '<fieldset id="{$id}" class="row multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 
-		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_CAPTCHA	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label>{$captcha}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_CAPTCHA2	=> '<div class="row{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" class="captcha" /> <a class="reload" href="javascript: void(0);">Reload image</a> {$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CAPTCHA	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="captcha">{$captcha}</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CAPTCHA2	=> '<div class="row blck{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div class="captcha"><input type="text" name="{$name}" id="{$id}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" /> <a class="reload" href="javascript: void(0);">Reload image</a></div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
-		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$form}_{$name}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$form}_{$name}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 	);
 
 	// This contains an array of all field types which are presentational only.
@@ -593,18 +593,20 @@ class FormIO implements ArrayAccess
 	 */
 	private function standardiseData($data, $overrideDataTypeField = null, $includeSubmit = false)
 	{
-		foreach ($data as $k => $v) {
-			$dataTypeField = !$overrideDataTypeField ? $k : $overrideDataTypeField;
-			if (in_array($this->dataTypes[$dataTypeField], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$dataTypeField] == FormIO::T_SUBMIT)) {
-				unset($data[$k]);
-			} else if ($this->dataTypes[$k] == FormIO::T_DATE) {
-				$data[$k] = FormIO::dateToUnix($v);
-			} else if ($this->dataTypes[$k] == FormIO::T_DATETIME) {
-				$data[$k] = FormIO::dateTimeToUnix($v);
-			} else if ($this->dataTypes[$k] == FormIO::T_DATERANGE) {
-				$data[$k] = array(FormIO::dateToUnix($v[0]), FormIO::dateToUnix($v[1]));
-			} else if ($this->dataTypes[$k] == FormIO::T_REPEATER) {
-				$data[$k] = $this->standardiseData($data[$k], $k, $includeSubmit);
+		if (is_array($data)) {
+			foreach ($data as $k => $v) {
+				$dataTypeField = !$overrideDataTypeField ? $k : $overrideDataTypeField;
+				if (in_array($this->dataTypes[$dataTypeField], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$dataTypeField] == FormIO::T_SUBMIT)) {
+					unset($data[$k]);
+				} else if ($this->dataTypes[$k] == FormIO::T_DATE) {
+					$data[$k] = FormIO::dateToUnix($v);
+				} else if ($this->dataTypes[$k] == FormIO::T_DATETIME) {
+					$data[$k] = FormIO::dateTimeToUnix($v);
+				} else if ($this->dataTypes[$k] == FormIO::T_DATERANGE) {
+					$data[$k] = array(FormIO::dateToUnix($v[0]), FormIO::dateToUnix($v[1]));
+				} else if ($this->dataTypes[$k] == FormIO::T_REPEATER) {
+					$data[$k] = $this->standardiseData($data[$k], $k, $includeSubmit);
+				}
 			}
 		}
 		return $data;
@@ -772,11 +774,14 @@ class FormIO implements ArrayAccess
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
 
-			// decrement stripe counter and keep going for spacer inputs
+			// Special striping handling
 			if ($fieldType == FormIO::T_SPACER) {
-				// :TODO: link to JS
-				--$spin;
-				continue;
+				--$spin;			// decrement stripe counter and keep going for spacer inputs
+				continue;		// :TODO: link to JS
+			} else if ($fieldType == FormIO::T_HIDDEN || $fieldType == FormIO::T_OUTDENT) {
+				--$spin;			// these field types don't increment the striper
+			} else if ($fieldType == FormIO::T_INDENT || $fieldType == FormIO::T_SECTIONBREAK) {
+				$spin = 1;			// these field types reset the striper
 			}
 
 			// check for specific field type output string
@@ -786,153 +791,42 @@ class FormIO implements ArrayAccess
 				$builderString = FormIO::$builder[$fieldType];
 			}
 
-			// build input property list. We optimise this array as much as possible, as each item present requires extra processing.
-			$inputVars = array(
-				'form'		=> $this->name,
-				'name'		=> $k,
-				'value'		=> $value,
-				'required'	=> ($this->hasValidator($k, 'requiredValidator') || $this->hasValidator($k, 'arrayRequiredValidator')),
-			);
-			// Add validation parameter output for JS
+			// array of wildcard replacements to build with the form builder string in addition
+			// to the automatically created ones. We start with our custom attributes (label, css classes etc)
+			$extraWildcards = $this->dataAttributes[$k];
+
+			// add required flag if set
+			if ($this->hasValidator($k, 'requiredValidator') || $this->hasValidator($k, 'arrayRequiredValidator')) {
+				$extraWildcards['required'] = true;
+			}
+
+			// validation parameter output for JavaScript
 			$params = $this->getValidatorParams($k);
 			if ($params) {
-				$inputVars['validation'] = $params;
+				$extraWildcards['validation'] = $params;
 			}
-			// Add labels, extra css class names etc
-			foreach ($this->dataAttributes[$k] as $attr => $attrVal) {
-				$inputVars[$attr] = $attrVal;
+
+			// dependencies for javascript
+			if (isset($this->dataDepends[$k])) {
+				$extraWildcards['dependencies'] = $this->getDependencyString($k);
 			}
+
 			// Add error output, if any
-			if (isset($this->errors[$k])) {
+			if (!$this->delaySubmission && isset($this->errors[$k])) {
 				$errArray = is_array($this->errors[$k]) ? $this->errors[$k] : array($this->errors[$k]);
-				$inputVars['error'] = implode("<br />", $errArray);
-			}
-			// set data behaviour for form JavaScript, and any other type-specific attributes
-			switch ($fieldType) {
-				case FormIO::T_HIDDEN:		// these field types don't increment the striper
-				case FormIO::T_OUTDENT:
-					--$spin;
-					break;
-				case FormIO::T_INDENT:		// these field types reset the striper
-				case FormIO::T_SECTIONBREAK:
-					$spin = 1;
-					break;
-				case FormIO::T_DATERANGE:
-					$inputVars['value']		= $value[0];
-					$inputVars['valueEnd']	= $value[1];
-					break;
-				case FormIO::T_DATETIME:
-					$inputVars['value']		= $value[0];
-					$inputVars['valueTime']	= $value[1];
-					$inputVars['pm']		= $value[2] == 'pm';
-					$inputVars['am']		= $value[2] != 'pm';
-					break;
-				case FormIO::T_CAPTCHA:
-				case FormIO::T_CAPTCHA2:
-					if (!empty($_SESSION[$this->CAPTCHA_session_var])) {
-						continue 2;								// already verified as human, so don't output the field anymore
-					}
-					if ($this->captchaType == 'securimage' || $fieldType == FormIO::T_CAPTCHA2) {
-						require_once($this->securImage_inc);
-						$inputVars['captchaImage'] = $this->securImage_img;
-						$builderString = FormIO::$builder[FormIO::T_CAPTCHA2];
-					} else if ($this->captchaType == 'recaptcha') {
-						require_once($this->reCAPTCHA_inc);
-						$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
-					}
-					break;
-				case FormIO::T_REPEATER:
-					$subFieldsString	= '';
-					$subFieldType		= $this->dataAttributes[$k]['fieldtype'];
-					$subFieldTemplate	= FormIO::$builder[$subFieldType];
-					foreach ($this->data[$k] as $subField => $subValue) {
-						$subInputVars = array(
-							'form'		=> $this->name,
-							'name'		=> $k . "[$subField]",
-							'value'		=> $subValue,
-							'required'	=> ($this->hasValidator($k, 'requiredValidator') || $this->hasValidator($k, 'arrayRequiredValidator')),
-						);
-
-						$subFieldsString .= $this->replaceInputVars($subFieldTemplate, $subInputVars) . "\n";
-					}
-
-					// Add submit buttons to control row adding / removing for no-JS support
-					$buttonVars = array(
-						'form'		=> $this->name,
-						'name'		=> $k . "[__add]",
-						'value'		=> "Add another",
-					);
-					$subFieldsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
-					$buttonVars['name']  = $k . "[__remove]";
-					$buttonVars['value'] = "Remove last";
-					$subFieldsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
-
-					// put all this in the 'inputs' variable
-					$inputVars['inputs'] = $subFieldsString;
-					break;
-				case FormIO::T_RADIOGROUP:	// these field types contain subelements
-				case FormIO::T_CHECKGROUP:
-				case FormIO::T_DROPDOWN:
-					// determine subfield output format
-					switch ($fieldType) {
-						case FormIO::T_RADIOGROUP:
-							$subFieldType = FormIO::T_RADIO;
-							break;
-						case FormIO::T_CHECKGROUP:
-							$builderString = FormIO::$builder[FormIO::T_RADIOGROUP]; // Use radiogroup string for checkgroup as well
-							$subFieldType = FormIO::T_CHECKBOX;
-							break;
-						case FormIO::T_DROPDOWN:
-							$subFieldType = FormIO::T_DROPOPTION;
-							break;
-					}
-
-					// dependencies for javascript
-					if (isset($this->dataDepends[$k])) {
-						$inputVars['dependencies'] = $this->getDependencyString($k);
-					}
-
-					// determine if a value has been sent
-					$valueSent = isset($this->data[$k]) && $this->data[$k] !== '';
-
-					// Build field sub-elements
-					$inputVars['options'] = '';
-					foreach ($this->dataOptions[$k] as $optVal => $desc) {
-						$radioVars = array(
-							'name'		=> $k,
-							'value'		=> $optVal,
-						);
-						if (is_array($desc)) {
-							$radioVars['desc'] = $desc['desc'];
-							if (isset($desc['disabled']))				$radioVars['disabled']	= $desc['disabled'];
-							if (isset($desc['checked']) && !$valueSent)	$radioVars['checked']	= $desc['checked'];
-						} else {
-							$radioVars['desc'] = $desc;
-						}
-						// determine whether option should be selected if it hasn't explicitly been set
-						if ($valueSent && $inputVars['value'] == $optVal) {
-							$radioVars['checked'] = true;
-						}
-						$inputVars['options'] .= $this->replaceInputVars(FormIO::$builder[$subFieldType], $radioVars);
-					}
-					// Unset value, we don't use it for these field types
-					unset($inputVars['value']);
-					break;
-				// these field types are normal text inputs that have extra clientside behaviours
-				case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
-				case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
-				case FormIO::T_CREDITCARD:	$inputVars['behaviour'] = 'credit'; break;
-				case FormIO::T_ALPHA:		$inputVars['behaviour'] = 'alpha'; break;
-				case FormIO::T_NUMERIC:		$inputVars['behaviour'] = 'numeric'; break;
-				case FormIO::T_CURRENCY:	$inputVars['behaviour'] = 'currency'; break;
-				case FormIO::T_DATE:		$inputVars['behaviour'] = 'date'; break;
-				case FormIO::T_TIME:		$inputVars['behaviour'] = 'time'; break;
-				case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
-				case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
+				$extraWildcards['error'] = implode("<br />", $errArray);
 			}
 
 			// add row striping
-			$inputVars['alt'] = ++$spin % 2 == 0;
+			$extraWildcards['alt'] = ++$spin % 2 == 0;
+
+			// send any field options as a primitive array for getBuilderVars() to squash into subfield HTML
+			if ($fieldType == FormIO::T_RADIOGROUP || $fieldType == FormIO::T_CHECKGROUP || $fieldType == FormIO::T_DROPDOWN) {
+				$extraWildcards['options'] = $this->dataOptions[$k];
+			}
+
+			// now get the system-generated ones
+			$inputVars = $this->getBuilderVars($fieldType, $builderString, $k, $value, $extraWildcards);
 
 			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
 		}
@@ -943,6 +837,165 @@ class FormIO implements ArrayAccess
 		}
 
 		return $form . "</form>\n";
+	}
+
+	/**
+	 * Creates a wildcard replacement array for use with replaceInputVars().
+	 * Use of these methods together is what builds the HTML output for fields.
+	 *
+	 * We optimise the returned array as much as possible, as each item present requires extra processing.
+	 *
+	 * @param	const	$fieldType		one of the FormIO field type constants
+	 * @param	string	$builderString	reference to the current string being used to build the field.
+	 *									This basically allows this method to switch field types
+	 * @param	string	$fieldName		the name of this input in the form, which is also used to build its HTML id
+	 * @param	mixed	$value			the value of this field (internal FormIO format for dates etc)
+	 * @param	array	$extraAttributes	Any extra attributes to add into the form builder array
+	 */
+	private function getBuilderVars($fieldType, &$builderString, $fieldName, $value = null, $extraAttributes = array())
+	{
+		// add to provided input property list.
+		$inputVars = $extraAttributes;
+		$inputVars['id'] = $this->getFieldId($fieldName);
+		$inputVars['name'] = $fieldName;
+		if ($value !== null) {
+			$inputVars['value'] = $value;
+		}
+
+		// set data behaviour for form JavaScript, and any other type-specific attributes
+		switch ($fieldType) {
+			case FormIO::T_DATERANGE:
+				$inputVars['value']		= $value[0];
+				$inputVars['valueEnd']	= $value[1];
+				break;
+			case FormIO::T_DATETIME:
+				$inputVars['value']		= $value[0];
+				$inputVars['valueTime']	= $value[1];
+				$inputVars['pm']		= $value[2] == 'pm';
+				$inputVars['am']		= $value[2] != 'pm';
+				break;
+			case FormIO::T_SECTIONBREAK:
+				$inputVars['id'] = $this->getFieldId("tab" . ++$this->tabCounter);	// override ID with incremented tab counter var
+				break;
+			case FormIO::T_CAPTCHA:
+			case FormIO::T_CAPTCHA2:
+				if (!empty($_SESSION[$this->CAPTCHA_session_var])) {
+					continue 2;								// already verified as human, so don't output the field anymore
+				}
+				if ($this->captchaType == 'securimage' || $fieldType == FormIO::T_CAPTCHA2) {
+					require_once($this->securImage_inc);
+					$inputVars['captchaImage'] = $this->securImage_img;
+					$builderString = FormIO::$builder[FormIO::T_CAPTCHA2];	// modify form builder string internally
+				} else if ($this->captchaType == 'recaptcha') {
+					require_once($this->reCAPTCHA_inc);
+					$inputVars['captcha'] = recaptcha_get_html($this->reCAPTCHA_pub);
+				}
+				break;
+			case FormIO::T_REPEATER:
+				unset($value['__add']);
+				unset($value['__remove']);
+				$subFieldsString	= '';
+				$subFieldType		= $extraAttributes['fieldtype'];
+				$subFieldTemplate	= isset(FormIO::$builder[$subFieldType]) ? FormIO::$builder[$subFieldType] : FormIO::$builder[FormIO::T_TEXT];
+				$numInputs			= isset($extraAttributes['numinputs']) ? $extraAttributes['numinputs'] : 1;
+				$maxKey				= -1;
+				if ($numInputs < sizeof($value)) {
+					$numInputs = sizeof($value);
+				}
+
+				if (is_array($value)) {
+					foreach ($value as $subField => $subValue) {		// add currently set vars
+						if ($maxKey < $subField) {
+							$maxKey = $subField;
+						}
+						$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $fieldName . "[$subField]", $subValue);
+						$subFieldsString .= $this->replaceInputVars($subFieldTemplate, $subInputVars) . "\n";
+						$numInputs--;
+					}
+				}
+
+				$subField = $maxKey + 1;				// keep going from the end of current field array
+				while ($numInputs > 0) {				// now add remainder to make up minimum count
+					$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $fieldName . "[$subField]");
+					$subFieldsString .= $this->replaceInputVars($subFieldTemplate, $subInputVars) . "\n";
+					$numInputs--;
+					$subField++;
+				}
+
+				// Add submit buttons to control row adding / removing for no-JS support
+				// :TODO: send this through getBuilderVars()
+				$buttonVars = array(
+					'id'		=> $this->getFieldId($fieldName . "[__add]"),
+					'name'		=> $fieldName . "[__add]",
+					'value'		=> "Add another",
+				);
+				$subFieldsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
+				$buttonVars['id']	 = $this->getFieldId($fieldName . "[__remove]");
+				$buttonVars['name']  = $fieldName . "[__remove]";
+				$buttonVars['value'] = "Remove last";
+				$subFieldsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
+
+				// put all this in the 'inputs' variable
+				$inputVars['inputs'] = $subFieldsString;
+				break;
+			case FormIO::T_RADIOGROUP:	// these field types contain subelements
+			case FormIO::T_CHECKGROUP:
+			case FormIO::T_DROPDOWN:
+				// determine subfield output format
+				switch ($fieldType) {
+					case FormIO::T_RADIOGROUP:
+						$subFieldType = FormIO::T_RADIO;
+						break;
+					case FormIO::T_CHECKGROUP:
+						$builderString = FormIO::$builder[FormIO::T_RADIOGROUP]; // Use radiogroup string for checkgroup as well
+						$subFieldType = FormIO::T_CHECKBOX;
+						break;
+					case FormIO::T_DROPDOWN:
+						$subFieldType = FormIO::T_DROPOPTION;
+						break;
+				}
+
+				// determine if a value has been sent
+				$valueSent = $value != null && $value !== '';
+
+				// Build field sub-elements
+				// :TODO: send this through getBuilderVars()
+				$inputVars['options'] = '';
+				foreach ($extraAttributes['options'] as $optVal => $desc) {
+					$radioVars = array(
+						'id'		=> $this->getFieldId("$fieldName[$optVal]"),
+						'name'		=> $fieldName,
+						'value'		=> $optVal,
+					);
+					if (is_array($desc)) {
+						$radioVars['desc'] = $desc['desc'];
+						if (isset($desc['disabled']))				$radioVars['disabled']	= $desc['disabled'];
+						if (isset($desc['checked']) && !$valueSent)	$radioVars['checked']	= $desc['checked'];
+					} else {
+						$radioVars['desc'] = $desc;
+					}
+					// determine whether option should be selected if it hasn't explicitly been set
+					if ($valueSent && $inputVars['value'] == $optVal) {
+						$radioVars['checked'] = true;
+					}
+					$inputVars['options'] .= $this->replaceInputVars(FormIO::$builder[$subFieldType], $radioVars);
+				}
+				// Unset value, we don't use it for these field types
+				unset($inputVars['value']);
+				break;
+			// these field types are normal text inputs that have extra clientside behaviours
+			case FormIO::T_EMAIL:		$inputVars['behaviour'] = 'email'; break;
+			case FormIO::T_PHONE:		$inputVars['behaviour'] = 'phone'; break;
+			case FormIO::T_CREDITCARD:	$inputVars['behaviour'] = 'credit'; break;
+			case FormIO::T_ALPHA:		$inputVars['behaviour'] = 'alpha'; break;
+			case FormIO::T_NUMERIC:		$inputVars['behaviour'] = 'numeric'; break;
+			case FormIO::T_CURRENCY:	$inputVars['behaviour'] = 'currency'; break;
+			case FormIO::T_DATE:		$inputVars['behaviour'] = 'date'; break;
+			case FormIO::T_TIME:		$inputVars['behaviour'] = 'time'; break;
+			case FormIO::T_AUSPOSTCODE:	$inputVars['behaviour'] = 'postcode'; break;
+			case FormIO::T_URL: 		$inputVars['behaviour'] = 'url'; break;
+		}
+		return $inputVars;
 	}
 
 	/**
@@ -983,6 +1036,12 @@ class FormIO implements ArrayAccess
 	private function getReadableFieldName($k)
 	{
 		return isset($this->dataAttributes[$k]['desc']) ? $this->dataAttributes[$k]['desc'] : $k;
+	}
+
+	// Returns an HTML field ID for this form (form's name is prepended), given a field name
+	private function getFieldId($name)
+	{
+		return $this->name . '_' . str_replace(array('[', ']'), array('_', ''), $name);
 	}
 
 	// for use in data-fio-depends field attributes
