@@ -901,16 +901,13 @@ class FormIO implements ArrayAccess
 				}
 				break;
 			case FormIO::T_REPEATER:
-				unset($value['__add']);
+				unset($value['__add']);		// we don't care about these anymore, the validator has updated the numinputs property by now...
 				unset($value['__remove']);
 				$subFieldsString	= '';
 				$subFieldType		= $extraAttributes['fieldtype'];
 				$subFieldTemplate	= isset(FormIO::$builder[$subFieldType]) ? FormIO::$builder[$subFieldType] : FormIO::$builder[FormIO::T_TEXT];
-				$numInputs			= isset($extraAttributes['numinputs']) ? $extraAttributes['numinputs'] : 1;
+				$numInputs			= $this->getMinRequiredRepeaterInputs($fieldName, $extraAttributes['numinputs']);
 				$maxKey				= -1;
-				if ($numInputs < sizeof($value)) {
-					$numInputs = sizeof($value);
-				}
 
 				if (is_array($value)) {
 					foreach ($value as $subField => $subValue) {		// add currently set vars
@@ -1394,35 +1391,13 @@ class FormIO implements ArrayAccess
 	 */
 	private function repeaterValidator($key) {
 		$fieldType = $this->dataAttributes[$key]['fieldtype'];
+		$errors = false;
 
-		// check for use of add/remove field buttons, and tell the form to ignore errors if so
-		if ($this->data[$key]['__remove']) {
-			if (!$this->dataAttributes[$key]['numinputs']) {
-				$this->dataAttributes[$key]['numinputs'] = 1;
-			}
-			$this->dataAttributes[$key]['numinputs']--;
-			$maxk = null;
-			foreach ($this->data[$key] as $k => $v) {
-				if (is_int($k) && $maxk < $k) {
-					$maxk = $k;
-				}
-			}
-			if ($maxk !== null) {
-				unset($this->data[$key][$maxk]);
-			}
-		} else if ($this->data[$key]['__add']) {
-			if (!$this->dataAttributes[$key]['numinputs']) {
-				$this->dataAttributes[$key]['numinputs'] = 1;
-			}
-			$this->dataAttributes[$key]['numinputs']++;
-			$this->data[$key][] = null;
-		}
-		if ($this->data[$key]['__add'] || $this->data[$key]['__remove']) {
-			unset($this->data[$key]['__remove']);
-			unset($this->data[$key]['__add']);
-			$this->delaySubmission = true;
-			return true;
-		}
+		$add = !empty($this->data[$key]['__add']);
+		$remove = !empty($this->data[$key]['__remove']);
+		unset($this->data[$key]['__add']);
+		unset($this->data[$key]['__remove']);
+		$numSent = sizeof($this->data[$key]);
 
 		foreach ($this->data[$key] as $subId => &$subValue) {
 			if (!$subValue) {
@@ -1443,11 +1418,28 @@ class FormIO implements ArrayAccess
 					$valid = call_user_func_array(array($this, $validatorName), $subParams);
 					if (!$valid) {
 						$this->addError(array($key, $subKey), $this->errorString($func, $params));
+						$errors = true;
 					}
 				}
 			}
 		}
-		return true;
+
+		// check for use of add/remove field buttons, and tell the form to ignore errors if so
+		if ($add || $remove) {
+			if ($remove) {
+				if (sizeof($this->data[$key]) == $numSent) {
+					end($this->data[$key]);
+					unset($this->data[$key][key($this->data[$key])]);
+					reset($this->data[$key]);
+				}
+				$this->dataAttributes[$key]['numinputs'] = $this->getMinRequiredRepeaterInputs($key, $numSent - 1);
+			} else if ($add) {
+				$this->dataAttributes[$key]['numinputs'] = $this->getMinRequiredRepeaterInputs($key, $numSent + 1);
+			}
+			$this->delaySubmission = true;
+		}
+
+		return $errors;
 	}
 
 	//==========================================================================
@@ -1534,6 +1526,17 @@ class FormIO implements ArrayAccess
 			return null;
 		}
 		return date("d/m/Y", $val);
+	}
+
+	private function getMinRequiredRepeaterInputs($key, $minNum = 1)
+	{
+		if ($minNum < sizeof($this->data[$key])) {
+			return sizeof($this->data[$key]) + 1;
+		}
+		if ($minNum < 1) {
+			return 1;
+		}
+		return $minNum;
 	}
 
 	//==========================================================================
