@@ -76,7 +76,7 @@ form.clean textarea {
 
 form.clean .multiple {
 	border: 0;
-	padding: 0 0.25em 0.5em 0.25em;
+	padding: 0 0.25em 0 0.25em;
 	margin-bottom: 0;
 }
 
@@ -98,7 +98,7 @@ form.clean .multiple label {
 	font-weight: normal;
 	white-space: nowrap;
 	padding: 0 0 0 1%;
-	margin: 0 3% 0 0;
+	margin: 0 3% 0.5em 0;
 	width: 96%;
 }
 form.clean .multiple.col2 label { width:46%; }
@@ -122,8 +122,10 @@ form.clean .multiple p.hint, form.clean .multiple p.err {
 
 /* Type-specific */
 
-form.clean input[type=checkbox], form.clean input[type=radio] {
+form.clean .checkbox input, form.clean .checkbox label.checkbox, form.clean input[type=radio] {
 	width: auto;
+	display: inline;
+	font-weight: normal;
 }
 
 form.clean input[type=text], form.clean input[type=password] {
