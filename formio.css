@@ -32,8 +32,9 @@ form.clean label {
 	width: 25%;
 }
 
-form.clean div.blck { position: relative; }
-form.clean div.blck label { position: absolute; }
+form.clean div.blck, form.clean div.chpass { position: relative; }
+form.clean div.blck label, form.clean div.chpass label { position: absolute; line-height: 1.5em; }
+form.clean div.chpass input { margin-left: 25%; margin-right: 0; width: 50%; display: inline; }
 
 form.clean fieldset {
 	border:1px solid #ddd;
@@ -44,6 +45,7 @@ form.clean fieldset legend {
 	font-size: 1.2em;
 	font-weight: bold;
 	padding: 0;											/* IE only (see overrides at bottom) */
+	line-height: 1.5em;
 }
 
 form.clean label, form.clean .multiple legend {
