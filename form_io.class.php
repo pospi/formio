@@ -141,6 +141,7 @@ class FormIO implements ArrayAccess
 		'urlValidator'		=> "Invalid URL",
 		'currencyValidator'	=> "Enter amount in dollars and cents",
 		'captchaValidator'	=> "The text entered did not match the verification image",
+		'chpasswdValidator'	=> "Entered passwords do not match",
 	);
 
 	// misc constants used for validation
@@ -749,6 +750,8 @@ class FormIO implements ArrayAccess
 				return array('captchaValidator' => array());
 			case FormIO::T_REPEATER:
 				return array('repeaterValidator' => array());
+			case FormIO::T_PASSWORDCHANGE:
+				return array('chpasswdValidator' => array());
 		}
 		return array();
 	}
@@ -1322,6 +1325,16 @@ class FormIO implements ArrayAccess
 		}
 
 		return (empty($bits['scheme']) || $bits['scheme'] == 'http' || $bits['scheme'] == 'https' || $bits['scheme'] == 'ftp');
+	}
+	
+	private function chpasswdValidator($key, $overrideData = null) {
+		$overrideData ? $data = &$overrideData : $data = &$this->data;
+		
+		if ((!empty($data[$key][0]) || !empty($data[$key][1])) && ($data[$key][0] != $data[$key][1])) {
+			return false;
+		}
+		$data[$key] = null;
+		return true;
 	}
 
 	// :NOTE: repeater data override parameter not implemented, but why would you?
