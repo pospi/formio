@@ -53,10 +53,11 @@ class FormIO implements ArrayAccess
 	const T_READONLY = 21;			// a bit like a hidden input, only we show the variable
 	const T_DROPDOWN = 22;			// select
 	const T_DROPOPTION = 34;		// single <select> option element. Not useful by itself - used by T_DROPDOWN
-	const T_CHECKBOX = 23;			// single checkbox (also used by T_CHECKGROUP)
+	const T_CHECKBOX = 23;			// single checkbox
 	const T_RADIO	= 33;			// single radio button. Not useful by itself - used by T_RADIOGROUP
 	const T_RADIOGROUP = 24;		// list of radio buttons
 	const T_CHECKGROUP = 25;		// list of checkboxes
+	const T_CHECKOPTION = 43;		// used by T_CHECKGROUP
 	const T_SURVEY	= 26;			// :TODO:
 	const T_PASSWORD = 27;
 	const T_BUTTON	= 28;
@@ -86,28 +87,29 @@ class FormIO implements ArrayAccess
 		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$id}" value="{$value}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$id}"{$maxlen? maxlength="$maxlen"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$id}"{$maxlen? maxlength="$maxlen"}{$dependencies? data-fio-depends="$dependencies"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$id}" value="{$value}" />',
-		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CHECKBOX	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="checkbox" name="{$name}" id="{$id}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
-		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="repeater">{$inputs}</div><p class="hint">{$hint}</p></div>',
+		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start" value="{$value}" data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date" value="{$value}" data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="repeater"{$dependencies? data-fio-depends="$dependencies"}>{$inputs}</div><p class="hint">{$hint}</p></div>',
 
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DROPOPTION=> '<option value="{$value}"{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
 
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
-		FormIO::T_RADIOGROUP=> '<fieldset id="{$id}" class="row multiple{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
+		FormIO::T_RADIOGROUP=> '<fieldset id="{$id}" class="row multiple col{$columns}{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
-		FormIO::T_CHECKBOX	=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
+		FormIO::T_CHECKOPTION=> '<label><input type="checkbox" name="{$name}" value="{$value}"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 
-		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}"{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CAPTCHA	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="captcha">{$captcha}</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CAPTCHA2	=> '<div class="row blck{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div class="captcha"><input type="text" name="{$name}" id="{$id}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" /> <a class="reload" href="javascript: void(0);">Reload image</a></div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
-		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}" value="{$value}"{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 	);
 
 	// This contains an array of all field types which are presentational only.
@@ -162,6 +164,8 @@ class FormIO implements ArrayAccess
 	public $reCAPTCHA_inc	= 'recaptcha/recaptchalib.php';		// this should point to the reCAPTCHA php include file
 	public $securImage_inc	= 'securimage/securimage.php';		// this should point to the SecurImage php include file
 	public $securImage_img	= 'securimage/securimage_show.php';	// this should point to the SecurImage php image generation file
+	
+	public static $default_multiinput_columns = 2;				// default column count for radiogroup and checkgroup inputs
 
 	//===============================================================================================/\
 
@@ -391,6 +395,9 @@ class FormIO implements ArrayAccess
 	{
 		$this->dataOptions[$k][$optionVal] = $optionText;
 		if ($dependentField !== null) {
+			if (($optionVal === true || $optionVal === false) && $this->dataTypes[$k] == FormIO::T_CHECKBOX) {
+				$optionVal = 1;		// allow passing true/false for checkbox field status'
+			}
 			$this->addFieldDependency($k, $optionVal, $dependentField);
 		}
 		return $this;
@@ -467,6 +474,22 @@ class FormIO implements ArrayAccess
 		list($k, $fieldType) = $a;
 
 		return $this->addAttribute($k, 'fieldtype', $fieldType);
+	}
+
+	/**
+	 * Sets a checkgroup or radiogroup's columns property. This is used to output a CSS
+	 * class which changes the field's layout - valid range is between 1 and 5.
+	 * :CHAINABLE:
+	 */
+	public function setOptionColumns()
+	{
+		$a = func_get_args();
+		if (sizeof($a) < 2) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $num) = $a;
+
+		return $this->addAttribute($k, 'columns', $num);
 	}
 
 	// simplified mutators for adding common field attributes. All are chainable.
@@ -954,7 +977,7 @@ class FormIO implements ArrayAccess
 						break;
 					case FormIO::T_CHECKGROUP:
 						$builderString = FormIO::$builder[FormIO::T_RADIOGROUP]; // Use radiogroup string for checkgroup as well
-						$subFieldType = FormIO::T_CHECKBOX;
+						$subFieldType = FormIO::T_CHECKOPTION;
 						break;
 					case FormIO::T_DROPDOWN:
 						$subFieldType = FormIO::T_DROPOPTION;
@@ -963,6 +986,9 @@ class FormIO implements ArrayAccess
 
 				// determine if a value has been sent
 				$valueSent = $value != null && $value !== '';
+				
+				// set the column count
+				$inputVars['columns'] = isset($extraAttributes['columns']) ? $extraAttributes['columns'] : FormIO::$default_multiinput_columns;
 
 				// Build field sub-elements
 				// :TODO: send this through getBuilderVars()

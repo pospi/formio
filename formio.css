@@ -94,20 +94,41 @@ form.clean .multiple input {
 
 form.clean .multiple label {
 	float:left;
-	width:29%;
 	overflow:hidden;
-	padding: 0 0 0 1%;
-	margin: 0 3% 0 0;
 	font-weight: normal;
 	white-space: nowrap;
+	padding: 0 0 0 1%;
+	margin: 0 3% 0 0;
+	width: 96%;
 }
+form.clean .multiple.col2 label { width:46%; }
+form.clean .multiple.col3 label { width:29%; }
+form.clean .multiple.col4 label { width:21%; }
+form.clean .multiple.col5 label { width:16%; }
 
 form.clean .multiple legend {
 	padding: 0.5em 0.25em 0.5em 0;
 	margin-left: -0.25em;								/* IE only (see overrides at bottom) */
 }
 
+form.clean .multiple legend .required {
+	top: 0.25em;
+}
+
+form.clean .multiple p.hint, form.clean .multiple p.err {
+	padding: 1em 0 0 0;
+	margin-left: 0;
+}
+
 /* Type-specific */
+
+form.clean input[type=checkbox], form.clean input[type=radio] {
+	width: auto;
+}
+
+form.clean input[type=text], form.clean input[type=password] {
+	padding-right: 1em;		/* this balances out the currency input's left padding... */
+}
 
 form.clean .daterange input, form.clean .datetime input, form.clean .datetime select {
 	width: auto !important;
@@ -126,10 +147,6 @@ form.clean .captcha img {
 
 form.clean .currency {
 	position: relative;
-}
-
-form.clean input[type=text], form.clean input[type=password] {
-	padding-right: 1em;		/* this balances out the currency input's left padding... */
 }
 
 form.clean .currency input {
@@ -216,10 +233,6 @@ form.clean .required {
 	top: -0.5em;
 }
 
-form.clean .multiple legend .required {
-	top: 0.25em;
-}
-
 form.clean .err {
 	color:#DF4545;
 	font-weight:bold;
@@ -233,11 +246,6 @@ form.clean p.hint, form.clean p.err {
 	font-size: 0.8em;
 	clear: left;
 	margin: 0 0 0 25%;
-}
-
-form.clean .multiple p.hint, form.clean .multiple p.err {
-	padding: 1em 0 0 0;
-	margin-left: 0;
 }
 
 form.clean .preamble .err {

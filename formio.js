@@ -78,7 +78,7 @@ FormIO.prototype.options = {
 		"[data-fio-depends]"		: 'initDependencies'
 	}
 };
-	
+
 //==========================================================================
 //	Form methods
 
@@ -137,11 +137,12 @@ FormIO.prototype.checkDependencies = function(el)
 	var t = this;
 	var current = this.getFieldValue(el);
 	var formModified = false;
-	
+	var elType = el[0].tagName.toLowerCase();
+
 	var depends = $.extend({}, this.fieldDependencies[el.attr('id')]);
 	var affected = depends['__affected'];
 	delete depends['__affected'];
-	
+
 	$.each(affected, function(k, elId) {
 		t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + elId)).hide();
 		formModified = true;
@@ -149,13 +150,18 @@ FormIO.prototype.checkDependencies = function(el)
 
 	$.each(depends, function(value, visible) {
 		var show = false;
-		$.each(current, function(i, selected) {
-			if (value == selected) {
-				show = true;
-				return false;
-			}
-		});
-		
+
+		if (elType == 'fieldset') {
+			$.each(current, function(i, selected) {
+				if (value == selected) {
+					show = true;
+					return false;
+				}
+			});
+		} else if (t.inputIsMatching(el, value)) {
+			show = true;
+		}
+
 		if (show) {
 			$.each(visible, function(unused, showEl) {
 				var row = t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + showEl));
@@ -170,6 +176,33 @@ FormIO.prototype.checkDependencies = function(el)
 	if (formModified) {
 		this.restripeForm();
 	}
+};
+
+// helper to determine whether a checkbox / radiobutton / text field is matching a value
+FormIO.prototype.inputIsMatching = function(el, value)
+{
+	var checkd	= el.attr('checked');
+	var val		= el.val();
+	return ( (		// checkbox / radio
+				this.elementIsRadioOrSelect(el) && (checkd && value == 1 || !checkd && value == 0)
+			) || (	// simple input / fallback
+			  	val == value
+			)
+		);
+};
+
+// input type helpers
+FormIO.prototype.elementIsRadioOrSelect = function(el)
+{
+	var elType	= el[0].tagName.toLowerCase();
+	var inType	= el.attr('type');
+	return elType == 'input' && (inType == 'checkbox' || inType == 'radio');
+};
+FormIO.prototype.elementIsTextual = function(el)
+{
+	var elType	= el[0].tagName.toLowerCase();
+	var inType	= el.attr('type');
+	return elType == 'textarea' || (elType == 'input' && inType == 'text');
 };
 
 //==========================================================================
@@ -198,28 +231,32 @@ FormIO.prototype.initDependencies = function(el)
 	var t = this;
 	var dependencies = {};
 	var affectedFields = [];
-	
+
 	var dependent = el.data('fio-depends');
 	dependent = dependent.split('&');
-	
+
 	$.each(dependent, function(unused, v) {
 		var parts = v.split('=');
 		var affected = parts[1].split(';');
 		dependencies[parts[0]] = affected;
 		affectedFields = affectedFields.concat(affected);
 	});
-	
+
 	this.fieldDependencies[el.attr('id')] = dependencies;
 	this.fieldDependencies[el.attr('id')]['__affected'] = affectedFields;
 
 	// setup change events
 	var elType = el[0].tagName.toLowerCase();
-	if (elType == 'fieldset') {			// radiogroup and checklist
+	if (elType == 'fieldset') {					// radiogroup and checklist
 		this.getFieldSubElements(el).change(function () {
 			t.checkDependencies(el);
 		});
-	} else {							// normal inputs (text, select etc)
-		el.change(function () {
+	} else if (t.elementIsTextual(el)) {		// textarea, text
+		el.keyup(function() {
+			t.checkDependencies(el);
+		});
+	} else {									// normal inputs (checkbox, radio, select etc)
+		el.change(function() {
 			t.checkDependencies(el);
 		});
 	}
