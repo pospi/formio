@@ -1202,17 +1202,22 @@ class FormIO implements ArrayAccess
 	 */
 	private function fieldHiddenByDependency($key)
 	{
+		$shown = false;
+		$hidden = false;
 		foreach ($this->dataDepends as $masterField => $dependencies) {
 			foreach ($dependencies as $postValue => $targetFields) {
-				if (in_array($key, $targetFields)								// field is dependant on another field's submission
-				  && $this->data[$masterField] != $postValue) {					// and value for master field means this field is hidden
-
-					// we should erase the field's value so it doesnt show if the user happens to have filled it out and changed their mind
-					$this->data[$key] = null;
-
-					return true;
+				if (in_array($key, $targetFields)) {							// field is dependant on another field's submission
+					if ($this->data[$masterField] != $postValue) {				// and value for master field means this field is hidden
+						$hidden = true;
+					} else {
+						$shown = true;
+					}
 				}
 			}
+		}
+		if ($hidden && !$shown) {
+			$this->data[$key] = null;
+			return true;
 		}
 		return false;
 	}
