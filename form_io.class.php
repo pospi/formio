@@ -75,6 +75,7 @@ class FormIO implements ArrayAccess
 	private static $builder = array(
 		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$id}"{$value? value="$value"}{$classes? class="$classes"} />',
 		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$id}"{$value? value="$value"}{$classes? class="$classes"} />',
+		FormIO::T_BUTTON	=> '<div class="row{$alt? alt}{$classes? $classes}"><label>{$desc}</label><input type="button" name="{$name}" id="{$id}"{$value? value="$value"} /><p class="hint">{$hint}</p></div>',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_RAW		=> '{$desc}',
