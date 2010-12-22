@@ -32,9 +32,13 @@ form.clean label {
 	width: 25%;
 }
 
-form.clean div.blck, form.clean div.chpass { position: relative; }
-form.clean div.blck label, form.clean div.chpass label { position: absolute; line-height: 1.5em; }
-form.clean div.chpass input { margin-left: 25%; margin-right: 0; width: 50%; display: inline; }
+form.clean div.blck { position: relative; }
+form.clean div.blck .row { margin: 0 0 0 25%; padding: 0.5em 0 0 0; background: transparent; }
+form.clean div.blck label { position: absolute; line-height: 1.5em; }
+form.clean div.blck .row label { display: none; }
+form.clean div.blck input { display: inline; width: 93%; }
+form.clean div.blck input[type=checkbox], form.clean div.blck input[type=radio], form.clean div.blck input[type=submit], form.clean div.blck input[type=reset], form.clean div.blck input[type=button] { width: auto; }
+form.clean div.blck .pad { width: 25%; height: 1em; float: left; }
 
 form.clean fieldset {
 	border:1px solid #ddd;
@@ -128,6 +132,7 @@ form.clean .checkbox input, form.clean .checkbox label.checkbox, form.clean inpu
 	width: auto;
 	display: inline;
 	font-weight: normal;
+	border: 0;
 }
 
 form.clean input[type=text], form.clean input[type=password] {
@@ -145,7 +150,7 @@ form.clean input.time {
 	width: 9em;
 }
 
-form.clean .captcha img {
+form.clean img.captcha {
 	vertical-align: middle;
 }
 
@@ -168,25 +173,9 @@ form.clean .currency input, form.clean .datetime input {
 	padding-right: 0.15em;
 }
 
-form.clean .repeater, form.clean .captcha {
-	margin-left: 25%;
-	width: 74%;
-	margin-right: 1%;
-}
-
-form.clean .repeater input, form.clean .captcha input {
-	width: 95%;
-}
-form.clean .repeater label { display: none; }
-
-form.clean .repeater .row {
-	background: transparent;
-	padding-left: 0;
-}
-
 /* Button */
 
-form.clean button, form.clean input[type=submit], form.clean input[type=reset] {
+form.clean button, form.clean input[type=submit], form.clean input[type=reset], form.clean input[type=button] {
 	margin:0.3em 0;
 	border:1px solid #ccc;
 	background-color:#eee;
@@ -197,13 +186,13 @@ form.clean button, form.clean input[type=submit], form.clean input[type=reset] {
 	display: inline;
 }
 
-form.clean button:hover, form.clean input[type=submit]:hover, form.clean input[type=reset]:hover {
+form.clean button:hover, form.clean input[type=submit]:hover, form.clean input[type=reset]:hover, form.clean input[type=button]:hover {
 	background-color:#C2D6EF;
 	border:1px solid #000;
 	color:#000;
 }
 
-form.clean button:active, form.clean input[type=submit]:active, form.clean input[type=reset]:active {
+form.clean button:active, form.clean input[type=submit]:active, form.clean input[type=reset]:active, form.clean input[type=button]:active {
 	background-color:#333;
 	color:white;
 	border:1px solid #000;

@@ -100,7 +100,12 @@ FormIO.prototype.restripeForm = function()
 
 FormIO.prototype.getFieldRowElement = function(el)
 {
-	return el.closest('.row');
+	var cl = el.closest('.row');
+	var p = cl.parent();
+	if (p.hasClass('blck')) {
+		return p;
+	}
+	return cl;
 };
 
 FormIO.prototype.getFieldSubElements = function(el)
@@ -221,7 +226,7 @@ FormIO.prototype.initAutoCompleteField = function(el)
 FormIO.prototype.initSecurImageField = function(el)		// adds 'reload image' behaviour
 {
 	el.find('.reload').click(function() {
-		var img = el.find('.captcha img').get(0);
+		var img = el.find('.row img').get(0);
 		img.src = img.src.match(/^[^\?]*/i)[0] + '?r=' + Math.random();
 	});
 };

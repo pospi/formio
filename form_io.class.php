@@ -73,8 +73,8 @@ class FormIO implements ArrayAccess
 
 	// form builder strings for different element types :TODO: finish implementation
 	private static $builder = array(
-		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$id}"{$value? value="$value"} />',
-		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$id}"{$value? value="$value"} />',
+		FormIO::T_SUBMIT	=> '<input type="submit" name="{$name}" id="{$id}"{$value? value="$value"}{$classes? class="$classes"} />',
+		FormIO::T_RESET		=> '<input type="reset" name="{$name}" id="{$id}"{$value? value="$value"}{$classes? class="$classes"} />',
 		FormIO::T_INDENT	=> '<fieldset><legend>{$desc}</legend>',
 		FormIO::T_OUTDENT	=> '</fieldset>',
 		FormIO::T_RAW		=> '{$desc}',
@@ -92,10 +92,10 @@ class FormIO implements ArrayAccess
 		FormIO::T_CHECKBOX	=> '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label>&nbsp;{$required? <span class="required">*</span>}</label><label class="checkbox"><input type="checkbox" name="{$name}" id="{$id}"{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} />{$desc}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		
-		FormIO::T_PASSWORDCHANGE => '<div class="row chpass{$alt? alt}{$classes? $classes}"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}[0]" id="{$id}_0" /><input type="password" name="{$name}[1]" id="{$id}_1" /> (verify){$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_PASSWORDCHANGE => '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label><div class="row"><input type="password" name="{$name}[0]" id="{$id}_0" /><input type="password" name="{$name}[1]" id="{$id}_1" /> (verify)</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start"{$value? value="$value"} data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date"{$value? value="$value"} data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="repeater"{$dependencies? data-fio-depends="$dependencies"}>{$inputs}</div><p class="hint">{$hint}</p></div>',
+		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}"{$dependencies? data-fio-depends="$dependencies"} data-fio-type="repeater"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}<div class="pad"></div>{$controls}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DROPOPTION=> '<option{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
@@ -106,8 +106,8 @@ class FormIO implements ArrayAccess
 		FormIO::T_CHECKOPTION=> '<label><input type="checkbox" name="{$name}"{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 
 		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}"{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_CAPTCHA	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div id="{$id}" class="captcha">{$captcha}</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_CAPTCHA2	=> '<div class="row blck{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div class="captcha"><input type="text" name="{$name}" id="{$id}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" /> <a class="reload" href="javascript: void(0);">Reload image</a></div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CAPTCHA	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div class="row" id="{$id}">{$captcha}</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CAPTCHA2	=> '<div class="row blck{$alt? alt}{$classes? $classes}" data-fio-type="securimage"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div class="row"><input type="text" name="{$name}" id="{$id}" {$maxlen? maxlength="$maxlen"} /><img src="{$captchaImage}" alt="CAPTCHA Image" class="captcha" /> <a class="reload" href="javascript: void(0);">Reload image</a></div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		// this is our fallback input string as well. js is added via use of data-fio-* attributes.
 		FormIO::T_TEXT		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -962,14 +962,15 @@ class FormIO implements ArrayAccess
 					'name'		=> $fieldName . "[__add]",
 					'value'		=> "Add another",
 				);
-				$subFieldsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
+				$controlsString = $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
 				$buttonVars['id']	 = $this->getFieldId($fieldName . "[__remove]");
 				$buttonVars['name']  = $fieldName . "[__remove]";
 				$buttonVars['value'] = "Remove last";
-				$subFieldsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
+				$controlsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
 
 				// put all this in the 'inputs' variable
 				$inputVars['inputs'] = $subFieldsString;
+				$inputVars['controls'] = $controlsString;
 				break;
 			case FormIO::T_RADIOGROUP:	// these field types contain subelements
 			case FormIO::T_CHECKGROUP:
