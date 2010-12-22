@@ -148,7 +148,7 @@ class FormIO implements ArrayAccess
 	const dateRegex		= '/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s*$/';						// capture: day, month, year
 	const timeRegex		= '/^\s*(\d{1,2})(:(\d{2}))?(:(\d{2}))?\s*$/';							// capture: hr, , min, , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
-	const phoneRegex	= '/^(\+)?(\d|\s|\(|\))*$/';
+	const phoneRegex	= '/^(\+)?(\d|\s|(\(\d+\)))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
 
 	// parameters for T_CAPTCHA. Recommend you set these from your own scripts.
@@ -887,6 +887,8 @@ class FormIO implements ArrayAccess
 	 * @param	string	$fieldName		the name of this input in the form, which is also used to build its HTML id
 	 * @param	mixed	$value			the value of this field (internal FormIO format for dates etc)
 	 * @param	array	$extraAttributes	Any extra attributes to add into the form builder array
+	 *
+	 * @return	array of wildcards to build the field with, or NULL if the field should not be built
 	 */
 	private function getBuilderVars($fieldType, &$builderString, $fieldName, $value = null, $extraAttributes = array())
 	{
@@ -916,7 +918,7 @@ class FormIO implements ArrayAccess
 			case FormIO::T_CAPTCHA:
 			case FormIO::T_CAPTCHA2:
 				if (!empty($_SESSION[$this->CAPTCHA_session_var])) {
-					continue 2;								// already verified as human, so don't output the field anymore
+					return null;								// already verified as human, so don't output the field anymore
 				}
 				if ($this->captchaType == 'securimage' || $fieldType == FormIO::T_CAPTCHA2) {
 					require_once($this->securImage_inc);
@@ -1042,6 +1044,9 @@ class FormIO implements ArrayAccess
 	 */
 	private function replaceInputVars($str, $varsMap)
 	{
+		if ($varsMap === null) {
+			return '';		// null means don't generate the field
+		}
 		foreach ($varsMap as $property => $value) {
 			if ($value === false || $value === null) {
 				$str = preg_replace('/\{\$' . $property . '.*\}/U', '', $str);
