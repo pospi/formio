@@ -92,7 +92,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />',
 		FormIO::T_CHECKBOX	=> '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label>&nbsp;{$required? <span class="required">*</span>}</label><label class="checkbox"><input type="checkbox" name="{$name}" id="{$id}"{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} />{$desc}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		
+
 		FormIO::T_PASSWORDCHANGE => '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label><div class="row"><input type="password" name="{$name}[0]" id="{$id}_0" /><input type="password" name="{$name}[1]" id="{$id}_1" /> (verify)</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start"{$value? value="$value"} data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date"{$value? value="$value"} data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -167,7 +167,7 @@ class FormIO implements ArrayAccess
 	public $reCAPTCHA_inc	= 'recaptcha/recaptchalib.php';		// this should point to the reCAPTCHA php include file
 	public $securImage_inc	= 'securimage/securimage.php';		// this should point to the SecurImage php include file
 	public $securImage_img	= 'securimage/securimage_show.php';	// this should point to the SecurImage php image generation file
-	
+
 	public static $default_multiinput_columns = 2;				// default column count for radiogroup and checkgroup inputs
 
 	//===============================================================================================/\
@@ -226,6 +226,9 @@ class FormIO implements ArrayAccess
 	 */
 	public function importData($assoc, $allowAdditions = false)
 	{
+		if (!is_array($assoc)) {
+			return;
+		}
 		if (!$allowAdditions) {
 			foreach ($assoc as $k => $unused) {
 				if (!array_key_exists($k, $this->data)) {
@@ -234,6 +237,16 @@ class FormIO implements ArrayAccess
 			}
 		}
 		$this->data = array_merge($this->data, $assoc);
+	}
+
+	/**
+	 * An accessor for importData() which imports from $_POST and $_FILES data
+	 */
+	public function takeSubmission()
+	{
+		$this->importData($_GET);
+		$this->importData($_POST);
+		$this->importData($_FILES);
 	}
 
 	//==========================================================================
@@ -994,7 +1007,7 @@ class FormIO implements ArrayAccess
 
 				// determine if a value has been sent
 				$valueSent = $value != null && $value !== '';
-				
+
 				// set the column count
 				$inputVars['columns'] = isset($extraAttributes['columns']) ? $extraAttributes['columns'] : FormIO::$default_multiinput_columns;
 
@@ -1333,10 +1346,10 @@ class FormIO implements ArrayAccess
 
 		return (empty($bits['scheme']) || $bits['scheme'] == 'http' || $bits['scheme'] == 'https' || $bits['scheme'] == 'ftp');
 	}
-	
+
 	private function chpasswdValidator($key, $overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
-		
+
 		if ((!empty($data[$key][0]) || !empty($data[$key][1])) && ($data[$key][0] != $data[$key][1])) {
 			return false;
 		}
