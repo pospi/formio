@@ -10,7 +10,7 @@
 /* General */
 
 form.clean {
-	line-height: 1em;
+	line-height: 1.25em;
 	text-align:left;
 	position:relative;
 }
@@ -34,7 +34,7 @@ form.clean label {
 
 form.clean div.blck { position: relative; }
 form.clean div.blck .row { margin: 0 0 0 25%; padding: 0.5em 0 0 0; background: transparent; }
-form.clean div.blck label { position: absolute; line-height: 1.5em; }
+form.clean div.blck label { position: absolute; }
 form.clean div.blck .row label { display: none; }
 form.clean div.blck input { display: inline; width: 93%; }
 form.clean div.blck input[type=checkbox], form.clean div.blck input[type=radio], form.clean div.blck input[type=submit], form.clean div.blck input[type=reset], form.clean div.blck input[type=button] { width: auto; }
@@ -49,7 +49,6 @@ form.clean fieldset legend {
 	font-size: 1.2em;
 	font-weight: bold;
 	padding: 0;											/* IE only (see overrides at bottom) */
-	line-height: 1.5em;
 }
 
 form.clean label, form.clean .multiple legend {
