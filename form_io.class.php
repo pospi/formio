@@ -1373,9 +1373,9 @@ class FormIO implements ArrayAccess
 		} else if ($this->captchaType == 'recaptcha') {
 			require_once($this->reCAPTCHA_inc);
 			$resp = recaptcha_check_answer($this->reCAPTCHA_priv,
-                            $_SERVER["REMOTE_ADDR"],
-                            $_POST["recaptcha_challenge_field"],
-                            $_POST["recaptcha_response_field"]);
+							$_SERVER["REMOTE_ADDR"],
+							$_POST["recaptcha_challenge_field"],
+							$_POST["recaptcha_response_field"]);
 			$ok = $resp->is_valid;
 		}
 		if (session_id() && $ok) {
@@ -1609,24 +1609,24 @@ class FormIO implements ArrayAccess
 
 	public function offsetSet($offset, $value)
 	{
-        if (is_null($offset)) {
-            trigger_error("Attempted to set form variable, but no key given", E_USER_ERROR);
-        } else {
-            $this->data[$offset] = $value;
-        }
-    }
-    public function offsetExists($offset)
+		if (is_null($offset)) {
+			trigger_error("Attempted to set form variable, but no key given", E_USER_ERROR);
+		} else {
+			$this->data[$offset] = $value;
+		}
+	}
+	public function offsetExists($offset)
 	{
-        return isset($this->data[$offset]);
-    }
-    public function offsetUnset($offset)
+		return isset($this->data[$offset]);
+	}
+	public function offsetUnset($offset)
 	{
-        unset($this->data[$offset]);
-    }
-    public function offsetGet($offset)
+		unset($this->data[$offset]);
+	}
+	public function offsetGet($offset)
 	{
-        return isset($this->data[$offset]) ? $this->data[$offset] : null;
-    }
+		return isset($this->data[$offset]) ? $this->data[$offset] : null;
+	}
 }
 
 ?>
