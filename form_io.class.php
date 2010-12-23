@@ -82,7 +82,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_PARAGRAPH	=> '<p id="{$id}">{$desc}</p>',
 		FormIO::T_HEADER	=> '<h2 id="{$id}">{$desc}</h2>',
 		FormIO::T_SUBHEADER	=> '<h3 id="{$id}">{$desc}</h3>',
-		FormIO::T_SECTIONBREAK => '</div><div id="{$id}">',
+		FormIO::T_SECTIONBREAK => '</div><div class="tab" id="{$id}">',
 		FormIO::T_IMAGE		=> '<img id="{$id}" src="{$value}" alt="{$desc}" />',
 
 		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -274,7 +274,7 @@ class FormIO implements ArrayAccess
 		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
 			$this->dataOptions[$name] = array();
 		}
-		
+
 		// if this is a repeater, we should handle its data in the correct subfield form. Must have repeater type set first.
 		if ($type == FormIO::T_REPEATER) {
 			$type = $this->dataAttributes[$name]['fieldtype'];
@@ -282,7 +282,7 @@ class FormIO implements ArrayAccess
 		} else {
 			$values = array(0 => &$this->data[$name]);
 		}
-		
+
 		// now we manipulate / convert any values in the input array by modifying the references
 		if (is_array($values)) {
 			foreach ($values as &$value) {
@@ -683,7 +683,7 @@ class FormIO implements ArrayAccess
 		if (is_array($data)) {
 			foreach ($data as $k => $v) {
 				$dataType = !$overrideDataType ? $this->dataTypes[$k] : $overrideDataType;
-				
+
 				if (in_array($dataType, FormIO::$presentational) || (!$includeSubmit && $dataType == FormIO::T_SUBMIT)) {
 					unset($data[$k]);
 				} else if ($dataType == FormIO::T_DATE) {
@@ -757,6 +757,24 @@ class FormIO implements ArrayAccess
 	public function setSuffix($html)
 	{
 		$this->suffix = $html;
+	}
+
+	/**
+	 * The header section of a form is the first elements added to it. These will
+	 * always display, independently of other tabs and pagination.
+	 */
+	public function startHeaderSection()
+	{
+		$this->tabCounter = 0;
+		return $this;
+	}
+
+	/**
+	 * To end the header, we simply output a section break to start the first tab.
+	 */
+	public function endHeaderSection()
+	{
+		return $this->addSectionBreak();
 	}
 
 	public function setDataType($k, $type)
@@ -854,17 +872,17 @@ class FormIO implements ArrayAccess
 
 	public function getForm()
 	{
-		$form = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method) . "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
+		$form = '';
 
-		$hasErrors = !$this->delaySubmission && sizeof($this->errors) > 0;
-		if ($hasErrors || isset($this->preamble)) {
-			$form .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
-			$form .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
-			$form .= '</div>' . "\n";
+		$firstSection = '';
+		$hasHeader = isset($this->tabCounter);
+		if (!$hasHeader) {
+			// default behaviour is to skip the first tab (0), which is used as the form's header section if present
+			$this->tabCounter = 1;
+			$form .= "<div id=\"{$this->name}_tab{$this->tabCounter}\" class=\"tab\">\n";
+		} else {
+			$firstSection = "<div id=\"{$this->name}_tab{$this->tabCounter}\" class=\"tab header\">\n";
 		}
-
-		$this->tabCounter = 1;
-		$form .= "<div id=\"{$this->name}_tab{$this->tabCounter}\">";
 
 		$spin = 1;
 		foreach ($this->data as $k => $value) {
@@ -924,7 +942,12 @@ class FormIO implements ArrayAccess
 			// now get the system-generated ones
 			$inputVars = $this->getBuilderVars($fieldType, $builderString, $k, $value, $extraWildcards);
 
-			$form .= $this->replaceInputVars($builderString, $inputVars) . "\n";
+			$inputStr = $this->replaceInputVars($builderString, $inputVars) . "\n";
+			if ($this->tabCounter == 0) {
+				$firstSection .= $inputStr;
+			} else {
+				$form .= $inputStr;
+			}
 		}
 
 		$form .= "</div>";
@@ -934,7 +957,32 @@ class FormIO implements ArrayAccess
 			$form .= '</div>' . "\n";
 		}
 
-		return $form . "</form>\n";
+		// build preamble section if present
+		$preamble = '';
+		$hasErrors = !$this->delaySubmission && sizeof($this->errors) > 0;
+		if ($hasErrors || isset($this->preamble)) {
+			$preamble .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
+			$preamble .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
+			$preamble .= '</div>' . "\n";
+		}
+
+		$head = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method) . "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
+		$start = $hasHeader ? $firstSection . $this->getFormTabNav() : $this->getFormTabNav() . $firstSection;
+		return $head . $preamble . $start . $form . "</form>\n";
+	}
+
+	private function getFormTabNav()
+	{
+		if ($this->tabCounter == 1) {
+			return '';
+		}
+		$count = 0;
+		$str = "<ul>\n";
+		while ($count < $this->tabCounter) {
+			$count++;
+			$str .= "<li><a href=\"#{$this->name}_tab{$count}\">Page $count</a></li>\n";
+		}
+		return $str . "</ul>";
 	}
 
 	/**
@@ -1016,7 +1064,7 @@ class FormIO implements ArrayAccess
 				$numInputs			= $this->getMinRequiredRepeaterInputs($fieldName, $extraAttributes['numinputs']);
 				$maxKey				= -1;
 				$errors				= $this->errors[$fieldName];
-				
+
 				if (is_array($value)) {
 					foreach ($value as $subField => $subValue) {		// add currently set vars
 						if ($maxKey < $subField) {
@@ -1044,10 +1092,10 @@ class FormIO implements ArrayAccess
 
 				// Add submit buttons to control row adding / removing for no-JS support
 				$buttonTemplate = FormIO::$builder[FormIO::T_SUBMIT];
-				
+
 				$buttonVars = $this->getBuilderVars(FormIO::T_SUBMIT, $buttonTemplate, $fieldName . "[__add]", "Add another");
 				$controlsString = $this->replaceInputVars($buttonTemplate, $buttonVars) . "\n";
-				
+
 				$buttonVars = $this->getBuilderVars(FormIO::T_SUBMIT, $buttonTemplate, $fieldName . "[__remove]", "Remove last");
 				$controlsString .= $this->replaceInputVars($buttonTemplate, $buttonVars) . "\n";
 
@@ -1491,18 +1539,18 @@ class FormIO implements ArrayAccess
 				unset($data[$key]);
 				return true;
 			}
-			
+
 			foreach ($data[$key] as &$datetime) {
 				$dateOk = preg_match(FormIO::dateRegex, $datetime[0], $dateMatches);
 				$timeOk = preg_match(FormIO::timeRegex, $datetime[1], $timeMatches);
-				
+
 				if (!$dateOk || !$timeOk) {
 					return false;
 				}
 				if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[3]) && $timeMatches[3] > 59)) {
 					return false;
 				}
-	
+
 				$datetime = array(
 								$this->normaliseDate($dateMatches[1], $dateMatches[2], $dateMatches[3]),
 								$this->normaliseTime($timeMatches[1], (isset($timeMatches[3]) ? $timeMatches[3] : 0), (isset($timeMatches[5]) ? $timeMatches[5] : null)),
@@ -1564,7 +1612,7 @@ class FormIO implements ArrayAccess
 		unset($this->data[$key]['__add']);
 		unset($this->data[$key]['__remove']);
 		$numSent = sizeof($this->data[$key]);
-		
+
 		// kill any values not sent
 		foreach ($this->data[$key] as $subKey => $subValue) {
 			if (!$subValue) {

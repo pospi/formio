@@ -59,9 +59,10 @@ form.clean label, form.clean .multiple legend {
 
 form.clean input, form.clean div.readonly {
 	width:70%;
-	line-height:1em;
 	padding:0.15em;
+	line-height:1em;
 }
+form.clean div.readonly { padding-top: 0.25em; }
 
 form.clean input, form.clean textarea, form.clean select {
 	display:block;

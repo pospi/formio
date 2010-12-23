@@ -63,6 +63,8 @@ var FormIO = function(el, options)
 			(t[method])($(this));
 		});
 	});
+
+	this.initTabs();
 };
 
 //==========================================================================
@@ -149,7 +151,7 @@ FormIO.prototype.checkDependencies = function(el)
 	delete depends['__affected'];
 
 	$.each(affected, function(k, elId) {
-		t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + elId)).hide();
+		t.getFieldRowElement($(t.getFieldId(elId))).hide();
 		formModified = true;
 	});
 
@@ -169,7 +171,7 @@ FormIO.prototype.checkDependencies = function(el)
 
 		if (show) {
 			$.each(visible, function(unused, showEl) {
-				var row = t.getFieldRowElement($('#' + t.elements.attr('id') + '_' + showEl));
+				var row = t.getFieldRowElement($(t.getFieldId(showEl)));
 				if (!row.is(':visible')) {
 					row.show();
 					formModified = true;
@@ -196,6 +198,12 @@ FormIO.prototype.inputIsMatching = function(el, value)
 		);
 };
 
+// field ID helper
+FormIO.prototype.getFieldId = function(fldname)
+{
+	return this.elements.attr('id') + '_' + fldname.replace(/\[/g, '_').replace(/\]/g, '');
+};
+
 // input type helpers
 FormIO.prototype.elementIsRadioOrSelect = function(el)
 {
@@ -212,6 +220,12 @@ FormIO.prototype.elementIsTextual = function(el)
 
 //==========================================================================
 //	Initialisation routines.
+
+FormIO.prototype.initTabs = function()
+{
+	this.elements.tabs();
+	$('#' + this.getFieldId('tab0'), this.elements).after($('.ui-tabs-nav', this.elements));
+};
 
 FormIO.prototype.initDateField = function(el)
 {
