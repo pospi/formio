@@ -143,7 +143,7 @@ class FormIO implements ArrayAccess
 		'dateRangeValidator'=> "Dates must be in dd/mm/yyyy format",
 		'timeRangeValidator'=> "Invalid date (dd/mm/yyyy) or time (hh:mm)",
 		'emailValidator'	=> "Invalid email address",
-		'phoneValidator'	=> "Invalid phone number. Phone numbers must contain numbers, spaces and brackets only, and may start with a plus sign.",
+		'phoneValidator'	=> "Invalid phone number. Phone numbers must contain numbers, spaces, dashes and brackets only, and may start with a plus sign.",
 		'urlValidator'		=> "Invalid URL",
 		'currencyValidator'	=> "Enter amount in dollars and cents",
 		'captchaValidator'	=> "The text entered did not match the verification image",
@@ -154,7 +154,7 @@ class FormIO implements ArrayAccess
 	const dateRegex		= '/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s*$/';						// capture: day, month, year
 	const timeRegex		= '/^\s*(\d{1,2})(:(\d{2}))?(:(\d{2}))?\s*$/';							// capture: hr, , min, , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
-	const phoneRegex	= '/^(\+)?(\d|\s|(\(\d+\)))*$/';
+	const phoneRegex	= '/^(\+)?(\d|\s|-|(\(\d+\)))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
 
 	// parameters for T_CAPTCHA. Recommend you set these from your own scripts.
@@ -657,23 +657,24 @@ class FormIO implements ArrayAccess
 	 * Transforms data from internal formats most useful for FormIO into standardised
 	 * formats.. pretty much just date type fields to timestamps, let's be honest.
 	 */
-	private function standardiseData($data, $overrideDataTypeField = null, $includeSubmit = false)
+	private function standardiseData($data, $overrideDataType = null, $includeSubmit = false)
 	{
 		if (is_array($data)) {
 			foreach ($data as $k => $v) {
-				$dataTypeField = !$overrideDataTypeField ? $k : $overrideDataTypeField;
-				if (in_array($this->dataTypes[$dataTypeField], FormIO::$presentational) || (!$includeSubmit && $this->dataTypes[$dataTypeField] == FormIO::T_SUBMIT)) {
+				$dataType = !$overrideDataType ? $this->dataTypes[$k] : $overrideDataType;
+				
+				if (in_array($dataType, FormIO::$presentational) || (!$includeSubmit && $dataType == FormIO::T_SUBMIT)) {
 					unset($data[$k]);
-				} else if ($this->dataTypes[$k] == FormIO::T_DATE) {
+				} else if ($dataType == FormIO::T_DATE) {
 					$data[$k] = FormIO::dateToUnix($v);
-				} else if ($this->dataTypes[$k] == FormIO::T_DATETIME) {
+				} else if ($dataType == FormIO::T_DATETIME) {
 					$data[$k] = FormIO::dateTimeToUnix($v);
-				} else if ($this->dataTypes[$k] == FormIO::T_DATERANGE) {
+				} else if ($dataType == FormIO::T_DATERANGE) {
 					$data[$k] = array(FormIO::dateToUnix($v[0]), FormIO::dateToUnix($v[1]));
-				} else if ($this->dataTypes[$k] == FormIO::T_TIMERANGE) {
+				} else if ($dataType == FormIO::T_TIMERANGE) {
 					$data[$k] = array(FormIO::dateTimeToUnix($v[0]), FormIO::dateTimeToUnix($v[1]));
-				} else if ($this->dataTypes[$k] == FormIO::T_REPEATER) {
-					$data[$k] = $this->standardiseData($data[$k], $k, $includeSubmit);
+				} else if ($dataType == FormIO::T_REPEATER) {
+					$data[$k] = $this->standardiseData($data[$k], $this->dataAttributes[$k]['fieldtype'], $includeSubmit);
 				}
 			}
 		}
@@ -1297,13 +1298,13 @@ class FormIO implements ArrayAccess
 	//		the array from which the data is read (default is $this->data).
 	//		This is useful for eg. repeater fields, which need to recurse.
 
-	private function requiredValidator($key, $overrideData = null) {
+	private function requiredValidator($key, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return isset($data[$key]) && $data[$key] !== '';
 	}
 
 	// @param	array	$requiredKeys	a list of array keys which are required. When omitted, all keys are checked.
-	private function arrayRequiredValidator($key, $requiredKeys = null, $overrideData = null) {
+	private function arrayRequiredValidator($key, $requiredKeys = null, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		if (isset($data[$key]) && is_array($data[$key]) && sizeof($data[$key])) {
 			foreach ($data[$key] as $k => $v) {
@@ -1316,37 +1317,37 @@ class FormIO implements ArrayAccess
 		return false;
 	}
 
-	private function equalValidator($key, $expected, $overrideData = null) {
+	private function equalValidator($key, $expected, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return isset($data[$key]) && $data[$key] == $expected;
 	}
 
-	private function notEqualValidator($key, $unexpected, $overrideData = null) {
+	private function notEqualValidator($key, $unexpected, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return !isset($data[$key]) || $data[$key] != $unexpected;
 	}
 
-	private function minLengthValidator($key, $length, $overrideData = null) {
+	private function minLengthValidator($key, $length, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return strlen($data[$key]) >= $length;
 	}
 
-	private function maxLengthValidator($key, $length, $overrideData = null) {
+	private function maxLengthValidator($key, $length, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return strlen($data[$key]) <= $length;
 	}
 
-	private function inArrayValidator($key, $allowable, $overrideData = null) {
+	private function inArrayValidator($key, $allowable, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return in_array($data[$key], $allowable);
 	}
 
-	private function regexValidator($key, $regex, $overrideData = null) {
+	private function regexValidator($key, $regex, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return preg_match($regex, $data[$key]) > 0;
 	}
 
-	private function dateValidator($key, $overrideData = null) {					// performs date normalisation
+	private function dateValidator($key, &$overrideData = null) {					// performs date normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		preg_match(FormIO::dateRegex, $data[$key], $matches);
 		$success = sizeof($matches) == 4;
@@ -1359,16 +1360,16 @@ class FormIO implements ArrayAccess
 		return $success != false;
 	}
 
-	private function emailValidator($key, $overrideData = null) {
-		return $this->regexValidator($key, FormIO::emailRegex, $overrideData = null);
+	private function emailValidator($key, &$overrideData = null) {
+		return $this->regexValidator($key, FormIO::emailRegex, $overrideData);
 	}
 
-	private function phoneValidator($key, $overrideData = null) {
+	private function phoneValidator($key, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
-		return preg_match('/\d/', $data[$key]) && $this->regexValidator($key, FormIO::phoneRegex, $overrideData = null);
+		return preg_match('/\d/', $data[$key]) && $this->regexValidator($key, FormIO::phoneRegex, $overrideData);
 	}
 
-	private function currencyValidator($key, $overrideData = null) {				// performs currency normalisation
+	private function currencyValidator($key, &$overrideData = null) {				// performs currency normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		preg_match(FormIO::currencyRegex, $data[$key], $matches);
 		$success = sizeof($matches) > 0;
@@ -1378,7 +1379,7 @@ class FormIO implements ArrayAccess
 		return $success != false;
 	}
 
-	private function urlValidator($key, $overrideData = null) {					// allows http, https & ftp *only*. Also performs url normalisation
+	private function urlValidator($key, &$overrideData = null) {					// allows http, https & ftp *only*. Also performs url normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		$data[$key] = $this->normaliseURL($data[$key]);
 
@@ -1392,7 +1393,7 @@ class FormIO implements ArrayAccess
 		return (empty($bits['scheme']) || $bits['scheme'] == 'http' || $bits['scheme'] == 'https' || $bits['scheme'] == 'ftp');
 	}
 
-	private function chpasswdValidator($key, $overrideData = null) {
+	private function chpasswdValidator($key, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 
 		if ((!empty($data[$key][0]) || !empty($data[$key][1])) && ($data[$key][0] != $data[$key][1])) {
@@ -1429,7 +1430,7 @@ class FormIO implements ArrayAccess
 		return $ok;
 	}
 
-	private function dateRangeValidator($key, $overrideData = null) {			// performs date normalisation
+	private function dateRangeValidator($key, &$overrideData = null) {			// performs date normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		if (isset($data[$key]) && is_array($data[$key])) {
 			if ((!empty($data[$key][0]) || !empty($data[$key][1]))
@@ -1458,7 +1459,7 @@ class FormIO implements ArrayAccess
 		return true;		// not set, so validate as OK and let requiredValidator pick it up
 	}
 
-	private function timeRangeValidator($key, $overrideData = null) {			// performs date and time normalisation
+	private function timeRangeValidator($key, &$overrideData = null) {			// performs date and time normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		if (isset($data[$key]) && is_array($data[$key])) {
 			// either both or none must be set
@@ -1492,14 +1493,14 @@ class FormIO implements ArrayAccess
 		return true;		// not set, so validate as OK and let requiredValidator pick it up
 	}
 
-	private function dateTimeValidator($key, $overrideData = null) {			// performs date and time normalisation
+	private function dateTimeValidator($key, &$overrideData = null) {			// performs date and time normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		if (isset($data[$key]) && is_array($data[$key])) {
 			// either both or none must be set
-			if ((empty($data[$key][0][0]) && empty($data[$key][0][1])) ^ (empty($data[$key][1][0]) && empty($data[$key][1][1]))) {
+			if (empty($data[$key][0]) ^ empty($data[$key][1])) {
 				return false;
 			}
-			if (empty($data[$key][0][0])) {		// none set, nothing being sent
+			if (empty($data[$key][0])) {		// none set, nothing being sent
 				$data[$key] = array();
 				return true;
 			}
@@ -1523,7 +1524,7 @@ class FormIO implements ArrayAccess
 		return true;
 	}
 
-	private function fileUploadValidator($key, $overrideData = null) {
+	private function fileUploadValidator($key, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		dump($data[$key]);
 		return true;
@@ -1547,7 +1548,7 @@ class FormIO implements ArrayAccess
 		$validators = $this->getDefaultFieldValidators($fieldType);
 		foreach ($validators as $validatorName => $params) {
 			// Add the $overrideData parameter to each validator call, setting it to our array
-			array_push($params, $this->data[$key]);
+			array_push($params, &$this->data[$key]);
 
 			// Validate each array element in turn
 			foreach ($this->data[$key] as $subKey => $subValue) {
@@ -1580,7 +1581,7 @@ class FormIO implements ArrayAccess
 			$this->delaySubmission = true;
 		}
 
-		return $errors;
+		return !$errors;
 	}
 
 	//==========================================================================
