@@ -94,9 +94,13 @@ class FormIO implements ArrayAccess
 		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_PASSWORDCHANGE => '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label><div class="row"><input type="password" name="{$name}[0]" id="{$id}_0" /><input type="password" name="{$name}[1]" id="{$id}_1" /> (verify)</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date"{$value? value="$value"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DATERANGE	=> '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start"{$value? value="$value"} data-fio-type="date" /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_DATETIME	=> '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_date"{$value? value="$value"} data-fio-type="date" /> at <input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time" class="time" /><select name="{$name}[2]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"} data-fio-type="repeater"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}<div class="pad"></div>{$controls}<p class="hint">{$hint}</p></div>',
+		FormIO::T_TIMERANGE	=> '<div class="row daterange datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label>
+									<span style="white-space: nowrap;"><input type="text" name="{$name}[0][0]" id="{$id}_0_date"{$startdate? value="$startdate"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[0][1]" id="{$id}_0_time"{$starttime? value="$starttime"} data-fio-type="time" class="time" /><select name="{$name}[0][2]" id="{$id}_0_meridian">{$startam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$startpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select></span> -
+									<span style="white-space: nowrap;"><input type="text" name="{$name}[1][0]" id="{$id}_1_date"{$enddate? value="$enddate"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[1][1]" id="{$id}_1_time"{$endtime? value="$endtime"} data-fio-type="time" class="time" /><select name="{$name}[1][2]" id="{$id}_1_meridian">{$endam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$endpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select></span>
+								{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"} data-fio-type="repeater"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}<div class="pad"></div>{$controls}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DROPOPTION=> '<option{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
@@ -137,6 +141,7 @@ class FormIO implements ArrayAccess
 		'dateValidator'		=> "Requires a valid date in dd/mm/yyyy format",
 		'dateTimeValidator'	=> "Requires a valid date (dd/mm/yyyy), time (hh:mm) and time of day",
 		'dateRangeValidator'=> "Dates must be in dd/mm/yyyy format",
+		'timeRangeValidator'=> "Invalid date (dd/mm/yyyy) or time (hh:mm)",
 		'emailValidator'	=> "Invalid email address",
 		'phoneValidator'	=> "Invalid phone number. Phone numbers must contain numbers, spaces and brackets only, and may start with a plus sign.",
 		'urlValidator'		=> "Invalid URL",
@@ -271,9 +276,14 @@ class FormIO implements ArrayAccess
 		  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
 			$this->data[$name] = $type == FormIO::T_DATE ? FormIO::timestampToDate($value) : FormIO::timestampToDateTime($value);
 		}
-		if ( $type == FormIO::T_DATERANGE
-		 && (is_array($value) && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0]))) && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))) ) {
-			$this->data[$name] = array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
+		if ( ($type == FormIO::T_DATERANGE || $type == FormIO::T_TIMERANGE)
+		  && (is_array($value)
+			 && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0])))
+			 && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))
+		  ) ) {
+			$this->data[$name] = $type == FormIO::T_TIMERANGE
+						? array(FormIO::timestampToDateTime($value[0]), FormIO::timestampToDateTime($value[1]))
+						: array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
 		}
 
 		$this->lastAddedField = $name;
@@ -295,6 +305,7 @@ class FormIO implements ArrayAccess
 		foreach ($a as $fieldName) {
 			switch ($this->dataTypes[$fieldName]) {
 				case FormIO::T_DATERANGE:
+				case FormIO::T_TIMERANGE:
 				case FormIO::T_DATETIME:
 				case FormIO::T_REPEATER:
 					$this->addValidator($fieldName, 'arrayRequiredValidator', array(), false);
@@ -385,11 +396,22 @@ class FormIO implements ArrayAccess
 		if (!$msg) {
 			return false;
 		}
-		if (isset($this->errors[$dataKey])) {
+		$subKey = null;
+		if (is_array($dataKey)) {
+			list($dataKey, $subKey) = $dataKey;
+		}
+		if (isset($this->errors[$dataKey]) || $subKey !== null) {
 			if (!is_array($this->errors[$dataKey])) {
 				$this->errors[$dataKey] = array($this->errors[$dataKey]);
 			}
-			$this->errors[$dataKey][] = $msg;
+			if ($subKey !== null) {
+				if (!isset($this->errors[$dataKey][$subKey])) {
+					$this->errors[$dataKey][$subKey] = array();
+				}
+				$this->errors[$dataKey][$subKey][] = $msg;
+			} else {
+				$this->errors[$dataKey][] = $msg;
+			}
 		} else {
 			$this->errors[$dataKey] = $msg;
 		}
@@ -648,6 +670,8 @@ class FormIO implements ArrayAccess
 					$data[$k] = FormIO::dateTimeToUnix($v);
 				} else if ($this->dataTypes[$k] == FormIO::T_DATERANGE) {
 					$data[$k] = array(FormIO::dateToUnix($v[0]), FormIO::dateToUnix($v[1]));
+				} else if ($this->dataTypes[$k] == FormIO::T_TIMERANGE) {
+					$data[$k] = array(FormIO::dateTimeToUnix($v[0]), FormIO::dateTimeToUnix($v[1]));
 				} else if ($this->dataTypes[$k] == FormIO::T_REPEATER) {
 					$data[$k] = $this->standardiseData($data[$k], $k, $includeSubmit);
 				}
@@ -756,6 +780,8 @@ class FormIO implements ArrayAccess
 				return array('dateRangeValidator' => array());
 			case FormIO::T_DATETIME:
 				return array('dateTimeValidator' => array());
+			case FormIO::T_TIMERANGE:
+				return array('timeRangeValidator' => array());
 			case FormIO::T_FILE:
 				return array('fileUploadValidator' => array());
 			case FormIO::T_CAPTCHA:
@@ -920,6 +946,17 @@ class FormIO implements ArrayAccess
 				$inputVars['value']		= $value[0];
 				$inputVars['valueEnd']	= $value[1];
 				break;
+			case FormIO::T_TIMERANGE:
+				unset($inputVars['value']);
+				$inputVars['startdate']	= $value[0][0];
+				$inputVars['enddate']	= $value[1][0];
+				$inputVars['starttime']	= $value[0][1];
+				$inputVars['endtime']	= $value[1][1];
+				$inputVars['startam']	= $value[0][2] != 'pm';
+				$inputVars['endam']		= $value[1][2] != 'pm';
+				$inputVars['startpm']	= $value[0][2] == 'pm';
+				$inputVars['endpm']		= $value[1][2] == 'pm';
+				break;
 			case FormIO::T_DATETIME:
 				$inputVars['value']		= $value[0];
 				$inputVars['valueTime']	= $value[1];
@@ -928,6 +965,11 @@ class FormIO implements ArrayAccess
 				break;
 			case FormIO::T_SECTIONBREAK:
 				$inputVars['id'] = $this->getFieldId("tab" . ++$this->tabCounter);	// override ID with incremented tab counter var
+				break;
+			case FormIO::T_RADIO:
+			case FormIO::T_CHECKOPTION:
+			case FormIO::T_DROPOPTION:
+				$inputVars['id'] = $this->getFieldId("{$fieldName}[{$value}]");
 				break;
 			case FormIO::T_CAPTCHA:
 			case FormIO::T_CAPTCHA2:
@@ -951,13 +993,20 @@ class FormIO implements ArrayAccess
 				$subFieldTemplate	= isset(FormIO::$builder[$subFieldType]) ? FormIO::$builder[$subFieldType] : FormIO::$builder[FormIO::T_TEXT];
 				$numInputs			= $this->getMinRequiredRepeaterInputs($fieldName, $extraAttributes['numinputs']);
 				$maxKey				= -1;
-
+				$errors				= $this->errors[$fieldName];
+				
 				if (is_array($value)) {
 					foreach ($value as $subField => $subValue) {		// add currently set vars
 						if ($maxKey < $subField) {
 							$maxKey = $subField;
 						}
-						$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $fieldName . "[$subField]", $subValue);
+						$extras = array();
+						if (is_array($errors[$subField])) {
+							$extras['error'] = implode("<br />", $errors[$subField]);
+							unset($errors[$subField]);					// mark this error as handled
+						}
+
+						$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $fieldName . "[$subField]", $subValue, $extras);
 						$subFieldsString .= $this->replaceInputVars($subFieldTemplate, $subInputVars) . "\n";
 						$numInputs--;
 					}
@@ -972,21 +1021,20 @@ class FormIO implements ArrayAccess
 				}
 
 				// Add submit buttons to control row adding / removing for no-JS support
-				// :TODO: send this through getBuilderVars()
-				$buttonVars = array(
-					'id'		=> $this->getFieldId($fieldName . "[__add]"),
-					'name'		=> $fieldName . "[__add]",
-					'value'		=> "Add another",
-				);
-				$controlsString = $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
-				$buttonVars['id']	 = $this->getFieldId($fieldName . "[__remove]");
-				$buttonVars['name']  = $fieldName . "[__remove]";
-				$buttonVars['value'] = "Remove last";
-				$controlsString .= $this->replaceInputVars(FormIO::$builder[FormIO::T_SUBMIT], $buttonVars) . "\n";
+				$buttonTemplate = FormIO::$builder[FormIO::T_SUBMIT];
+				
+				$buttonVars = $this->getBuilderVars(FormIO::T_SUBMIT, $buttonTemplate, $fieldName . "[__add]", "Add another");
+				$controlsString = $this->replaceInputVars($buttonTemplate, $buttonVars) . "\n";
+				
+				$buttonVars = $this->getBuilderVars(FormIO::T_SUBMIT, $buttonTemplate, $fieldName . "[__remove]", "Remove last");
+				$controlsString .= $this->replaceInputVars($buttonTemplate, $buttonVars) . "\n";
 
 				// put all this in the 'inputs' variable
 				$inputVars['inputs'] = $subFieldsString;
 				$inputVars['controls'] = $controlsString;
+				if (sizeof($errors)) {
+					$inputVars['error'] = implode("<br />", $errors);	// also add any unhandled errors
+				}
 				break;
 			case FormIO::T_RADIOGROUP:	// these field types contain subelements
 			case FormIO::T_CHECKGROUP:
@@ -1012,26 +1060,23 @@ class FormIO implements ArrayAccess
 				$inputVars['columns'] = isset($extraAttributes['columns']) ? $extraAttributes['columns'] : FormIO::$default_multiinput_columns;
 
 				// Build field sub-elements
-				// :TODO: send this through getBuilderVars()
 				$inputVars['options'] = '';
 				foreach ($extraAttributes['options'] as $optVal => $desc) {
-					$radioVars = array(
-						'id'		=> $this->getFieldId("$fieldName[$optVal]"),
-						'name'		=> $fieldName,
-						'value'		=> $optVal,
-					);
+					$extraSubAttrs = array();
 					if (is_array($desc)) {
-						$radioVars['desc'] = $desc['desc'];
-						if (isset($desc['disabled']))				$radioVars['disabled']	= $desc['disabled'];
-						if (isset($desc['checked']) && !$valueSent)	$radioVars['checked']	= $desc['checked'];
+						$extraSubAttrs['desc'] = $desc['desc'];
+						if (isset($desc['disabled']))				$extraSubAttrs['disabled']	= $desc['disabled'];
+						if (isset($desc['checked']) && !$valueSent)	$extraSubAttrs['checked']	= $desc['checked'];
 					} else {
-						$radioVars['desc'] = $desc;
+						$extraSubAttrs['desc'] = $desc;
 					}
 					// determine whether option should be selected if it hasn't explicitly been set
-					if ($valueSent && $inputVars['value'] == $optVal) {
-						$radioVars['checked'] = true;
+					if ($valueSent && $value == $optVal) {
+						$extraSubAttrs['checked'] = true;
 					}
-					$inputVars['options'] .= $this->replaceInputVars(FormIO::$builder[$subFieldType], $radioVars);
+					$subString = FormIO::$builder[$subFieldType];
+					$radioVars = $this->getBuilderVars($subFieldType, $subString, $fieldName, $optVal, $extraSubAttrs);
+					$inputVars['options'] .= $this->replaceInputVars($subString, $radioVars);
 				}
 				// Unset value, we don't use it for these field types
 				unset($inputVars['value']);
@@ -1413,14 +1458,48 @@ class FormIO implements ArrayAccess
 		return true;		// not set, so validate as OK and let requiredValidator pick it up
 	}
 
+	private function timeRangeValidator($key, $overrideData = null) {			// performs date and time normalisation
+		$overrideData ? $data = &$overrideData : $data = &$this->data;
+		if (isset($data[$key]) && is_array($data[$key])) {
+			// either both or none must be set
+			if ((empty($data[$key][0][0]) && empty($data[$key][0][1])) ^ (empty($data[$key][1][0]) && empty($data[$key][1][1]))) {
+				return false;
+			}
+			if (empty($data[$key][0][0])) {		// none set, nothing being sent
+				unset($data[$key]);
+				return true;
+			}
+			
+			foreach ($data[$key] as &$datetime) {
+				$dateOk = preg_match(FormIO::dateRegex, $datetime[0], $dateMatches);
+				$timeOk = preg_match(FormIO::timeRegex, $datetime[1], $timeMatches);
+				
+				if (!$dateOk || !$timeOk) {
+					return false;
+				}
+				if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[3]) && $timeMatches[3] > 59)) {
+					return false;
+				}
+	
+				$datetime = array(
+								$this->normaliseDate($dateMatches[1], $dateMatches[2], $dateMatches[3]),
+								$this->normaliseTime($timeMatches[1], (isset($timeMatches[3]) ? $timeMatches[3] : 0), (isset($timeMatches[5]) ? $timeMatches[5] : null)),
+								$datetime[2]
+							);
+			}
+			return true;
+		}
+		return true;		// not set, so validate as OK and let requiredValidator pick it up
+	}
+
 	private function dateTimeValidator($key, $overrideData = null) {			// performs date and time normalisation
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		if (isset($data[$key]) && is_array($data[$key])) {
 			// either both or none must be set
-			if (empty($data[$key][0]) ^ empty($data[$key][1])) {
+			if ((empty($data[$key][0][0]) && empty($data[$key][0][1])) ^ (empty($data[$key][1][0]) && empty($data[$key][1][1]))) {
 				return false;
 			}
-			if (empty($data[$key][0])) {		// none set, nothing being sent
+			if (empty($data[$key][0][0])) {		// none set, nothing being sent
 				$data[$key] = array();
 				return true;
 			}
@@ -1464,27 +1543,24 @@ class FormIO implements ArrayAccess
 		unset($this->data[$key]['__remove']);
 		$numSent = sizeof($this->data[$key]);
 
-		foreach ($this->data[$key] as $subId => &$subValue) {
-			if (!$subValue) {
-				unset($this->data[$key][$subId]);
-				continue;
-			}
+		// Run internal validation routines that apply to this field type
+		$validators = $this->getDefaultFieldValidators($fieldType);
+		foreach ($validators as $validatorName => $params) {
+			// Add the $overrideData parameter to each validator call, setting it to our array
+			array_push($params, $this->data[$key]);
 
-			// Run internal validation routines that apply to this field type
-			$validators = $this->getDefaultFieldValidators($fieldType);
-			foreach ($validators as $validatorName => $params) {
-				// Add the $overrideData parameter to each validator call, setting it to our array
-				array_push($params, $this->data[$key]);
-
-				// Validate each array element in turn
-				foreach ($this->data[$key] as $subKey => $unused) {
-					$subParams = $params;
-					array_unshift($subParams, $subKey);
-					$valid = call_user_func_array(array($this, $validatorName), $subParams);
-					if (!$valid) {
-						$this->addError(array($key, $subKey), $this->errorString($func, $params));
-						$errors = true;
-					}
+			// Validate each array element in turn
+			foreach ($this->data[$key] as $subKey => $subValue) {
+				if (!$subValue) {		// delete data if not sent
+					unset($this->data[$key][$subKey]);
+					continue;
+				}
+				$subParams = $params;
+				array_unshift($subParams, $subKey);
+				$valid = call_user_func_array(array($this, $validatorName), $subParams);
+				if (!$valid) {
+					$this->addError(array($key, $subKey), $this->errorString($validatorName, $subParams));
+					$errors = true;
 				}
 			}
 		}

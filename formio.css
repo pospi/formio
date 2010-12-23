@@ -120,10 +120,8 @@ form.clean .multiple legend .required {
 	top: 0.25em;
 }
 
-form.clean .multiple p.hint, form.clean .multiple p.err {
-	padding: 1em 0 0 0;
-	margin-left: 0;
-}
+form.clean .multiple p.hint, form.clean .multiple p.err { padding: 1em 0 0 0; margin-left: 0; }
+form.clean .blck p.hint, form.clean .blck p.err { margin-left: 0; }
 
 /* Type-specific */
 
@@ -144,9 +142,13 @@ form.clean .daterange input, form.clean .datetime input, form.clean .datetime se
 	margin: 0;
 }
 
+form.clean input.date {
+	width: 7em !important;
+}
+
 form.clean input.time {
 	text-align: right;
-	width: 9em;
+	width: 5em !important;
 }
 
 form.clean img.captcha {
