@@ -265,7 +265,11 @@ class FormIO implements ArrayAccess
 	public function addField($name, $displayText, $type, $value = null)
 	{
 		$this->data[$name] = $value;
-		$this->dataAttributes[$name] = array_merge((array)$this->dataAttributes[$name], array('desc' => $displayText));
+		if (isset($this->dataAttributes[$name])) {
+			$this->dataAttributes[$name] = array_merge($this->dataAttributes[$name], array('desc' => $displayText));
+		} else {
+			$this->dataAttributes[$name] = array('desc' => $displayText);
+		}
 		$this->setDataType($name, $type);
 		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
 			$this->dataOptions[$name] = array();
@@ -280,20 +284,22 @@ class FormIO implements ArrayAccess
 		}
 		
 		// now we manipulate / convert any values in the input array by modifying the references
-		foreach ($values as &$value) {
-			// convert timestamp values passed in for date-related fields
-			if ( ($type == FormIO::T_DATE || $type == FormIO::T_DATETIME)
-			  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
-				$value = $type == FormIO::T_DATE ? FormIO::timestampToDate($value) : FormIO::timestampToDateTime($value);
-			}
-			if ( ($type == FormIO::T_DATERANGE || $type == FormIO::T_TIMERANGE)
-			  && (is_array($value)
-				 && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0])))
-				 && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))
-			  ) ) {
-				$value = $type == FormIO::T_TIMERANGE
-							? array(FormIO::timestampToDateTime($value[0]), FormIO::timestampToDateTime($value[1]))
-							: array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
+		if (is_array($values)) {
+			foreach ($values as &$value) {
+				// convert timestamp values passed in for date-related fields
+				if ( ($type == FormIO::T_DATE || $type == FormIO::T_DATETIME)
+				  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
+					$value = $type == FormIO::T_DATE ? FormIO::timestampToDate($value) : FormIO::timestampToDateTime($value);
+				}
+				if ( ($type == FormIO::T_DATERANGE || $type == FormIO::T_TIMERANGE)
+				  && (is_array($value)
+					 && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0])))
+					 && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))
+				  ) ) {
+					$value = $type == FormIO::T_TIMERANGE
+								? array(FormIO::timestampToDateTime($value[0]), FormIO::timestampToDateTime($value[1]))
+								: array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
+				}
 			}
 		}
 
@@ -1048,8 +1054,8 @@ class FormIO implements ArrayAccess
 				// put all this in the 'inputs' variable
 				$inputVars['inputs'] = $subFieldsString;
 				$inputVars['controls'] = $controlsString;
-				if (sizeof($errors)) {
-					$inputVars['error'] = implode("<br />", $errors);	// also add any unhandled errors
+				if (!$this->delaySubmission && sizeof($errors)) {
+					$inputVars['error'] = is_array($errors) ? implode("<br />", $errors) : $errors;	// also add any unhandled errors
 				}
 				break;
 			case FormIO::T_RADIOGROUP:	// these field types contain subelements
@@ -1558,19 +1564,23 @@ class FormIO implements ArrayAccess
 		unset($this->data[$key]['__add']);
 		unset($this->data[$key]['__remove']);
 		$numSent = sizeof($this->data[$key]);
+		
+		// kill any values not sent
+		foreach ($this->data[$key] as $subKey => $subValue) {
+			if (!$subValue) {
+				unset($this->data[$key][$subKey]);
+				continue;
+			}
+		}
 
 		// Run internal validation routines that apply to this field type
 		$validators = $this->getDefaultFieldValidators($fieldType);
 		foreach ($validators as $validatorName => $params) {
 			// Add the $overrideData parameter to each validator call, setting it to our array
-			array_push($params, &$this->data[$key]);
+			$params[] = &$this->data[$key];
 
 			// Validate each array element in turn
 			foreach ($this->data[$key] as $subKey => $subValue) {
-				if (!$subValue) {		// delete data if not sent
-					unset($this->data[$key][$subKey]);
-					continue;
-				}
 				$subParams = $params;
 				array_unshift($subParams, $subKey);
 				$valid = call_user_func_array(array($this, $validatorName), $subParams);
