@@ -265,25 +265,36 @@ class FormIO implements ArrayAccess
 	public function addField($name, $displayText, $type, $value = null)
 	{
 		$this->data[$name] = $value;
-		$this->dataAttributes[$name] = array('desc' => $displayText);
+		$this->dataAttributes[$name] = array_merge((array)$this->dataAttributes[$name], array('desc' => $displayText));
 		$this->setDataType($name, $type);
 		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
 			$this->dataOptions[$name] = array();
 		}
-
-		// convert timestamp values passed in for date-related fields
-		if ( ($type == FormIO::T_DATE || $type == FormIO::T_DATETIME)
-		  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
-			$this->data[$name] = $type == FormIO::T_DATE ? FormIO::timestampToDate($value) : FormIO::timestampToDateTime($value);
+		
+		// if this is a repeater, we should handle its data in the correct subfield form. Must have repeater type set first.
+		if ($type == FormIO::T_REPEATER) {
+			$type = $this->dataAttributes[$name]['fieldtype'];
+			$values = &$this->data[$name];
+		} else {
+			$values = array(0 => &$this->data[$name]);
 		}
-		if ( ($type == FormIO::T_DATERANGE || $type == FormIO::T_TIMERANGE)
-		  && (is_array($value)
-			 && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0])))
-			 && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))
-		  ) ) {
-			$this->data[$name] = $type == FormIO::T_TIMERANGE
-						? array(FormIO::timestampToDateTime($value[0]), FormIO::timestampToDateTime($value[1]))
-						: array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
+		
+		// now we manipulate / convert any values in the input array by modifying the references
+		foreach ($values as &$value) {
+			// convert timestamp values passed in for date-related fields
+			if ( ($type == FormIO::T_DATE || $type == FormIO::T_DATETIME)
+			  && (is_int($value) || (is_string($value) && !preg_match('/[^\d]/', $value))) ) {
+				$value = $type == FormIO::T_DATE ? FormIO::timestampToDate($value) : FormIO::timestampToDateTime($value);
+			}
+			if ( ($type == FormIO::T_DATERANGE || $type == FormIO::T_TIMERANGE)
+			  && (is_array($value)
+				 && (is_int($value[0]) || (is_string($value[0]) && !preg_match('/[^\d]/', $value[0])))
+				 && (is_int($value[1]) || (is_string($value[1]) && !preg_match('/[^\d]/', $value[1])))
+			  ) ) {
+				$value = $type == FormIO::T_TIMERANGE
+							? array(FormIO::timestampToDateTime($value[0]), FormIO::timestampToDateTime($value[1]))
+							: array(FormIO::timestampToDate($value[0]), FormIO::timestampToDate($value[1]));
+			}
 		}
 
 		$this->lastAddedField = $name;
@@ -584,15 +595,19 @@ class FormIO implements ArrayAccess
 	 * Simplified function to add a repeater field. Function signature is much the same as
 	 * addField(), only the field type is the type of the field to be repeated.
 	 *
+	 * Repeaters should generally be added via this function, as they require their repeated
+	 * field type to be set before adding. You can still add them via addField() if you call
+	 * setRepeaterType() manually first.
+	 *
 	 * @param	array	$default	an array of default values for this field. At least this many inputs will be drawn.
 	 * @param	int		$numInputs	the minimum total number of inputs to draw. Empty ones will be added until there are at least this many visible.
 	 *
 	 * :CHAINABLE:
 	 */
 	public function addRepeater($name, $description, $repeatedFieldType = FormIO::T_TEXT, $default = array(), $numInputs = null) {
+		$this->setRepeaterType($name, $repeatedFieldType);	// this must be done before adding the field, so that addField() knows what the repeated type is
 		$win = $this->addField($name, $description, FormIO::T_REPEATER, $default);
 		if ($win) {
-			$this->setRepeaterType($repeatedFieldType);
 			if (intval($numInputs) > 0) {
 				$this->addAttribute($name, 'numinputs', intval($numInputs));
 			}
