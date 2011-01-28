@@ -91,9 +91,31 @@ FormIO.prototype.get = function() {
 
 FormIO.prototype.restripeForm = function()
 {
-	// :TODO: account for striper incrementation and resetting by various fieldtypes
+	// account for striper incrementation
+	var skipParts = this.elements.data('fio-stripe');
+	var striperSkips = {};
+	skipParts = unescape(skipParts).split('&');
+	$.each(skipParts, function(i) {
+		var bits = this.split('=');
+		striperSkips[bits[0]] = bits[1];
+	});
+
+	// remove all highlighting first
 	this.elements.find('.row:visible').removeClass('alt');
-	this.elements.find('.row:visible:even').addClass('alt');
+
+	// redo new striping
+	var spin = 1;
+	this.elements.find('.row:visible').each(function(i, row) {
+		if (spin % 2 == 0) {
+			$(row).addClass('alt');
+		}
+		++spin;
+		var fieldName = $(row).find('input[name], select[name]').attr('name');
+		if (typeof striperSkips[fieldName] != 'undefined' && striperSkips[fieldName] > 0) {
+			--spin;
+			striperSkips[fieldName]--;
+		}
+	});
 };
 
 //==========================================================================
@@ -223,7 +245,12 @@ FormIO.prototype.elementIsTextual = function(el)
 
 FormIO.prototype.initTabs = function()
 {
-	this.elements.tabs();
+	var that = this;
+	this.elements.tabs({
+		show: function(evt, ui) {
+			that.restripeForm();
+		}
+	});
 	$('#' + this.getFieldId('tab0'), this.elements).after($('.ui-tabs-nav', this.elements));
 };
 

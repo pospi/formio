@@ -974,7 +974,10 @@ class FormIO implements ArrayAccess
 			$preamble .= '</div>' . "\n";
 		}
 
-		$head = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method) . "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
+		$head = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method)
+				. "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '')
+				. " data-fio-stripe=\"" . http_build_query($this->getRowStriperIncrements()) . "\""
+				. '>' . "\n";
 		$start = $hasHeader ? $firstSection . $this->getFormTabNav() : $this->getFormTabNav() . $firstSection;
 		return $head . $preamble . $start . $form . "</form>\n";
 	}
@@ -1069,6 +1072,23 @@ class FormIO implements ArrayAccess
 			$str .= "<li><a href=\"#{$this->name}_tab{$count}\">Page $count</a></li>\n";
 		}
 		return $str . "</ul>";
+	}
+
+	private function getRowStriperIncrements()
+	{
+		$spacers = array();
+		$lastField = null;
+		foreach ($this->dataTypes as $k => $fieldType) {
+			if ($fieldType == FormIO::T_SPACER) {
+				if (!isset($spacers[$lastField])) {
+					$spacers[$lastField] = 0;
+				}
+				$spacers[$lastField]++;
+			} else {
+				$lastField = $k;
+			}
+		}
+		return $spacers;
 	}
 
 	/**
