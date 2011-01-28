@@ -310,17 +310,23 @@ class FormIO implements ArrayAccess
 		} else {
 			$this->dataAttributes[$name] = array('desc' => $displayText);
 		}
-		$this->setDataType($name, $type);
 		if ($type == FormIO::T_DROPDOWN || $type == FormIO::T_RADIOGROUP || $type == FormIO::T_CHECKGROUP || $type == FormIO::T_SURVEY) {
 			$this->dataOptions[$name] = array();
 		}
 
 		// if this is a repeater, we should handle its data in the correct subfield form. Must have repeater type set first.
+		$subtype = null;
 		if ($type == FormIO::T_REPEATER) {
-			$type = $this->dataAttributes[$name]['fieldtype'];
+			$subtype = $this->dataAttributes[$name]['fieldtype'];
 			$values = &$this->data[$name];
 		} else {
 			$values = array(0 => &$this->data[$name]);
+		}
+		$this->setDataType($name, $type, $subtype);
+		if ($subtype) {
+			// override the rest of the processing to use the subfield's type in the same way that
+			// we dereference the field's values
+			$type = $subtype;
 		}
 
 		// now we manipulate / convert any values in the input array by modifying the references
@@ -817,7 +823,8 @@ class FormIO implements ArrayAccess
 		return $this->addSectionBreak();
 	}
 
-	public function setDataType($k, $type)
+	// Subtype is used by the repeater field to recurse its checks
+	public function setDataType($k, $type, $subtype = null)
 	{
 		$this->dataTypes[$k] = $type;
 
@@ -828,6 +835,15 @@ class FormIO implements ArrayAccess
 		}
 
 		// Do type-specific things
+		$this->handleDataType($type, $subtype);
+	}
+
+	/**
+	 * Handles any particular requirements of adding a certain type of
+	 * field to the form
+	 */
+	private function handleDataType($type, $subtype = null)
+	{
 		switch ($type) {
 			case FormIO::T_FILE:
 				$this->multipart = true;
@@ -836,6 +852,9 @@ class FormIO implements ArrayAccess
 				if ($this->captchaType == 'recaptcha') {
 					$this->method = 'POST';						// force using POST submission for reCAPTCHA
 				}
+				break;
+			case FormIO::T_REPEATER:
+				$this->handleDataType($subtype);
 				break;
 		}
 	}
@@ -1106,6 +1125,7 @@ class FormIO implements ArrayAccess
 				$maxKey				= -1;
 				$errors				= $this->errors[$fieldName];
 
+				// iterate through values and output all currently sent submissions
 				if (is_array($value)) {
 					foreach ($value as $subField => $subValue) {		// add currently set vars
 						if ($maxKey < $subField) {
@@ -1117,15 +1137,27 @@ class FormIO implements ArrayAccess
 							unset($errors[$subField]);					// mark this error as handled
 						}
 
-						$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $fieldName . "[$subField]", $subValue, $extras);
+						$subFieldName = $fieldName . "[$subField]";
+						if ($subFieldType == FormIO::T_FILE) {
+							// we don't array index subfields for file inputs, as they don't support array sending
+							$subFieldName = $fieldName . "_f$subField";
+						}
+
+						$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $subFieldName, $subValue, $extras);
 						$subFieldsString .= $this->replaceInputVars($subFieldTemplate, $subInputVars) . "\n";
 						$numInputs--;
 					}
 				}
 
+				// output any remaining fields required to fill the number requested
 				$subField = $maxKey + 1;				// keep going from the end of current field array
 				while ($numInputs > 0) {				// now add remainder to make up minimum count
-					$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $fieldName . "[$subField]");
+					$subFieldName = $fieldName . "[$subField]";
+					if ($subFieldType == FormIO::T_FILE) {
+						// we don't array index subfields for file inputs, as they don't support array sending
+						$subFieldName = $fieldName . "_$subField";
+					}
+					$subInputVars = $this->getBuilderVars($subFieldType, $subFieldTemplate, $subFieldName);
 					$subFieldsString .= $this->replaceInputVars($subFieldTemplate, $subInputVars) . "\n";
 					$numInputs--;
 					$subField++;
