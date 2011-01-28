@@ -229,7 +229,13 @@ FormIO.prototype.initTabs = function()
 
 FormIO.prototype.initDateField = function(el)
 {
-	el.datepicker({'dateFormat' : 'dd/mm/yy'});
+	el.datepicker({
+		dateFormat:	'dd/mm/yy',
+		beforeShow:	function(dateText, inst) {
+			// clearfix jQueryUI class can prevent the picker from showing in some documents
+			inst.dpDiv.removeClass('ui-helper-hidden-accessible');
+		}
+	});
 };
 
 FormIO.prototype.initAutoCompleteField = function(el)
