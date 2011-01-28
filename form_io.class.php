@@ -87,6 +87,7 @@ class FormIO implements ArrayAccess
 
 		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
+		FormIO::T_FILE		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="file" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$id}"{$maxlen? maxlength="$maxlen"}{$dependencies? data-fio-depends="$dependencies"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />',
@@ -100,7 +101,7 @@ class FormIO implements ArrayAccess
 									<span style="white-space: nowrap;"><input type="text" name="{$name}[0][0]" id="{$id}_0_date"{$startdate? value="$startdate"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[0][1]" id="{$id}_0_time"{$starttime? value="$starttime"} data-fio-type="time" class="time" /><select name="{$name}[0][2]" id="{$id}_0_meridian">{$startam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$startpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select></span> -
 									<span style="white-space: nowrap;"><input type="text" name="{$name}[1][0]" id="{$id}_1_date"{$enddate? value="$enddate"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[1][1]" id="{$id}_1_time"{$endtime? value="$endtime"} data-fio-type="time" class="time" /><select name="{$name}[1][2]" id="{$id}_1_meridian">{$endam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$endpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select></span>
 								{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
-		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"} data-fio-type="repeater"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}<div class="pad"></div>{$controls}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_REPEATER	=> '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"} data-fio-type="repeater"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}<input type="hidden"{$isfiles? name="$isfiles[isfiles]"} value="1" /><div class="pad"></div>{$controls}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_DROPDOWN	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_DROPOPTION=> '<option{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>',
@@ -148,6 +149,13 @@ class FormIO implements ArrayAccess
 		'currencyValidator'	=> "Enter amount in dollars and cents",
 		'captchaValidator'	=> "The text entered did not match the verification image",
 		'chpasswdValidator'	=> "Entered passwords do not match",
+		'fileUploadValidator'					=> "File upload failed",
+		'fileInvalid1'/*UPLOAD_ERR_INI_SIZE*/	=> "File too big (exceeded system size)",
+		'fileInvalid2'/*UPLOAD_ERR_FORM_SIZE*/	=> "File too big (exceeded form size)",
+		'fileInvalid3'/*UPLOAD_ERR_PARTIAL*/	=> "File upload interrupted",
+		'fileInvalid6'/*UPLOAD_ERR_NO_TMP_DIR*/	=> "Could not save file",
+		'fileInvalid7'/*UPLOAD_ERR_CANT_WRITE*/	=> "Could not write file",
+		'fileInvalid8'/*UPLOAD_ERR_EXTENSION*/	=> "Upload prevented by server extension",
 	);
 
 	// misc constants used for validation
@@ -224,34 +232,66 @@ class FormIO implements ArrayAccess
 	/**
 	 * Imports a data map from some other array. This does not erase existing values
 	 * unless the source array overrides those properties.
-	 * Best used when importing variables from $_POST, $_GET etc
+	 * Best used when importing variables from $_POST, $_GET etc.
+	 *
+	 * :NOTE: To import from repeated file inputs, you must send:
+	 *	$assoc = the repeater field's name
+	 *	$isFile = true
 	 *
 	 * @param	array	$assoc			Associative data array to import
 	 * @param	bool	$allowAdditions	if true, we can set values that weren't initially declared on the form
 	 */
-	public function importData($assoc, $allowAdditions = false)
+	public function importData($assoc, $allowAdditions = false, $isPost = false, $isRepeatedFile = false)
 	{
-		if (!is_array($assoc)) {
-			return;
+		if (!is_array($assoc) && !is_string($assoc)) {
+			return false;
 		}
+
+		// file inputs cannot be sent as arrays, and so repeated file inputs must be treated differently.
+		// hacky but best that can be done.
+		if ($isRepeatedFile) {
+			$idx = $assoc . '_';
+			$i = 0;
+			$assoc = array();
+			while (isset($_FILES[$idx.$i])) {
+				$assoc['f' . $i] = $_FILES[$idx.$i];
+				++$i;
+			}
+			return $assoc;
+		}
+
 		if (!$allowAdditions) {
-			foreach ($assoc as $k => $unused) {
+			foreach ($assoc as $k => $val) {
 				if (!array_key_exists($k, $this->data)) {
 					unset($assoc[$k]);
 				}
+
+				// if we are POSTing, and the input variable is a repeated file input, act accordingly.
+				if ($isPost
+				  && $this->dataTypes[$k] == FormIO::T_REPEATER
+				  && $this->dataAttributes[$k]['fieldtype'] == FormIO::T_FILE
+				  && isset($val['isfiles'])) {
+					$assoc[$k] = $this->importData($k, $allowAdditions, false, true);
+				}
 			}
 		}
+		if (empty($assoc)) {
+			return false;
+		}
 		$this->data = array_merge($this->data, $assoc);
+		return true;
 	}
 
 	/**
-	 * An accessor for importData() which imports from $_POST and $_FILES data
+	 * An accessor for importData() which imports from $_POST and $_GET data. Note
+	 * That data from $_FILES is handled differently, and imports based on the presence
+	 * of the same $_POST variables.
 	 */
 	public function takeSubmission()
 	{
-		$this->importData($_GET);
-		$this->importData($_POST);
-		$this->importData($_FILES);
+		$g = $this->importData($_GET);
+		$p = $this->importData($_POST, false, true);
+		return ($g || $p);
 	}
 
 	//==========================================================================
@@ -1058,6 +1098,7 @@ class FormIO implements ArrayAccess
 			case FormIO::T_REPEATER:
 				unset($value['__add']);		// we don't care about these anymore, the validator has updated the numinputs property by now...
 				unset($value['__remove']);
+				unset($value['isfiles']);
 				$subFieldsString	= '';
 				$subFieldType		= $extraAttributes['fieldtype'];
 				$subFieldTemplate	= isset(FormIO::$builder[$subFieldType]) ? FormIO::$builder[$subFieldType] : FormIO::$builder[FormIO::T_TEXT];
@@ -1104,6 +1145,9 @@ class FormIO implements ArrayAccess
 				$inputVars['controls'] = $controlsString;
 				if (!$this->delaySubmission && sizeof($errors)) {
 					$inputVars['error'] = is_array($errors) ? implode("<br />", $errors) : $errors;	// also add any unhandled errors
+				}
+				if ($subFieldType == FormIO::T_FILE) {
+					$inputVars['isfiles'] = $fieldName;		// we pass the fieldname as it's the only thing we need to output in that builder string
 				}
 				break;
 			case FormIO::T_RADIOGROUP:	// these field types contain subelements
@@ -1593,10 +1637,25 @@ class FormIO implements ArrayAccess
 		return true;
 	}
 
-	private function fileUploadValidator($key, &$overrideData = null) {
+	private function fileUploadValidator($key, &$overrideData = null, $parentKey = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
-		dump($data[$key]);
-		return true;
+		$errorKey = $key;
+		if ($parentKey) {
+			$errorKey = array($parentKey, $key);
+		}
+
+		$ok = true;
+		switch ($data[$key]['error']) {
+			case UPLOAD_ERR_INI_SIZE:
+			case UPLOAD_ERR_FORM_SIZE:
+			case UPLOAD_ERR_PARTIAL:
+			case UPLOAD_ERR_NO_TMP_DIR:
+			case UPLOAD_ERR_CANT_WRITE:
+			case UPLOAD_ERR_EXTENSION:
+				$ok = false;
+				$this->addError($errorKey, FormIO::$defaultErrors['fileInvalid' . $data[$key]['error']]);
+		}
+		return $ok;
 	}
 
 	/**
@@ -1611,6 +1670,7 @@ class FormIO implements ArrayAccess
 		$remove = !empty($this->data[$key]['__remove']);
 		unset($this->data[$key]['__add']);
 		unset($this->data[$key]['__remove']);
+		unset($this->data[$key]['isfiles']);
 		$numSent = sizeof($this->data[$key]);
 
 		// kill any values not sent
@@ -1631,6 +1691,12 @@ class FormIO implements ArrayAccess
 			foreach ($this->data[$key] as $subKey => $subValue) {
 				$subParams = $params;
 				array_unshift($subParams, $subKey);
+
+				// add extra needed parameter for file upload validator to be able to sent errors
+				if ($fieldType == FormIO::T_FILE) {
+					array_push($subParams, $key);
+				}
+
 				$valid = call_user_func_array(array($this, $validatorName), $subParams);
 				if (!$valid) {
 					$this->addError(array($key, $subKey), $this->errorString($validatorName, $subParams));
