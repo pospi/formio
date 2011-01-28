@@ -758,6 +758,11 @@ class FormIO implements ArrayAccess
 		return $this->errors;
 	}
 
+	public function getError($k)
+	{
+		return $this->errors[$k];
+	}
+
 	public function getDataType($k)
 	{
 		return $this->dataTypes[$k];
@@ -942,7 +947,37 @@ class FormIO implements ArrayAccess
 		} else {
 			$firstSection = "<div id=\"{$this->name}_tab{$this->tabCounter}\" class=\"tab header\">\n";
 		}
+		
+		$this->getFieldsHTML($firstSection, $form);
 
+		$form .= "</div>";
+
+		if (isset($this->suffix)) {
+			$form .= '<div class="suffix">' . "\n" . (isset($this->suffix) ? $this->suffix : '') . "\n";
+			$form .= '</div>' . "\n";
+		}
+
+		// build preamble section if present
+		$preamble = '';
+		$hasErrors = !$this->delaySubmission && sizeof($this->errors) > 0;
+		if ($hasErrors || isset($this->preamble)) {
+			$preamble .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
+			$preamble .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
+			$preamble .= '</div>' . "\n";
+		}
+
+		$head = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method) . "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
+		$start = $hasHeader ? $firstSection . $this->getFormTabNav() : $this->getFormTabNav() . $firstSection;
+		return $head . $preamble . $start . $form . "</form>\n";
+	}
+	
+	/**
+	 * Parameters are strings to append fields to if one requires the first section of
+	 * the form to be separated. Otherwise, just use the return value and implode() it!
+	 */
+	public function getFieldsHTML(&$firstSection = null, &$form = null)
+	{
+		$html = array();
 		$spin = 1;
 		foreach ($this->data as $k => $value) {
 			$fieldType = isset($this->dataTypes[$k]) ? $this->dataTypes[$k] : FormIO::T_RAW;
@@ -1002,32 +1037,16 @@ class FormIO implements ArrayAccess
 			$inputVars = $this->getBuilderVars($fieldType, $builderString, $k, $value, $extraWildcards);
 
 			$inputStr = $this->replaceInputVars($builderString, $inputVars) . "\n";
+			
 			if ($this->tabCounter == 0) {
 				$firstSection .= $inputStr;
 			} else {
 				$form .= $inputStr;
 			}
+			$html[] = $inputStr;
 		}
-
-		$form .= "</div>";
-
-		if (isset($this->suffix)) {
-			$form .= '<div class="suffix">' . "\n" . (isset($this->suffix) ? $this->suffix : '') . "\n";
-			$form .= '</div>' . "\n";
-		}
-
-		// build preamble section if present
-		$preamble = '';
-		$hasErrors = !$this->delaySubmission && sizeof($this->errors) > 0;
-		if ($hasErrors || isset($this->preamble)) {
-			$preamble .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
-			$preamble .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
-			$preamble .= '</div>' . "\n";
-		}
-
-		$head = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method) . "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '') . '>' . "\n";
-		$start = $hasHeader ? $firstSection . $this->getFormTabNav() : $this->getFormTabNav() . $firstSection;
-		return $head . $preamble . $start . $form . "</form>\n";
+		
+		return $html;
 	}
 
 	private function getFormTabNav()
