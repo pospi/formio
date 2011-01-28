@@ -215,6 +215,10 @@ class FormIO implements ArrayAccess
 	private $dataOptions = array();			// input options for checkbox, radio, dropdown etc types
 	private $dataAttributes = array();		// any extra attributes to add to HTML output - maxlen, classes, desc
 
+	// state variables
+	public $submitted	= false;
+	public $valid		= false;
+
 	//==========================================================================
 	//	Important stuff
 
@@ -279,6 +283,9 @@ class FormIO implements ArrayAccess
 			return false;
 		}
 		$this->data = array_merge($this->data, $assoc);
+
+		$this->submitted = true;
+		$this->valid = true;		// assume validity until a validator or some user function adds an error
 		return true;
 	}
 
@@ -478,6 +485,7 @@ class FormIO implements ArrayAccess
 		} else {
 			$this->errors[$dataKey] = $msg;
 		}
+		$this->valid = false;
 		return true;
 	}
 
@@ -947,7 +955,7 @@ class FormIO implements ArrayAccess
 		} else {
 			$firstSection = "<div id=\"{$this->name}_tab{$this->tabCounter}\" class=\"tab header\">\n";
 		}
-		
+
 		$this->getFieldsHTML($firstSection, $form);
 
 		$form .= "</div>";
@@ -970,7 +978,7 @@ class FormIO implements ArrayAccess
 		$start = $hasHeader ? $firstSection . $this->getFormTabNav() : $this->getFormTabNav() . $firstSection;
 		return $head . $preamble . $start . $form . "</form>\n";
 	}
-	
+
 	/**
 	 * Parameters are strings to append fields to if one requires the first section of
 	 * the form to be separated. Otherwise, just use the return value and implode() it!
@@ -1037,7 +1045,7 @@ class FormIO implements ArrayAccess
 			$inputVars = $this->getBuilderVars($fieldType, $builderString, $k, $value, $extraWildcards);
 
 			$inputStr = $this->replaceInputVars($builderString, $inputVars) . "\n";
-			
+
 			if ($this->tabCounter == 0) {
 				$firstSection .= $inputStr;
 			} else {
@@ -1045,7 +1053,7 @@ class FormIO implements ArrayAccess
 			}
 			$html[] = $inputStr;
 		}
-		
+
 		return $html;
 	}
 
@@ -1769,6 +1777,7 @@ class FormIO implements ArrayAccess
 				$this->dataAttributes[$key]['numinputs'] = $this->getMinRequiredRepeaterInputs($key, $numSent + 1);
 			}
 			$this->delaySubmission = true;
+			$this->submitted = false;
 		}
 
 		return !$errors;
