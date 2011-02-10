@@ -31,7 +31,7 @@ $.fn.formio = function(func) {
 	};
 
 	// Run the appropriate behaviour
-    if (func !== undefined && typeof myForm[func] == 'function') {
+    if (func != undefined && myForm != undefined && typeof myForm[func] == 'function') {
       return myForm[func].apply( myForm, Array.prototype.slice.call( arguments, 1 ));
     } else if (typeof func === 'object' || !func ) {
       init.apply( t, arguments );
@@ -245,6 +245,9 @@ FormIO.prototype.elementIsTextual = function(el)
 
 FormIO.prototype.initTabs = function()
 {
+	if (this.elements.find('.tab').length < 2) {
+		return;
+	}
 	var that = this;
 	this.elements.tabs({
 		show: function(evt, ui) {
