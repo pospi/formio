@@ -687,12 +687,13 @@ class FormIO implements ArrayAccess
 	 * Note that this method doesn't allow you to choose a submit name, since it is most often not important.
 	 * If you wish to do this, call addField() directly.
 	 */
-	public function addSubmitButton($text = 'Submit') {
-		return $this->addField('btn' . $this->autoNameCounter++, '', FormIO::T_SUBMIT, $text);
+	public function addSubmitButton($text = 'Submit', $name = null) {
+		$name = $name ? $name : '_btn' . $this->autoNameCounter++;
+		return $this->addField($name, '', FormIO::T_SUBMIT, $text);
 	}
 
 	public function addResetButton($text = 'Reset') {
-		return $this->addField('__btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
+		return $this->addField('_btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
 	}
 
 	public function addButton($text, $javascript, $name = null) {
@@ -723,6 +724,7 @@ class FormIO implements ArrayAccess
 		} else {
 			$data = array($param => $this->data[$param]);
 			$flatten = true;
+			$includeSubmit = true;
 		}
 		$data = $this->standardiseData($data, null, $includeSubmit);
 		return $flatten ? $data[$param] : $data;
