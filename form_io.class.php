@@ -85,7 +85,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_SECTIONBREAK => '</div><div class="tab" id="{$id}">',
 		FormIO::T_IMAGE		=> '<img id="{$id}" src="{$value}" alt="{$desc}" />',
 
-		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_READONLY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}</label><div class="readonly">{$value}</div><input type="hidden" name="{$name}" id="{$id}"{$escapedvalue? value="$escapedvalue"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_FILE		=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="file" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -1118,6 +1118,9 @@ class FormIO implements ArrayAccess
 
 		// set data behaviour for form JavaScript, and any other type-specific attributes
 		switch ($fieldType) {
+			case FormIO::T_READONLY:
+				$inputVars['escapedvalue'] = htmlentities($value);
+				break;
 			case FormIO::T_DATERANGE:
 				$inputVars['value']		= $value[0];
 				$inputVars['valueEnd']	= $value[1];
