@@ -173,7 +173,7 @@ FormIO.prototype.checkDependencies = function(el)
 	delete depends['__affected'];
 
 	$.each(affected, function(k, elId) {
-		t.getFieldRowElement($(t.getFieldId(elId))).hide();
+		t.getFieldRowElement($('#' + t.getFieldId(elId))).hide();
 		formModified = true;
 	});
 
@@ -193,7 +193,7 @@ FormIO.prototype.checkDependencies = function(el)
 
 		if (show) {
 			$.each(visible, function(unused, showEl) {
-				var row = t.getFieldRowElement($(t.getFieldId(showEl)));
+				var row = t.getFieldRowElement($('#' + t.getFieldId(showEl)));
 				if (!row.is(':visible')) {
 					row.show();
 					formModified = true;
