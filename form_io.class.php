@@ -122,7 +122,7 @@ class FormIO implements ArrayAccess
 	// This contains an array of all field types which are presentational only.
 	// Used by FormIO::getData() to filter the returned array
 	private static $presentational = array(
-		FormIO::T_RAW, FormIO::T_HEADER, FormIO::T_SUBHEADER, FormIO::T_PARAGRAPH, FormIO::T_SECTIONBREAK,
+		FormIO::T_RAW, FormIO::T_HEADER, FormIO::T_SUBHEADER, FormIO::T_PARAGRAPH, FormIO::T_SECTIONBREAK, FormIO::T_SPACER,
 		FormIO::T_IMAGE, FormIO::T_INDENT, FormIO::T_OUTDENT, FormIO::T_BUTTON, FormIO::T_RESET, FormIO::T_CAPTCHA, FormIO::T_CAPTCHA2
 	);
 
@@ -228,7 +228,11 @@ class FormIO implements ArrayAccess
 	public function __construct($formName, $method = "GET", $action = null, $multipart = false)
 	{
 		$this->name = $formName;
-		$this->action = $action === null ? $_SERVER['PHP_SELF'] : $action;
+		if ($action === null) {
+			$this->action = $_SERVER['PHP_SELF'] . ($method != "GET" && isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
+		} else {
+			$this->action = $action;
+		}
 		$this->method = $method == "GET" ? "GET" : "POST";
 		$this->multipart = $multipart;
 	}
