@@ -397,11 +397,11 @@ class FormIO implements ArrayAccess
 
 	/**
 	 * Adds a validator to a field.
-	 * When run, validators are passed the following parameters before any extra validation params:
+	 * When run, validators are passed the following parameters:
 	 *	Internal (class method) validators -
-	 *		data key, ...
+	 *		data key, [extra params...]
 	 *	External validators -
-	 *		form object, data key, ...
+	 *		sent value, form object, data key, [extra params...]
 	 *
 	 * @param	string	$k				data key in form data to apply validator to
 	 * @param	string	$validatorName	name of validation function to run
@@ -420,7 +420,7 @@ class FormIO implements ArrayAccess
 			$this->dataValidators[$k] = array();
 		}
 		if ($errorMsg) {
-			$this->customValidatorErrors[$validatorName] == $errorMsg;
+			$this->customValidatorErrors[$validatorName] = $errorMsg;
 		}
 		if (sizeof($params) || $customFunc) {
 			$validatorName = array(
@@ -439,6 +439,9 @@ class FormIO implements ArrayAccess
 	 */
 	public function validateWith($validatorName, $params = array(), $errorMsg = null, $customFunc = true)
 	{
+		if (!is_array($params)) {
+			$params = array($params);
+		}
 		return $this->addValidator($this->lastAddedField, $validatorName, $params, $customFunc, $errorMsg);
 	}
 
@@ -1430,8 +1433,13 @@ class FormIO implements ArrayAccess
 				} else if ($dataSubmitted || (!$externalValidator && $func == 'captchaValidator')) {
 					if ($externalValidator) {
 						array_unshift($params, $this);
+						array_unshift($params, $this->data[$dataKey]);
 					}
 					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
+					if ($externalValidator) {
+						array_shift($params);	// remove our extra parameters again so that we can create error strings
+						array_shift($params);
+					}
 				}
 
 				if (!$valid) {
@@ -1598,9 +1606,10 @@ class FormIO implements ArrayAccess
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 
 		if ((!empty($data[$key][0]) || !empty($data[$key][1])) && ($data[$key][0] != $data[$key][1])) {
+			$data[$key] = null;
 			return false;
 		}
-		$data[$key] = null;
+		$data[$key] = $data[$key][0];
 		return true;
 	}
 
