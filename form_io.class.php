@@ -1443,15 +1443,17 @@ class FormIO implements ArrayAccess
 			if (!isset($func)) {						// array of validators to be performed in sequence - recurse.
 				$valid = $this->handleValidations($validator, $dataKey);
 			} else {
-				// only perform validation if data has been sent, or we are checking a required fieldtype (captcha)
 				if (!$externalValidator && $func == 'requiredValidator') {
 					$valid = $dataSubmitted;
-				} else if ($dataSubmitted || (!$externalValidator && $func == 'captchaValidator')) {
+				} else {
 					if ($externalValidator) {
 						array_unshift($params, $this);
 						array_unshift($params, $this->data[$dataKey]);
 					}
-					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
+					// only perform validation if data has been sent, or we are using an external validator (since we have no idea how this might run)
+					if ($dataSubmitted || $externalValidator) {
+						$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
+					}
 					if ($externalValidator) {
 						array_shift($params);	// remove our extra parameters again so that we can create error strings
 						array_shift($params);
