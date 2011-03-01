@@ -229,7 +229,7 @@ class FormIO implements ArrayAccess
 	{
 		$this->name = $formName;
 		if ($action === null) {
-			$this->action = $_SERVER['PHP_SELF'] . ($method != "GET" && isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
+			$this->action = $_SERVER['PHP_SELF'] . ($method != "GET" && !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
 		} else {
 			$this->action = $action;
 		}
@@ -314,9 +314,7 @@ class FormIO implements ArrayAccess
 	 */
 	public function takeSubmission()
 	{
-		$g = $this->importData($_GET);
-		$p = $this->importData($_POST, false, true);
-		return ($g || $p);
+		return $this->method == 'GET' ? $this->importData($_GET) : $this->importData($_POST, false, true);
 	}
 
 	//==========================================================================
