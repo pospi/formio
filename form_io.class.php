@@ -91,7 +91,7 @@ class FormIO implements ArrayAccess
 		FormIO::T_PASSWORD	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="password" name="{$name}" id="{$id}" />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_BIGTEXT	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><textarea name="{$name}" id="{$id}"{$maxlen? maxlength="$maxlen"}{$dependencies? data-fio-depends="$dependencies"}>{$value}</textarea>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_HIDDEN	=> '<input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />',
-		FormIO::T_CHECKBOX	=> '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label>&nbsp;{$required? <span class="required">*</span>}</label><label class="checkbox"><input type="checkbox" name="{$name}" id="{$id}"{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} />{$desc}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
+		FormIO::T_CHECKBOX	=> '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label>&nbsp;{$required? <span class="required">*</span>}</label><label class="checkbox"><input type="checkbox" name="{$name}" id="{$id}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} /><input type="hidden" name="{$name}__sent" id="{$id}__sent" value="1" />{$desc}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CURRENCY	=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><span class="currency"><span>$</span><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} /></span>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 
 		FormIO::T_PASSWORDCHANGE => '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"><label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label><div class="row"><input type="password" name="{$name}[0]" id="{$id}_0" /><input type="password" name="{$name}[1]" id="{$id}_1" /> (verify)</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
@@ -267,7 +267,21 @@ class FormIO implements ArrayAccess
 			}
 			return $assoc;
 		}
-
+		
+		// any checkbox fields found should have their values set to FALSE before beginning, since
+		// no POST will be present for them. We may as well normalise truthy values too while we're here
+		foreach ($this->dataTypes as $key => $type) {
+			if ($type == FormIO::T_CHECKBOX) {
+				$this->data[$key] = $this->normaliseCheckbox($this->data[$key]);
+				if (isset($assoc[$key])) {
+					$assoc[$key] = $this->normaliseCheckbox($assoc[$key]);
+				} else if (isset($assoc[$key . '__sent'])) {				// use the hidden field to check whether it was sent with this array
+					$assoc[$key] = false;
+				}
+			}
+		}
+		
+		// now we add the new data
 		if (!$allowAdditions) {
 			foreach ($assoc as $k => $val) {
 				if (!array_key_exists($k, $this->data)) {
@@ -511,7 +525,7 @@ class FormIO implements ArrayAccess
 	{
 		$this->dataOptions[$k][$optionVal] = $optionText;
 		if ($dependentField !== null) {
-			if (($optionVal === true || $optionVal === false) && $this->dataTypes[$k] == FormIO::T_CHECKBOX) {
+			if (($optionVal === true || $optionVal === false) && $this->dataTypes[$k] == FormIO::T_CHECKGROUP) {
 				$optionVal = 1;		// allow passing true/false for checkbox field status'
 			}
 			$this->addFieldDependency($k, $optionVal, $dependentField);
@@ -1127,6 +1141,10 @@ class FormIO implements ArrayAccess
 
 		// set data behaviour for form JavaScript, and any other type-specific attributes
 		switch ($fieldType) {
+			case FormIO::T_CHECKBOX:
+				$inputVars['checked'] = !!$value;
+				unset($inputVars['value']);
+				break;
 			case FormIO::T_READONLY:
 				$inputVars['escapedvalue'] = htmlentities($value);
 				break;
@@ -1853,6 +1871,10 @@ class FormIO implements ArrayAccess
 			return 'http://' . $str;
 		}
 		return $str;
+	}
+	
+	private function normaliseCheckbox($val) {					// converts to boolean :NOTE: this is done in data import phase rather than validators
+		return $val == 'on' || $val == 'true' || (is_numeric($val) && $val > 0);
 	}
 
 	//==========================================================================
