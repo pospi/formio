@@ -40,6 +40,7 @@ class FormIO implements ArrayAccess
 		const T_CREDITCARD = 9;		// performs MOD10 validation
 		const T_ALPHA	= 10;
 		const T_NUMERIC	= 11;
+		const T_ALPHANUMERIC = 44;
 		const T_CURRENCY = 12;		// rounded to 2 decimal points, allows $
 		const T_DATE	= 13;
 		const T_TIME	= 14;
@@ -139,11 +140,15 @@ class FormIO implements ArrayAccess
 		'maxLengthValidator'=> "Must not be longer than \$2 characters",
 		'inArrayValidator'	=> "Must be one of \$2",
 		'regexValidator'	=> "Incorrect format",
+			// the following are all using the regex validator internally
+			FormIO::T_EMAIL			=> "Invalid email address",
+			FormIO::T_ALPHA			=> "Must contain letters only",
+			FormIO::T_NUMERIC		=> "Must contain numbers only",
+			FormIO::T_ALPHANUMERIC	=> "May contain letters and numbers only",
 		'dateValidator'		=> "Requires a valid date in dd/mm/yyyy format",
 		'dateTimeValidator'	=> "Requires a valid date (dd/mm/yyyy), time (hh:mm) and time of day",
 		'dateRangeValidator'=> "Dates must be in dd/mm/yyyy format",
 		'timeRangeValidator'=> "Invalid date (dd/mm/yyyy) or time (hh:mm)",
-		'emailValidator'	=> "Invalid email address",
 		'phoneValidator'	=> "Invalid phone number. Phone numbers must contain numbers, spaces, dashes and brackets only, and may start with a plus sign.",
 		'urlValidator'		=> "Invalid URL",
 		'currencyValidator'	=> "Enter amount in dollars and cents",
@@ -899,8 +904,14 @@ class FormIO implements ArrayAccess
 	private function getDefaultFieldValidators($fieldType)
 	{
 		switch ($fieldType) {
+			case FormIO::T_ALPHA:
+				return array('regexValidator' => array('/^[A-Za-z]*$/', FormIO::$defaultErrors[FormIO::T_ALPHA]));
+			case FormIO::T_NUMERIC:
+				return array('regexValidator' => array('/^\d*$/', FormIO::$defaultErrors[FormIO::T_NUMERIC]));
+			case FormIO::T_ALPHANUMERIC:
+				return array('regexValidator' => array('/^[A-Za-z0-9]*$/', FormIO::$defaultErrors[FormIO::T_ALPHANUMERIC]));
 			case FormIO::T_EMAIL:
-				return array('emailValidator' => array());
+				return array('regexValidator' => array(FormIO::emailRegex, FormIO::$defaultErrors[FormIO::T_EMAIL]));
 			case FormIO::T_PHONE:
 				return array('phoneValidator' => array());
 			case FormIO::T_CURRENCY:
@@ -1477,10 +1488,12 @@ class FormIO implements ArrayAccess
 	// not a requried fix yet as I really cant see a validator needing that many parameters passed
 	private function errorString($callbackName, $params)
 	{
-		if (isset(FormIO::$defaultErrors[$callbackName])) {		// only the internal validators have an entry set in $defaultErrors
+		if ($callbackName == 'regexValidator') {						// regex validator works differently - error to set is passed in
+			$str = $params[2];
+		} else if (isset(FormIO::$defaultErrors[$callbackName])) {		// only the internal validators have an entry set in $defaultErrors
 			$str = FormIO::$defaultErrors[$callbackName];
 		} else if (isset($this->customValidatorErrors[$callbackName])) {
-			$str = $this->customValidatorErrors[$callbackName];	// external validators can attempt to get theirs from the customValidatorErrors array
+			$str = $this->customValidatorErrors[$callbackName];			// external validators can attempt to get theirs from the customValidatorErrors array
 		} else {
 			return null;
 		}
@@ -1569,7 +1582,9 @@ class FormIO implements ArrayAccess
 		return in_array($data[$key], $allowable);
 	}
 
-	private function regexValidator($key, $regex, &$overrideData = null) {
+	// Regex validator is passed $errorMsg - although this does nothing within this function,
+	// it is used by errorString() as the error for this particular field type
+	private function regexValidator($key, $regex, $errorMsg = null, &$overrideData = null) {
 		$overrideData ? $data = &$overrideData : $data = &$this->data;
 		return preg_match($regex, $data[$key]) > 0;
 	}
@@ -1585,10 +1600,6 @@ class FormIO implements ArrayAccess
 			$data[$key] = $this->normaliseDate($matches[1], $matches[2], $matches[3]);
 		}
 		return $success != false;
-	}
-
-	private function emailValidator($key, &$overrideData = null) {
-		return $this->regexValidator($key, FormIO::emailRegex, $overrideData);
 	}
 
 	private function phoneValidator($key, &$overrideData = null) {
