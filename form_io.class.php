@@ -165,7 +165,7 @@ class FormIO implements ArrayAccess
 
 	// misc constants used for validation
 	const dateRegex		= '/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s*$/';						// capture: day, month, year
-	const timeRegex		= '/^\s*(\d{1,2})(:(\d{2}))?(:(\d{2}))?\s*$/';							// capture: hr, , min, , sec
+	const timeRegex		= '/^\s*(\d{1,2})(:|\.(\d{2}))?(:|\.(\d{2}))?\s*$/';							// capture: hr, , min, , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|-|(\(\d+\)))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
@@ -272,7 +272,7 @@ class FormIO implements ArrayAccess
 			}
 			return $assoc;
 		}
-		
+
 		// any checkbox fields found should have their values set to FALSE before beginning, since
 		// no POST will be present for them. We may as well normalise truthy values too while we're here
 		foreach ($this->dataTypes as $key => $type) {
@@ -285,7 +285,7 @@ class FormIO implements ArrayAccess
 				}
 			}
 		}
-		
+
 		// now we add the new data
 		if (!$allowAdditions) {
 			foreach ($assoc as $k => $val) {
@@ -1883,7 +1883,7 @@ class FormIO implements ArrayAccess
 		}
 		return $str;
 	}
-	
+
 	private function normaliseCheckbox($val) {					// converts to boolean :NOTE: this is done in data import phase rather than validators
 		return $val == 'on' || $val == 'true' || (is_numeric($val) && $val > 0);
 	}

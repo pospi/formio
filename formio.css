@@ -13,6 +13,8 @@ form.clean {
 	line-height: 1.25em;
 	text-align:left;
 	position:relative;
+	background: transparent;
+	border: 0;
 }
 
 form.clean div.row, form.clean fieldset {
@@ -22,7 +24,7 @@ form.clean div.row, form.clean fieldset {
 }
 
 form.clean .alt {
-	background: #D5ECFF;
+	background: #E8F3FF;
 }
 
 form.clean label {
