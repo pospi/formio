@@ -165,7 +165,7 @@ class FormIO implements ArrayAccess
 
 	// misc constants used for validation
 	const dateRegex		= '/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s*$/';						// capture: day, month, year
-	const timeRegex		= '/^\s*(\d{1,2})(:|\.(\d{2}))?(:|\.(\d{2}))?\s*$/';							// capture: hr, , min, , sec
+	const timeRegex		= '/^\s*(\d{1,2})((:|\.)(\d{2}))?((:|\.)(\d{2}))?\s*$/';				// capture: hr, , , min, , , sec
 	const emailRegex	= '/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i';
 	const phoneRegex	= '/^(\+)?(\d|\s|-|(\(\d+\)))*$/';
 	const currencyRegex	= '/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/';									// capture: dollars, , cents
@@ -1717,13 +1717,13 @@ class FormIO implements ArrayAccess
 				if (!$dateOk || !$timeOk) {
 					return false;
 				}
-				if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[3]) && $timeMatches[3] > 59)) {
+				if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[4]) && $timeMatches[4] > 59)) {
 					return false;
 				}
 
 				$datetime = array(
 								$this->normaliseDate($dateMatches[1], $dateMatches[2], $dateMatches[3]),
-								$this->normaliseTime($timeMatches[1], (isset($timeMatches[3]) ? $timeMatches[3] : 0), (isset($timeMatches[5]) ? $timeMatches[5] : null)),
+								$this->normaliseTime($timeMatches[1], (isset($timeMatches[4]) ? $timeMatches[4] : 0), (isset($timeMatches[7]) ? $timeMatches[7] : null)),
 								$datetime[2]
 							);
 			}
@@ -1750,13 +1750,13 @@ class FormIO implements ArrayAccess
 			if (!$dateOk || !$timeOk) {
 				return false;
 			}
-			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[3]) && $timeMatches[3] > 59)) {
+			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[4]) && $timeMatches[4] > 59)) {
 				return false;
 			}
 
 			$data[$key] = array(
 								$this->normaliseDate($dateMatches[1], $dateMatches[2], $dateMatches[3]),
-								$this->normaliseTime($timeMatches[1], (isset($timeMatches[3]) ? $timeMatches[3] : 0), (isset($timeMatches[5]) ? $timeMatches[5] : null)),
+								$this->normaliseTime($timeMatches[1], (isset($timeMatches[4]) ? $timeMatches[4] : 0), (isset($timeMatches[7]) ? $timeMatches[7] : null)),
 								$data[$key][2]
 							);
 		}
