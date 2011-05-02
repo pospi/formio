@@ -1458,6 +1458,9 @@ class FormIO implements ArrayAccess
 			}
 
 			if (!isset($func)) {						// array of validators to be performed in sequence - recurse.
+				// first reorder them so that the external validators are run last - that way,
+				// any data passed to the external validator/s will already have been normalised
+				uasort($validator, array($this, 'sortValidators'));
 				$valid = $this->handleValidations($validator, $dataKey);
 			} else {
 				if (!$externalValidator && $func == 'requiredValidator') {
@@ -1488,6 +1491,21 @@ class FormIO implements ArrayAccess
 		}
 
 		return $allValid;
+	}
+
+	// callback for ordering multiple field validators
+	private function sortValidators($a, $b)
+	{
+		if (is_string($a) && is_string($b)) {
+			return 0;
+		} else if (is_string($a) && is_array($b)) {
+			return -1;
+		} else if (is_array($a) && is_string($b)) {
+			return 1;
+		}
+		$aext = !empty($a['external']);
+		$bext = !empty($b['external']);
+		return $aext && $bext ? 0 : ($aext ? 1 : -1);
 	}
 
 	// :WARNING: will break if more than 10 substitutions are required ($10 will be replaced as $1, etc)
