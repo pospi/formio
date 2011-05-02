@@ -110,7 +110,7 @@ class FormIO implements ArrayAccess
 		// T_RADIOGROUP is used for both radiogroup and checkgroup at present
 		FormIO::T_RADIOGROUP=> '<fieldset id="{$id}" class="row multiple col{$columns}{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}><legend>{$desc}{$required? <span class="required">*</span>}</legend>{$options}{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></fieldset>',
 		FormIO::T_RADIO		=> '<label><input type="radio" name="{$name}"{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
-		FormIO::T_CHECKOPTION=> '<label><input type="checkbox" name="{$name}"{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
+		FormIO::T_CHECKOPTION=> '<label><input type="checkbox" name="{$name}[{$value}]"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>',
 
 		FormIO::T_AUTOCOMPLETE=> '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}"{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
 		FormIO::T_CAPTCHA	=> '<div class="row blck{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><div class="row" id="{$id}">{$captcha}</div>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>',
