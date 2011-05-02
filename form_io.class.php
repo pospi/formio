@@ -332,6 +332,11 @@ class FormIO implements ArrayAccess
 	 */
 	public function addField($name, $displayText, $type, $value = null)
 	{
+		if (isset($this->data[$name])) {
+			trigger_error("Attempted to add new FormIO field, but field name already exists", E_USER_ERROR);
+			return $this;
+		}
+		
 		$this->data[$name] = $value;
 		if (isset($this->dataAttributes[$name])) {
 			$this->dataAttributes[$name] = array_merge($this->dataAttributes[$name], array('desc' => $displayText));
