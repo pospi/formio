@@ -336,7 +336,7 @@ class FormIO implements ArrayAccess
 			trigger_error("Attempted to add new FormIO field, but field name already exists", E_USER_ERROR);
 			return $this;
 		}
-		
+
 		$this->data[$name] = $value;
 		if (isset($this->dataAttributes[$name])) {
 			$this->dataAttributes[$name] = array_merge($this->dataAttributes[$name], array('desc' => $displayText));
@@ -1423,7 +1423,8 @@ class FormIO implements ArrayAccess
 	public function validate()
 	{
 		$this->errors = array();
-		return $this->handleValidations($this->dataValidators);
+		$noDirectErrors = $this->handleValidations($this->dataValidators);
+		return $noDirectErrors ? (sizeof($this->errors) > 0) : false;
 	}
 
 	private function handleValidations($validators, $overrideDataKey = null)
