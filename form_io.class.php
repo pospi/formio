@@ -1424,7 +1424,7 @@ class FormIO implements ArrayAccess
 	{
 		$this->errors = array();
 		$noDirectErrors = $this->handleValidations($this->dataValidators);
-		return $noDirectErrors ? (sizeof($this->errors) > 0) : false;
+		return $noDirectErrors ? !(sizeof($this->errors) > 0) : false;
 	}
 
 	private function handleValidations($validators, $overrideDataKey = null)
