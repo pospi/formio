@@ -1,0 +1,96 @@
+<?php
+/**
+ * :TODO: reorder components when provided in the wrong order
+ */
+
+class FormIOField_Timerange extends FormIOField_DateTime
+{
+	public $buildString = '<div class="row daterange datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label>
+									<span style="white-space: nowrap;"><input type="text" name="{$name}[0][0]" id="{$id}_0_date"{$startdate? value="$startdate"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[0][1]" id="{$id}_0_time"{$starttime? value="$starttime"} data-fio-type="time" class="time" /><select name="{$name}[0][2]" id="{$id}_0_meridian">{$startam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$startpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select></span> -
+									<span style="white-space: nowrap;"><input type="text" name="{$name}[1][0]" id="{$id}_1_date"{$enddate? value="$enddate"} data-fio-type="date" class="date" /> at <input type="text" name="{$name}[1][1]" id="{$id}_1_time"{$endtime? value="$endtime"} data-fio-type="time" class="time" /><select name="{$name}[1][2]" id="{$id}_1_meridian">{$endam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$endpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select></span>
+								{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+
+	public static $VALIDATOR_ERRORS = array(
+		'timeRangeValidator'=> "Invalid date (dd/mm/yyyy) or time (hh:mm)",
+	);
+
+	protected $validators = array(
+		'timeRangeValidator'
+	);
+
+	public function setValue($value)
+	{
+		if (is_array($value) && is_array($value[0])) {
+			$this->value = $value;
+		} else {
+			$this->value = array($this->timestampToDateTime($value[0]), $this->timestampToDateTime($value[1]));
+		}
+	}
+
+	public function getValue()
+	{
+		$val = $this->getRawValue();
+		if ($val === null) {
+			return null;
+		}
+		return array($this->dateTimeToUnix($val[0]), $this->dateTimeToUnix($val[1]));
+	}
+
+	protected function getBuilderVars()
+	{
+		$inputVars = FormIOField_Text::getBuilderVars();
+		unset($inputVars['value']);
+		$inputVars['startdate']	= $this->value[0][0];
+		$inputVars['enddate']	= $this->value[1][0];
+		$inputVars['starttime']	= $this->value[0][1];
+		$inputVars['endtime']	= $this->value[1][1];
+		$inputVars['startam']	= $this->value[0][2] != 'pm';
+		$inputVars['endam']		= $this->value[1][2] != 'pm';
+		$inputVars['startpm']	= $this->value[0][2] == 'pm';
+		$inputVars['endpm']		= $this->value[1][2] == 'pm';
+		return $inputVars;
+	}
+
+	/**
+	 * We should use the arrayRequiredValidator if the field is required
+	 */
+	public function setRequired()
+	{
+		$this->addValidator('arrayRequiredValidator', array(), false);
+	}
+
+	// performs date and time normalisation
+	final protected function timeRangeValidator() {
+		if (isset($this->value) && is_array($this->value)) {
+			// either both or none must be set
+			if ((empty($this->value[0][0]) && empty($this->value[0][1])) ^ (empty($this->value[1][0]) && empty($this->value[1][1]))) {
+				return false;
+			}
+			if (empty($this->value[0][0])) {		// none set, nothing being sent
+				$this->value = null;
+				return true;
+			}
+
+			foreach ($this->value as &$datetime) {
+				$dateOk = preg_match(FormIOField_Date::dateRegex, $datetime[0], $dateMatches);
+				$timeOk = preg_match(FormIOField_Time::timeRegex, $datetime[1], $timeMatches);
+
+				if (!$dateOk || !$timeOk) {
+					return false;
+				}
+				if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[4]) && $timeMatches[4] > 59)) {
+					return false;
+				}
+
+				$datetime = array(
+								$this->normaliseDate($dateMatches[1], $dateMatches[2], $dateMatches[3]),
+								$this->normaliseTime($timeMatches[1], (isset($timeMatches[4]) ? $timeMatches[4] : 0), (isset($timeMatches[7]) ? $timeMatches[7] : null)),
+								$datetime[2]
+							);
+			}
+			return true;
+		}
+		return true;		// not set, so validate as OK and let requiredValidator pick it up
+	}
+}
+?>

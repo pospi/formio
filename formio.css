@@ -211,7 +211,7 @@ form.clean .preamble {
 	border-bottom:0.1em solid #ddd;
 }
 
-form.clean .preamble h2 {
+form.clean .preamble h1 {
 	color:#00889e;
 	font-weight:bold;
 	font-size:1.2em;
