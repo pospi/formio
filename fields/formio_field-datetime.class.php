@@ -102,7 +102,7 @@ class FormIOField_Datetime extends FormIOField_Time
 			if (!$dateOk || !$timeOk) {
 				return false;
 			}
-			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[4]) && $timeMatches[4] > 59)) {
+			if ($dateMatches[1] > 31 || $dateMatches[2] > 12 || $timeMatches[1] > 12 || (isset($timeMatches[4]) && $timeMatches[4] > 59) || (isset($timeMatches[7]) && $timeMatches[7] > 59)) {
 				return false;
 			}
 
