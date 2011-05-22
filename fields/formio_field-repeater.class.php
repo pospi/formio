@@ -149,7 +149,7 @@ class FormIOField_Repeater extends FormIOField_Text
 	 */
 	public function validate()
 	{
-		$errors = parent::validate();
+		$errors = !parent::validate();
 
 		$add = !empty($this->value['__add']);
 		$remove = !empty($this->value['__remove']);
