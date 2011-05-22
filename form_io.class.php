@@ -216,7 +216,7 @@ class FormIO implements ArrayAccess
 
 			// if we are POSTing, and the input variable is a repeated file input, act accordingly.
 			if ($isPost
-			  && is_a($this->fields[$k], 'FormIOField_Repeater')
+			  && $this->fields[$k] instanceof FormIOField_Repeater
 			  && $this->fields[$k]->getAttribute('fieldtype') == FormIO::T_FILE
 			  && isset($val['isfiles'])) {
 				$val = $this->importData($k, false, true);
@@ -396,7 +396,7 @@ class FormIO implements ArrayAccess
 	 */
 	public function addFieldOption($k, $optionVal, $optionText, $dependentField = null)
 	{
-		if (!is_a($this->fields[$k], 'FormIOField_Multiple')) {
+		if (!$this->fields[$k] instanceof FormIOField_Multiple) {
 			trigger_error("Wrong field type for adding field options with field '$k'", E_USER_WARNING);
 		}
 		$this->fields[$k]->setOption($optionVal, $optionText, $dependentField);
@@ -449,7 +449,7 @@ class FormIO implements ArrayAccess
 		}
 		list($k, $url) = $a;
 
-		if (!is_a($this->fields[$k], 'FormIOField_Autocomplete')) {
+		if (!$this->fields[$k] instanceof FormIOField_Autocomplete) {
 			trigger_error("Wrong field type for autocomplete URL with field '$k'", E_USER_WARNING);
 		}
 
@@ -475,7 +475,7 @@ class FormIO implements ArrayAccess
 		}
 		list($k, $fieldType) = $a;
 
-		if (!is_a($this->fields[$k], 'FormIOField_Repeater')) {
+		if (!$this->fields[$k] instanceof FormIOField_Repeater) {
 			trigger_error("Wrong field type for repeater type with field '$k'", E_USER_WARNING);
 		}
 
@@ -497,7 +497,7 @@ class FormIO implements ArrayAccess
 		}
 		list($k, $num) = $a;
 
-		if (!is_a($this->fields[$k], 'FormIOField_Multiple')) {
+		if (!$this->fields[$k] instanceof FormIOField_Multiple) {
 			trigger_error("Wrong field type for option columns with field '$k'", E_USER_WARNING);
 		}
 
@@ -638,7 +638,7 @@ class FormIO implements ArrayAccess
 		if (is_bool($param)) {
 			$includeSubmit = $param;
 			foreach ($this->fields as $name => $field) {
-				if (!$field->isPresentational() && ($includeSubmit || !is_subclass_of($field, 'FormIOField_Submit'))) {
+				if (!$field->isPresentational() && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
 					$data[$name] = $field->getValue();
 				}
 			}
@@ -844,7 +844,7 @@ class FormIO implements ArrayAccess
 		$spacers = array();
 		$lastField = null;
 		foreach ($this->fields as $k => $field) {
-			if (is_a($field, 'FormIOField_Spacer')) {
+			if ($field instanceof FormIOField_Spacer) {
 				if (!isset($spacers[$lastField])) {
 					$spacers[$lastField] = 0;
 				}

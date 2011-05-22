@@ -35,7 +35,7 @@ class FormIOField_Raw
 	 */
 	public function isPresentational()
 	{
-		return !is_subclass_of($this, 'FormIOField_Text') && get_class($this) != 'FormIOField_Text';
+		return !$this instanceof FormIOField_Text;
 	}
 
 	/**

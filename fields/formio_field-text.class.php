@@ -133,7 +133,7 @@ class FormIOField_Text extends FormIOField_Raw
 				}
 				// only perform validation if data has been sent, or we are using an external validator (since we have no idea how this might run)
 				// or if we are validating a CAPTCHA field (since CAPTCHAs are *always* required
-				if ($dataSubmitted || $externalValidator || is_a($this, 'FormIOField_Captcha')) {
+				if ($dataSubmitted || $externalValidator || $this instanceof FormIOField_Captcha) {
 					$valid = call_user_func_array($externalValidator ? $func : array($this, $func), $params);
 				}
 				if ($externalValidator) {
