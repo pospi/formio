@@ -245,7 +245,7 @@ FormIO.prototype.elementIsTextual = function(el)
 
 FormIO.prototype.initTabs = function()
 {
-	if (this.elements.find('.tab').length < 2) {
+	if (this.elements.find('.tab:not(.header):not(.footer)').length < 2) {
 		return;
 	}
 	var that = this;
@@ -254,7 +254,6 @@ FormIO.prototype.initTabs = function()
 			that.restripeForm();
 		}
 	});
-	$('#' + this.getFieldId('tab0'), this.elements).after($('.ui-tabs-nav', this.elements));
 };
 
 FormIO.prototype.initDateField = function(el)

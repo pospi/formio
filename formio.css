@@ -205,23 +205,6 @@ form.clean button:active, form.clean input[type=submit]:active, form.clean input
 
 /* information */
 
-form.clean .preamble {
-	margin-bottom:1em;
-	padding-bottom:0.5em;
-	border-bottom:0.1em solid #ddd;
-}
-
-form.clean .preamble h1 {
-	color:#00889e;
-	font-weight:bold;
-	font-size:1.2em;
-	margin-bottom:1em
-}
-
-form.clean .preamble p {
-	text-align:justify
-}
-
 form.clean .required {
 	color:#ff3838;
 	font-weight:bold;
@@ -231,7 +214,7 @@ form.clean .required {
 	top: -0.5em;
 }
 
-form.clean .err {
+form.clean .err, form.clean .errSummary {
 	color:#DF4545;
 	font-weight:bold;
 }
@@ -246,7 +229,7 @@ form.clean p.hint, form.clean p.err {
 	margin: 0 0 0 25%;
 }
 
-form.clean .preamble .err {
+form.clean .errSummary {
 	margin: 0.5em 0;
 	font-size: 1em;
 }

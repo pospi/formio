@@ -5,13 +5,20 @@
 
 class FormIOField_Sectionbreak extends FormIOField_Fieldsetstart
 {
-	public $buildString = '</div><div class="tab" id="{$id}">';
+	public $buildString = '{$hasPrevious?</div>}<div class="tab{$classes? $classes}" id="{$id}">';
 
-	protected function getBuilderVars()
+	/**
+	 * @param	bool	$fakeSection	if true, do not add this section break to the parent form's sections array
+	 */
+	public function __construct($form, $name, $displayText = '', $defaultValue = null)
 	{
-		$inputVars = parent::getBuilderVars();
-		$inputVars['id'] = $this->getFieldId("tab" . ++$this->form->tabCounter);	// override ID with form's incremented tab counter var
-		return $inputVars;
+		if (empty($displayText)) {
+			$displayText = "Page {$form->tabCounter}";
+		}
+		parent::__construct($form, $name, $displayText, $defaultValue);
+
+		$this->setAttribute('hasPrevious', true);
+		$this->form->sectionAdded($this);
 	}
 }
 ?>

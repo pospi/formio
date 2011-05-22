@@ -115,19 +115,19 @@ class FormIO implements ArrayAccess
 	public	$nextRepeaterFieldType = false;	// this must be flagged prior to adding a repeater with the type (classname substring) of field to repeat
 	private $autoNameCounter;				// used for presentational field types where the field name doesn't matter and we don't want to have to specify it
 	public $delaySubmission = false;		// this is used by fields which post back to the form in fallback mode to prevent validation
-	public $tabCounter;					// used by T_SECTIONBREAK to set field IDs for JavaScript
+	public $tabCounter = 0;					// used by SectionBreak fields to set their names
 
 	// Form stuff
 	public $name;		// unique html ID for this form
 	private $action;
 	private $method;	// GET or POST
 	private $multipart;	// if true, render with enctype="multipart/form-data"
-	private $preamble;	// HTML to output at top of form
-	private $suffix;	// HTML to output at bottom of form
 
 	// Field stuff
 	private $fields = array();
 	private $errors = array();		// data validation errors, filled by call to validate()
+
+	private $sections = array();	// SectionBreak fields are referenced into this array as well, to simplify pulling out tab navigation
 
 	// state variables
 	public $submitted	= false;
@@ -547,8 +547,8 @@ class FormIO implements ArrayAccess
 		return $this->addField('__h' . $this->autoNameCounter++, $text, FormIO::T_SUBHEADER);
 	}
 
-	public function addSectionBreak() {
-		return $this->addField('__s' . $this->autoNameCounter++, '', FormIO::T_SECTIONBREAK);
+	public function addSectionBreak($sectionTitle = null) {
+		return $this->addField("tab" . ++$this->tabCounter, $sectionTitle, FormIO::T_SECTIONBREAK);
 	}
 
 	public function addImage($url, $altText, $name = null) {
@@ -703,16 +703,6 @@ class FormIO implements ArrayAccess
 		$this->action = $url;
 	}
 
-	public function setPreamble($html)
-	{
-		$this->preamble = $html;
-	}
-
-	public function setSuffix($html)
-	{
-		$this->suffix = $html;
-	}
-
 	public function setMethod($gorp)
 	{
 		$this->method = $gorp == 'GET' ? $gorp : 'POST';
@@ -729,16 +719,36 @@ class FormIO implements ArrayAccess
 	 */
 	public function startHeaderSection()
 	{
-		$this->tabCounter = 0;
-		return $this;
+		if (sizeof($this->sections)) {
+			trigger_error("FormIO header section must be the first section added to the form", E_USER_ERROR);
+		}
+		$this->addField("tab" . ++$this->tabCounter, '', FormIO::T_SECTIONBREAK);
+		$this->addAttribute('hasPrevious', false);
+		return $this->addAttribute('classes', 'header');
 	}
 
 	/**
 	 * To end the header, we simply output a section break to start the first tab.
 	 */
-	public function endHeaderSection()
+	public function endHeaderSection($firstSectionName = null)
 	{
-		return $this->addSectionBreak();
+		return $this->addSectionBreak($firstSectionName);
+	}
+
+	/**
+	 * The footer is created by adding a section with the class "footer" - the FormIO
+	 * JavaScript will ignore this section.
+	 */
+	public function startFooterSection()
+	{
+		$this->addField("tab" . ++$this->tabCounter, '', FormIO::T_SECTIONBREAK);
+		return $this->addAttribute('classes', 'footer');
+	}
+
+	// Called by SectionBreak field after creation, to add a reference into $this->sections
+	public function sectionAdded($sectionField)
+	{
+		$this->sections[] = $sectionField;
 	}
 
 	// Removes a validator from a field if it is found to exist. Returns true if one was erased.
@@ -768,72 +778,61 @@ class FormIO implements ArrayAccess
 
 	public function getForm()
 	{
-		$form = '';
+		// build error string, if present
+		$errorStr = !$this->delaySubmission && sizeof($this->errors) > 0
+						? "<p class=\"errSummary\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n"
+						: '';
 
-		$firstSection = '';
-		$hasHeader = isset($this->tabCounter);
-		if (!$hasHeader) {
-			// default behaviour is to skip the first tab (0), which is used as the form's header section if present
-			$this->tabCounter = 1;
-			$form .= "<div id=\"{$this->name}_tab{$this->tabCounter}\" class=\"tab\">\n";
-		} else {
-			$firstSection = "<div id=\"{$this->name}_tab{$this->tabCounter}\" class=\"tab header\">\n";
+		$form = $this->getFieldsHTML($errorStr);
+
+		if (sizeof($this->sections)) {
+			$form .= "</div>";
 		}
 
-		$this->getFieldsHTML($firstSection, $form);
-
-		$form .= "</div>";
-
-		if (isset($this->suffix)) {
-			$form .= '<div class="suffix">' . "\n" . (isset($this->suffix) ? $this->suffix : '') . "\n";
-			$form .= '</div>' . "\n";
-		}
-
-		// build preamble section if present
-		$preamble = '';
-		$hasErrors = !$this->delaySubmission && sizeof($this->errors) > 0;
-		if ($hasErrors || isset($this->preamble)) {
-			$preamble .= '<div class="preamble">' . "\n" . (isset($this->preamble) ? $this->preamble : '') . "\n";
-			$preamble .= $hasErrors ? "<p class=\"err\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n" : '';
-			$preamble .= '</div>' . "\n";
-		}
-
-		$head = "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method)
+		return "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method)
 				. "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '')
 				. " data-fio-stripe=\"" . http_build_query($this->getRowStriperIncrements()) . "\""
-				. '>' . "\n";
-		$start = $hasHeader ? $firstSection . $this->getFormTabNav() : $this->getFormTabNav() . $firstSection;
-		return $head . $preamble . $start . $form . "</form>\n";
+				. '>' . "\n" . $form . "</form>\n";
 	}
 
-	/**
-	 * Parameters are strings to append fields to if one requires the first section of
-	 * the form to be separated. Otherwise, just use the return value and implode() it!
-	 */
-	public function getFieldsHTML(&$firstSection = null, &$form = null)
+	public function getFieldsHTML($statusMessage)
 	{
+		$hasHeader = isset($this->sections[0]) && $this->sections[0]->getAttribute('classes') == 'header';
+		$foundFirstSection = false;
 		$spin = 1;
-		foreach ($this->fields as $k => $field) {
-			$inputStr = $field->getHTML($spin) . "\n";
 
-			if ($this->tabCounter == 0) {
-				$firstSection .= $inputStr;
-			} else {
-				$form .= $inputStr;
+		$string = $hasHeader ? '' : $statusMessage . $this->getFormTabNav();
+
+		foreach ($this->fields as $k => $field) {
+			if ($hasHeader && !$foundFirstSection && $field instanceof FormIOField_Sectionbreak && $field != $this->sections[0]) {
+				$string .= $statusMessage . $this->getFormTabNav();
+				$foundFirstSection = true;
 			}
+			$string .= $field->getHTML($spin) . "\n";
 		}
+
+		// form has no sections except a header, so treat it as if there's just 1 section
+		if ($hasHeader && !$foundFirstSection) {
+			$string = $statusMessage . $this->getFormTabNav() . $string;
+		}
+
+		return $string;
 	}
 
 	private function getFormTabNav()
 	{
-		if ($this->tabCounter == 1) {
+		$numSections = sizeof($this->sections);
+		if (!$numSections || ($numSections == 1 && $this->sections[0] === null)) {
 			return '';
 		}
-		$count = 0;
+
 		$str = "<ul>\n";
-		while ($count < $this->tabCounter) {
-			$count++;
-			$str .= "<li><a href=\"#{$this->name}_tab{$count}\">Page $count</a></li>\n";
+		foreach ($this->sections as $section) {
+			$class = $section->getAttribute('classes');
+			if ($class == 'footer' || $class == 'header') {
+				continue;
+			}
+			$str .= "<li><a href=\"#{$section->getFieldId()}\">{$section->getAttribute('desc')}</a></li>\n";
 		}
 		return $str . "</ul>";
 	}
