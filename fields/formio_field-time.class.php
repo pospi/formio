@@ -80,7 +80,7 @@ class FormIOField_Time extends FormIOField_Date
 
 	// performs time normalisation
 	final protected function timeValidator() {
-		if (isset($this->value)) {
+		if (is_array($this->value) && !empty($this->value[0])) {
 			if (preg_match(FormIOField_Time::timeRegex, $this->value[0], $matches)) {
 				if ($matches[1] > 12 || (isset($matches[4]) && $matches[4] > 59) || (isset($matches[7]) && $matches[7] > 59)) {
 					return false;
