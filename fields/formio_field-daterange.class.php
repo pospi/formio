@@ -52,10 +52,10 @@ class FormIOField_Daterange extends FormIOField_Date
 
 	// performs date normalisation
 	final protected function dateRangeValidator() {
-		if (isset($this->value) && is_array($this->value) && isset($this->value[0]) && isset($this->value[1])) {
-			if ((!empty($this->value[0]) || !empty($this->value[1]))
-			  && (!preg_match(FormIOField_Date::dateRegex, $this->value[0], $matches1)
-			  || !preg_match(FormIOField_Date::dateRegex, $this->value[1], $matches2))) {
+		if (isset($this->value) && is_array($this->value) && (!empty($this->value[0]) || !empty($this->value[1]))) {
+			$firstOk	= preg_match(FormIOField_Date::dateRegex, $this->value[0], $matches1);
+			$secondOk 	= preg_match(FormIOField_Date::dateRegex, $this->value[1], $matches2);
+			if (!$firstOk || !$secondOk) {
 				return false;
 			}
 
