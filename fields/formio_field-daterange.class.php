@@ -27,7 +27,7 @@ class FormIOField_Daterange extends FormIOField_Date
 	public function getValue()
 	{
 		$val = $this->getRawValue();
-		if ($val === null) {
+		if (!is_array($val) || empty($val[0]) || empty($val[1])) {
 			return null;
 		}
 		return array($this->dateToUnix($val[0]), $this->dateToUnix($val[1]));
