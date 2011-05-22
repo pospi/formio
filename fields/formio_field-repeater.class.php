@@ -36,7 +36,7 @@ class FormIOField_Repeater extends FormIOField_Text
 		foreach ($this->children as $i => $subField) {
 			$values[$i] = $subField->getValue();
 		}
-		return $values;
+		return empty($values) ? null : $values;
 	}
 
 	public function getRawValue()
