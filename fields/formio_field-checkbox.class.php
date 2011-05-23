@@ -9,7 +9,7 @@
 
 class FormIOField_Checkbox extends FormIOField_Text
 {
-	public $buildString = '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label>&nbsp;{$required? <span class="required">*</span>}</label><label class="checkbox"><input type="checkbox" name="{$name}[value]" id="{$id}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} /><input type="hidden" name="{$name}[sent]" value="1" />{$desc}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+	public $buildString = '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label>&nbsp;{$required? <span class="required">*</span>}</label><label class="checkbox"><input type="checkbox" name="{$name}" id="{$id}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"} />{$desc}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
 
 	protected $value = false;		// start with a value of FALSE, since checkboxes aren't sent at all when not checked
 
@@ -18,10 +18,8 @@ class FormIOField_Checkbox extends FormIOField_Text
 	{
 		if (is_bool($val)) {
 			// leave untouched
-		} else if (!is_array($val)) {
-			$val = ($val === 'on' || $val === 'true' || (is_numeric($val) && $val > 0));
 		} else {
-			$val = isset($val['sent']) ? (isset($val['value']) ? true : false) : $this->value;
+			$val = (strtolower($val) === 'on' || strtolower($val) === 'true' || strtolower($val) === 'yes' || (is_numeric($val) && $val > 0));
 		}
 		parent::setValue($val);
 	}
