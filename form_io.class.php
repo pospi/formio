@@ -124,6 +124,7 @@ class FormIO implements ArrayAccess
 	private $multipart;	// if true, render with enctype="multipart/form-data"
 
 	private $statusMessage;		// this allows setting a form message to display at the top of the form. use for notifying of success, etc
+	private $defaultSubmit;		// the default submit action (enter key) MUST be the first submit button on the form. This is echoed out twice (hidden on the first one) for this to work without JS
 
 	// Field stuff
 	private $fields = array();
@@ -593,12 +594,20 @@ class FormIO implements ArrayAccess
 	}
 
 	/**
-	 * Note that this method doesn't allow you to choose a submit name, since it is most often not important.
-	 * If you wish to do this, call addField() directly.
+	 * @param	bool	$defaultAction	The first submit button added to a form becomes the default action of the
+	 *									form when the user presses "enter" in a text field - this prevents repeater
+	 *									postback buttons becoming the default submission action. If this param is
+	 *									true, you can make a later submit button the default enter key handler.
 	 */
-	public function addSubmitButton($text = 'Submit', $name = null) {
+	public function addSubmitButton($text = 'Submit', $name = null, $defaultAction = false) {
 		$name = $name ? $name : '_btn' . $this->autoNameCounter++;
-		return $this->addField($name, '', FormIO::T_SUBMIT, $text);
+		$this->addField($name, '', FormIO::T_SUBMIT, $text);
+
+		if ($defaultAction || !isset($this->defaultSubmit)) {
+			$this->defaultSubmit = $name;
+		}
+
+		return $this;
 	}
 
 	public function addResetButton($text = 'Reset') {
@@ -795,7 +804,18 @@ class FormIO implements ArrayAccess
 			$errorStr = '<p class="status">' . $this->statusMessage . '</p>' . $errorStr;
 		}
 
-		$form = $this->getFieldsHTML($errorStr);
+		// ensure that the default submit button is echoed out first (as a duplicate) so that pressing enter
+		// submits the form properly (and doesnt just send the first repeater's submit button, preventing ACTUAL submission)
+		if ($this->defaultSubmit) {
+			$unusedSpin = 0;
+			$hiddenSubmit = clone $this->fields[$this->defaultSubmit];
+			$hiddenSubmit->setAttribute('styles', 'display: none;');
+			$form = $hiddenSubmit->getHTML($unusedSpin);
+		} else {
+			$form = '';
+		}
+
+		$form .= $this->getFieldsHTML($errorStr);
 
 		if (sizeof($this->sections)) {
 			$form .= "</div>";
