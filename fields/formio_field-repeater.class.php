@@ -18,6 +18,9 @@ class FormIOField_Repeater extends FormIOField_Text
 	public function setValue($values)
 	{
 		$this->value = array();
+		if (empty($values)) {
+			return;
+		}
 		foreach ($values as $i => $val) {
 			if ($i === '__add' || $i === '__remove' || $i === 'isfiles') {	// field controls are stored in $value
 				$this->value[$i] = $val;
