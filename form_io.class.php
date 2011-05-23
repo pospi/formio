@@ -635,43 +635,6 @@ class FormIO implements ArrayAccess
 		return $this->fields[$name];
 	}
 
-	/**
-	 * Retrieves all the form's data, as an array. Non-input field types are filtered from the output.
-	 * You may choose to also retrieve submit button values by passing true to the function.
-	 *
-	 * @param	mixed	$param		- if boolean, return all the form's data with submit button values if true
-	 * 								- if string, return the specific data element converted to externally useful format
-	 */
-	public function getData($param = false)
-	{
-		$data = array();
-
-		if (is_bool($param)) {
-			$includeSubmit = $param;
-			foreach ($this->fields as $name => $field) {
-				if (!$field->isPresentational() && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
-					$data[$name] = $field->getValue();
-				}
-			}
-		} else {
-			$name = $param;
-			$data = array($name => $this->fields[$name]->getValue());
-		}
-
-		return $data;
-	}
-
-	public function getRawData()
-	{
-		$data = array();
-		foreach ($this->fields as $name => $field) {
-			if (!$field->isPresentational()) {
-				$data[$name] = $field->getRawValue();
-			}
-		}
-		return $data;
-	}
-
 	public function getErrors()
 	{
 		return $this->errors;
@@ -780,18 +743,127 @@ class FormIO implements ArrayAccess
 	}
 
 	//==========================================================================
-	//	Rendering
+	//	Data
 
+	/**
+	 * Retrieves all the form's data, as an array. Non-input field types are filtered from the output.
+	 * You may choose to also retrieve submit button values by passing true to the function.
+	 *
+	 * @param	mixed	$param		- if boolean, return all the form's data with submit button values if true
+	 * 								- if string, return the specific data element converted to externally useful format
+	 */
+	public function getData($param = false)
+	{
+		list($includeSubmit, $fieldName) = $this->interpretDataParam($param);
+		return $this->walkData(array('_field', 'getName'), array(), array('_field', 'getValue'), array(), $includeSubmit, $fieldName);
+	}
+
+	/**
+	 * returns a data array of the internal field values as they are handled by FormIO
+	 * @see getData()
+	 */
+	public function getRawData($param = false)
+	{
+		list($includeSubmit, $fieldName) = $this->interpretDataParam($param);
+		return $this->walkData(array('_field', 'getName'), array(), array('_field', 'getRawValue'), array(), $includeSubmit, $fieldName);
+	}
+
+	/**
+	 * returns a data structure representing the form's input as JSON
+	 * @see getData()
+	 */
 	public function getJSON($includeSubmit = false)
 	{
 		//JSONParser::encode
 		return json_encode($this->getData($includeSubmit));
 	}
 
+	/**
+	 * returns a data structure representing the form's input as an HTTP query string
+	 * @see getData()
+	 */
 	public function getQueryString($includeSubmit = false)
 	{
 		return http_build_query($this->getData($includeSubmit));
 	}
+	/**
+	 * Simimlar to getData(), only the form's information is displayed in a format
+	 * suitable to the user. Use this to build your own tables, layouts etc by
+	 * iterating the returned array as $optionDescription => $convertedValue
+	 *
+	 * This function calls FormIOField_Text::getHumanReadableValue() internally.
+	 *
+	 * @param	mixed	$param		- if boolean, return all the form's data with submit button values if true
+	 * 								- if string, return the specific data element converted to externally useful format
+	 */
+	public function getHumanReadableData($param = false)
+	{
+		list($includeSubmit, $fieldName) = $this->interpretDataParam($param);
+		return $this->walkData(array('_field', 'getHumanReadableName'), array(), array('_field', 'getHumanReadableValue'), array(), $includeSubmit, $fieldName);
+	}
+
+	/**
+	 * Walk over the field data with your own callbacks to generate the keys and values of the array returned
+	 *
+	 * The callbacks passed to this function may have the object set to the special string '_field', which will
+	 * cause the methods to be called on the field objects in the loop themselves.
+	 *
+	 * @param	callback	$keyMethod		callback func to call on each field to generate array keys
+	 * @param	array		$keyArgs		arguments to pass to the key method
+	 * @param	callback	$valueMethod	callback func to call on each field to generate array values
+	 * @param	array		$valueArgs		arguments to pass to the value method
+	 * @param	bool		$includeSubmit	whether or not to return submit button data in the results
+	 * @param	string		$fieldName		if given, the returned array only contains this field's data
+	 */
+	public function walkData($keyMethod, $keyArgs, $valueMethod, $valueArgs, $includeSubmit = false, $fieldName = null)
+	{
+		$data = array();
+
+		$fields = $this->fields;
+		if (is_string($fieldName)) {
+			$fields = array($fieldName => $this->fields[$fieldName]);
+		}
+
+		foreach ($fields as $name => $field) {
+			if (!$field->isPresentational() && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
+				if (is_array($keyMethod) && $keyMethod[0] == '_field') {
+					$myKeyMethod = array($field, $keyMethod[1]);
+				} else {
+					$myKeyMethod = $keyMethod;
+				}
+				if (is_array($valueMethod) && $valueMethod[0] == '_field') {
+					$myValueMethod = array($field, $valueMethod[1]);
+				} else {
+					$myValueMethod = $valueMethod;
+				}
+
+				$key = call_user_func_array($myKeyMethod, $keyArgs);
+				$value = call_user_func_array($myValueMethod, $valueArgs);
+
+				$data[$key] = $value;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @return	an array of (whether to include submit button values => field name to retrieve)
+	 */
+	private function interpretDataParam($param)
+	{
+		$fieldName = null;
+		$includeSubmit = false;
+		if (is_bool($param)) {
+			$includeSubmit = $param;
+		} else {
+			$fieldName = $param;
+		}
+		return array($includeSubmit, $fieldName);
+	}
+
+	//==========================================================================
+	//	Rendering
 
 	public function getForm()
 	{

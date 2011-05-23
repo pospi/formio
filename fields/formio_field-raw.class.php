@@ -76,6 +76,11 @@ class FormIOField_Raw
 		$this->attributes[$name] = $value;
 	}
 
+	public function getName()
+	{
+		return $this->name;
+	}
+
 	public function getHumanReadableName()
 	{
 		return isset($this->attributes['desc']) ? $this->attributes['desc'] : $this->name;
