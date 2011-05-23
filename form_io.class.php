@@ -729,6 +729,7 @@ class FormIO implements ArrayAccess
 		if (sizeof($this->sections)) {
 			trigger_error("FormIO header section must be the first section added to the form", E_USER_ERROR);
 		}
+		$this->tabCounter = -1;
 		$this->addField("tab" . ++$this->tabCounter, '', FormIO::T_SECTIONBREAK);
 		$this->addAttribute('hasPrevious', false);
 		return $this->addAttribute('classes', 'header');
