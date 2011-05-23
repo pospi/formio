@@ -123,6 +123,8 @@ class FormIO implements ArrayAccess
 	private $method;	// GET or POST
 	private $multipart;	// if true, render with enctype="multipart/form-data"
 
+	private $statusMessage;		// this allows setting a form message to display at the top of the form. use for notifying of success, etc
+
 	// Field stuff
 	private $fields = array();
 	private $errors = array();		// data validation errors, filled by call to validate()
@@ -713,6 +715,11 @@ class FormIO implements ArrayAccess
 		$this->multipart = (bool)$mult;
 	}
 
+	public function setStatusMessage($msgHTML)
+	{
+		$this->statusMessage = strval($msgHTML);
+	}
+
 	/**
 	 * The header section of a form is the first elements added to it. These will
 	 * always display, independently of other tabs and pagination.
@@ -782,6 +789,10 @@ class FormIO implements ArrayAccess
 		$errorStr = !$this->delaySubmission && sizeof($this->errors) > 0
 						? "<p class=\"errSummary\">Please review your submission: " . sizeof($this->errors) . " fields have errors.</p>\n"
 						: '';
+		// add any form status messages that have been set
+		if ($this->statusMessage) {
+			$errorStr = '<p class="status">' . $this->statusMessage . '</p>' . $errorStr;
+		}
 
 		$form = $this->getFieldsHTML($errorStr);
 

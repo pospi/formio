@@ -205,6 +205,11 @@ form.clean button:active, form.clean input[type=submit]:active, form.clean input
 
 /* information */
 
+form.clean .status {
+	margin-bottom:1em;
+	text-align: justify;
+}
+
 form.clean .required {
 	color:#ff3838;
 	font-weight:bold;
