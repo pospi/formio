@@ -22,7 +22,7 @@ class FormIOField_Postcode extends FormIOField_Text
 	}
 
 	final protected function AUPostCodeValidator() {
-		return strlen($this->value) == 4 && intval($this->value) < 10000;
+		return strlen($this->value) == 4 && is_numeric($this->value) && intval($this->value) < 10000;
 	}
 }
 ?>
