@@ -185,5 +185,11 @@ class FormIOField_Raw
 	 */
 	public function handleCreation($parentForm)
 	{}
+
+	// an opportunity to reset the field to a state suitable for accepting user input
+	// this is usually a case of removing any default values the field's type may have set
+	// (checkboxes, submit buttons etc)
+	public function prepareForSubmission()
+	{}
 }
 ?>

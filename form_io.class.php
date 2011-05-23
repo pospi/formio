@@ -210,8 +210,6 @@ class FormIO implements ArrayAccess
 			return $assoc;
 		}
 
-		$unhandledFields = $this->fields;		// reference the fields array so we can remove the processed ones
-
 		// now we add the new data
 		foreach ($assoc as $k => $val) {
 			if (!array_key_exists($k, $this->fields)) {
@@ -227,16 +225,8 @@ class FormIO implements ArrayAccess
 				$val = $this->importData($k, false, true);
 			}
 
+			$this->fields[$k]->prepareForSubmission();		// resets the field's value to a state ready to accept user input
 			$this->fields[$k]->setValue($val);
-
-			unset($unhandledFields[$k]);		// remove the processed field from the list
-		}
-
-		// go through all unsent fields and kill unsent submit button values and checkbox values
-		foreach ($unhandledFields as $name => $field) {
-			if ($field instanceof FormIOField_Submit || $field instanceof FormIOField_Checkbox) {
-				$field->setValue(null);
-			}
 		}
 
 		$this->submitted = true;
@@ -836,7 +826,7 @@ class FormIO implements ArrayAccess
 		}
 
 		foreach ($fields as $name => $field) {
-			if (!$field->isPresentational() && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
+			if (!$field->isPresentational() && !$field->excludeFromData && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
 				if (is_array($keyMethod) && $keyMethod[0] == '_field') {
 					$myKeyMethod = array($field, $keyMethod[1]);
 				} else {
