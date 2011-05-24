@@ -535,7 +535,7 @@ class FormIO implements ArrayAccess
 	// simplified mutators for adding various non-field types. All are chainable.
 
 	public function addHiddenField($name, $value) {
-		return $this->addField($name, '', FormIO::T_HIDDEN, $value);
+		return $this->addField($name, null, FormIO::T_HIDDEN, $value);
 	}
 
 	public function startFieldset($title) {
@@ -543,7 +543,7 @@ class FormIO implements ArrayAccess
 	}
 
 	public function endFieldset() {
-		return $this->addField('__fs' . $this->autoNameCounter++, '', FormIO::T_OUTDENT);
+		return $this->addField('__fs' . $this->autoNameCounter++, null, FormIO::T_OUTDENT);
 	}
 
 	public function addParagraph($html) {
@@ -596,7 +596,7 @@ class FormIO implements ArrayAccess
 	// Incrementing the striper adds a spacer element internally. The last added field is not advanced.
 	public function incrementStriper() {
 		$lastField = $this->lastAddedField;
-		$this->addField('__n' . $this->autoNameCounter++, '', FormIO::T_SPACER);
+		$this->addField('__n' . $this->autoNameCounter++, null, FormIO::T_SPACER);
 		$this->lastAddedField = $lastField;
 		return $this;
 	}
@@ -619,14 +619,14 @@ class FormIO implements ArrayAccess
 	}
 
 	public function addResetButton($text = 'Reset') {
-		return $this->addField('_btn' . $this->autoNameCounter++, '', FormIO::T_RESET, $text);
+		return $this->addField('_btn' . $this->autoNameCounter++, null, FormIO::T_RESET, $text);
 	}
 
 	public function addButton($text, $javascript, $name = null) {
 		if (!$name) {
 			$name = '__btn' . $this->autoNameCounter++;
 		}
-		return $this->addField($name, '', FormIO::T_BUTTON, $text)
+		return $this->addField($name, null, FormIO::T_BUTTON, $text)
 					->addAttribute($name, 'js', $javascript);
 	}
 
@@ -710,7 +710,7 @@ class FormIO implements ArrayAccess
 			trigger_error("FormIO header section must be the first section added to the form", E_USER_ERROR);
 		}
 		$this->tabCounter = -1;
-		$this->addField("tab" . ++$this->tabCounter, '', FormIO::T_SECTIONBREAK);
+		$this->addField("tab" . ++$this->tabCounter, null, FormIO::T_SECTIONBREAK);
 		$this->addAttribute('hasPrevious', false);
 		return $this->addAttribute('classes', 'header');
 	}
@@ -729,7 +729,7 @@ class FormIO implements ArrayAccess
 	 */
 	public function startFooterSection()
 	{
-		$this->addField("tab" . ++$this->tabCounter, '', FormIO::T_SECTIONBREAK);
+		$this->addField("tab" . ++$this->tabCounter, null, FormIO::T_SECTIONBREAK);
 		return $this->addAttribute('classes', 'footer');
 	}
 

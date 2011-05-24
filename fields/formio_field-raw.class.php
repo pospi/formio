@@ -19,12 +19,14 @@ class FormIOField_Raw
 	 * @param	FormIO	$form		parent form object
 	 * @param	string	$name		name of this field
 	 */
-	public function __construct($form, $name, $displayText = '', $defaultValue = null)
+	public function __construct($form, $name, $displayText = null, $defaultValue = null)
 	{
 		$this->form = $form;
 
 		$this->name = $name;
-		$this->setAttribute('desc', $displayText);
+		if (isset($displayText)) {
+			$this->setAttribute('desc', $displayText);
+		}
 
 		$this->handleCreation($this->form);
 	}

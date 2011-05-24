@@ -10,7 +10,7 @@ class FormIOField_Sectionbreak extends FormIOField_Fieldsetstart
 	/**
 	 * @param	bool	$fakeSection	if true, do not add this section break to the parent form's sections array
 	 */
-	public function __construct($form, $name, $displayText = '', $defaultValue = null)
+	public function __construct($form, $name, $displayText = null, $defaultValue = null)
 	{
 		if (empty($displayText)) {
 			$displayText = "Page {$form->tabCounter}";

@@ -7,7 +7,7 @@ class FormIOField_Image extends FormIOField_Raw
 {
 	public $buildString = '<img id="{$id}" src="{$url}" alt="{$desc}" />';
 
-	public function __construct($form, $name, $displayText = '', $defaultValue = null)
+	public function __construct($form, $name, $displayText = null, $defaultValue = null)
 	{
 		parent::__construct($form, $name, $displayText, $defaultValue);
 
