@@ -331,6 +331,12 @@ class FormIO implements ArrayAccess
 		return $this;
 	}
 
+	// same as above, only this adds a member function validator rather than an external function
+	public function addFieldValidator($k, $validatorName, $params = array())
+	{
+		return $this->addValidator($k, $validatorName, $params, false);
+	}
+
 	/**
 	 * convenience :CHAINABLE: version of the above (no fieldname required). Use like $form->addField(...)->validateWith(...)->addField(......
 	 */
@@ -340,6 +346,12 @@ class FormIO implements ArrayAccess
 			$params = array($params);
 		}
 		return $this->addValidator($this->lastAddedField, $validatorName, $params, $customFunc, $errorMsg);
+	}
+
+	// same as above, only this adds a member function validator rather than an external function
+	public function useValidator($validatorName, $params = array())
+	{
+		return $this->validateWith($validatorName, $params, null, false);
 	}
 
 	/**

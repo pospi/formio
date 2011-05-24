@@ -191,11 +191,11 @@ class FormIOField_Text extends FormIOField_Raw
 	 *
 	 * @param	string	$validatorName	name of validation function to run
 	 * @param	array	$params			extra parameters to pass to the validation callback (value is always parameter 0)
-	 * @param	bool	$customFunc		if true, look in the global namespace for this function. otherwise it is a method of the FormIO class.
+	 * @param	bool	$customFunc		if true, look in the global namespace for this function. otherwise it is a method of this object.
 	 * @param	string	$errorMsg		A custom error message to return if this validator is unsuccessful.
 	 *									If you require multiple error messages to be set, use addError() from within the validator function itself.
 	 */
-	public function addValidator($validatorName, $params = array(), $customFunc = true, $errorMsg = null)
+	public function addValidator($validatorName, $params = array(), $customFunc = false, $errorMsg = null)
 	{
 		$this->removeValidator($validatorName);		// remove it if it exists, so we can use the most recently applied parameters
 
