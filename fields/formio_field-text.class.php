@@ -380,6 +380,8 @@ class FormIOField_Text extends FormIOField_Raw
 
 	//========================================================================================
 	// Some general-use validation routines
+	// :NOTE: that validators are never run unless requiredvalidator() succeeds, so there is
+	// no need to check for !isset($this->value) in validators.
 
 	final private function regexValidator($regex) {
 		return preg_match($regex, $this->value) > 0;
@@ -403,11 +405,11 @@ class FormIOField_Text extends FormIOField_Raw
 	}
 
 	final private function equalValidator($expected) {
-		return isset($this->value) && $this->value == $expected;
+		return $this->value == $expected;
 	}
 
 	final private function notEqualValidator($unexpected) {
-		return !isset($this->value) || $this->value != $unexpected;
+		return $this->value != $unexpected;
 	}
 
 	final private function minLengthValidator($length) {

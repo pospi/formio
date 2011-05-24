@@ -67,7 +67,7 @@ class FormIOField_Timerange extends FormIOField_DateTime
 
 	// performs date and time normalisation
 	final protected function timeRangeValidator() {
-		if (isset($this->value) && is_array($this->value)) {
+		if (is_array($this->value)) {
 			// either both or none must be set
 			if ((empty($this->value[0][0]) && empty($this->value[0][1])) ^ (empty($this->value[1][0]) && empty($this->value[1][1]))) {
 				return false;
@@ -96,7 +96,7 @@ class FormIOField_Timerange extends FormIOField_DateTime
 			}
 			return true;
 		}
-		return true;		// not set, so validate as OK and let requiredValidator pick it up
+		return false;
 	}
 }
 ?>

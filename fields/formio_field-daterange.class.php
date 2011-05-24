@@ -58,7 +58,10 @@ class FormIOField_Daterange extends FormIOField_Date
 
 	// performs date normalisation
 	final protected function dateRangeValidator() {
-		if (isset($this->value) && is_array($this->value) && (!empty($this->value[0]) || !empty($this->value[1]))) {
+		if (is_array($this->value)) {
+			if (empty($this->value[0]) || empty($this->value[1])) {
+				return true;		// not sent
+			}
 			$firstOk	= preg_match(FormIOField_Date::dateRegex, $this->value[0], $matches1);
 			$secondOk 	= preg_match(FormIOField_Date::dateRegex, $this->value[1], $matches2);
 			if (!$firstOk || !$secondOk) {
@@ -82,7 +85,7 @@ class FormIOField_Daterange extends FormIOField_Date
 			}
 			return true;
 		}
-		return true;		// not set, so validate as OK and let requiredValidator pick it up if required
+		return false;
 	}
 }
 ?>

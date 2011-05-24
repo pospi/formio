@@ -10,9 +10,11 @@ class FormIOField_Checkgroup extends FormIOField_Radiogroup
 	{
 		$output = array();
 		$val = $this->getValue();
-		foreach ($val as $idx => $choice) {
-			if ($choice) {		// this is the only check we need here since unsent checkboxes will not even be set
-				$output[] = $this->options[$idx];
+		if (is_array($val)) {
+			foreach ($val as $idx => $choice) {
+				if ($choice) {		// this is the only check we need here since unsent checkboxes will not even be set
+					$output[] = $this->options[$idx];
+				}
 			}
 		}
 

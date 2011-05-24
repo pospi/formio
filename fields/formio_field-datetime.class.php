@@ -102,7 +102,7 @@ class FormIOField_Datetime extends FormIOField_Time
 
 	// performs date and time normalisation
 	final protected function dateTimeValidator() {
-		if (isset($this->value) && is_array($this->value)) {
+		if (is_array($this->value)) {
 			// either both or none must be set
 			if (empty($this->value[0]) ^ empty($this->value[1])) {
 				return false;
@@ -127,8 +127,9 @@ class FormIOField_Datetime extends FormIOField_Time
 								$this->normaliseTime($timeMatches[1], (isset($timeMatches[4]) ? $timeMatches[4] : 0), (isset($timeMatches[7]) ? $timeMatches[7] : null)),
 								$this->value[2]
 							);
+			return true;
 		}
-		return true;
+		return false;
 	}
 }
 ?>
