@@ -224,6 +224,9 @@ form.clean .err, form.clean .errSummary {
 	font-weight:bold;
 }
 
+form.clean li.sectionErrors { border-color: #E8AEAE; }
+form.clean li.sectionErrors a {	color: #A82626; }
+
 form.clean p.hint {
 	color: #5F5F5F;
 }

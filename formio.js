@@ -245,13 +245,30 @@ FormIO.prototype.elementIsTextual = function(el)
 
 FormIO.prototype.initTabs = function()
 {
-	if (this.elements.find('.tab:not(.header):not(.footer)').length < 2) {
+	var tabs = this.elements.find('.tab:not(.header):not(.footer)');
+	if (tabs.length < 2) {
 		return;
 	}
 	var that = this;
 	this.elements.tabs({
 		show: function(evt, ui) {
 			that.restripeForm();
+		}
+	});
+
+	this.refreshTabs();
+};
+
+// refresh tab display after an update to the form
+FormIO.prototype.refreshTabs = function()
+{
+	var tabs = this.elements.find('.tab:not(.header):not(.footer)');
+	var navbar = this.elements.find('ul.formnav');
+
+	tabs.each(function() {
+		if ($(this).find('p.err:parent').length > 0) {
+			var a = navbar.find('a[href=#' + $(this).attr('id') + ']');
+			a.parent().addClass('sectionErrors');
 		}
 	});
 };

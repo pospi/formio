@@ -981,7 +981,7 @@ class FormIO implements ArrayAccess
 	{
 		$numSections = 0;	// this counts the number of REAL sections (ignores header & footer sections)
 
-		$str = "<ul>\n";
+		$str = "<ul class=\"formnav\">\n";
 		foreach ($this->sections as $section) {
 			$class = $section->getAttribute('classes');
 			if ($class == 'footer' || $class == 'header') {
