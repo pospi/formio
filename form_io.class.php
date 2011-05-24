@@ -844,6 +844,12 @@ class FormIO implements ArrayAccess
 	 * cause the methods to be called on the field objects in the loop themselves.
 	 * If the object is anything else (or absent), the field object is passed to the callback as the first parameter.
 	 *
+	 * This function ignores fields which are:
+	 *	- presentational	(do not extend from FormIOField_Text)
+	 *	- hidden by another field's dependency
+	 *	- configured to be excluded from all form data (@see FormIOField::excludeFromData)
+	 *	- submit actions, if $includeSubmit = false (extend from FormIOField_Submit)
+	 *
 	 * @param	callback	$keyMethod		callback func to call on each field to generate array keys
 	 * @param	array		$keyArgs		arguments to pass to the key method
 	 * @param	callback	$valueMethod	callback func to call on each field to generate array values
@@ -973,10 +979,7 @@ class FormIO implements ArrayAccess
 
 	private function getFormTabNav()
 	{
-		$numSections = sizeof($this->sections);
-		if (!$numSections || ($numSections == 1 && $this->sections[0] === null)) {
-			return '';
-		}
+		$numSections = 0;	// this counts the number of REAL sections (ignores header & footer sections)
 
 		$str = "<ul>\n";
 		foreach ($this->sections as $section) {
@@ -984,8 +987,14 @@ class FormIO implements ArrayAccess
 			if ($class == 'footer' || $class == 'header') {
 				continue;
 			}
+			++$numSections;
 			$str .= "<li><a href=\"#{$section->getFieldId()}\">{$section->getAttribute('desc')}</a></li>\n";
 		}
+
+		if ($numSections < 2) {
+			return '';
+		}
+
 		return $str . "</ul>";
 	}
 
