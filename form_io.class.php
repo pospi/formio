@@ -210,6 +210,8 @@ class FormIO implements ArrayAccess
 			return $assoc;
 		}
 
+		$unhandledFields = $this->fields;               // reference the fields array so we can remove the processed ones
+
 		// now we add the new data
 		foreach ($assoc as $k => $val) {
 			if (!array_key_exists($k, $this->fields)) {
@@ -225,8 +227,13 @@ class FormIO implements ArrayAccess
 				$val = $this->importData($k, false, true);
 			}
 
-			$this->fields[$k]->prepareForSubmission();		// resets the field's value to a state ready to accept user input
 			$this->fields[$k]->setValue($val);
+			unset($unhandledFields[$k]);		// remove the processed field from the list
+		}
+
+		// go through all unhandled fields and give them an opportunity to reset their value to an 'unprovided' state
+		foreach ($unhandledFields as $name => $field) {
+			$field->inputNotProvided();
 		}
 
 		$this->submitted = true;

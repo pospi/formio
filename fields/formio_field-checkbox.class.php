@@ -36,5 +36,10 @@ class FormIOField_Checkbox extends FormIOField_Text
 		unset($vars['value']);
 		return $vars;
 	}
+
+	public function inputNotProvided()
+	{
+		$this->setValue(false);
+	}
 }
 ?>
