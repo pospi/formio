@@ -609,7 +609,7 @@ class FormIO implements ArrayAccess
 	 */
 	public function addSubmitButton($text = 'Submit', $name = null, $defaultAction = false) {
 		$name = $name ? $name : '_btn' . $this->autoNameCounter++;
-		$this->addField($name, '', FormIO::T_SUBMIT, $text);
+		$this->addField($name, $text, FormIO::T_SUBMIT, $text);
 
 		if ($defaultAction || !isset($this->defaultSubmit)) {
 			$this->defaultSubmit = $name;

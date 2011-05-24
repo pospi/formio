@@ -7,7 +7,7 @@
 
 class FormIOField_Submit extends FormIOField_Text
 {
-	public $buildString = '<input type="submit" name="{$name}" id="{$id}"{$value? value="$value"}{$classes? class="$classes"}{$styles? style="$styles"} />';
+	public $buildString = '<input type="submit" name="{$name}" id="{$id}"{$desc? value="$desc"}{$classes? class="$classes"}{$styles? style="$styles"} />';
 
 	public function inputNotProvided()
 	{
