@@ -24,6 +24,11 @@ class FormIOField_Checkbox extends FormIOField_Text
 		parent::setValue($val);
 	}
 
+	public function getHumanReadableValue()
+	{
+		return $this->value ? 'Yes' : 'No';
+	}
+
 	protected function getBuilderVars()
 	{
 		$vars = parent::getBuilderVars();

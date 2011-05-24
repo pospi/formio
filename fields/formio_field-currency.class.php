@@ -15,6 +15,12 @@ class FormIOField_Currency extends FormIOField_Text
 		'currencyValidator'
 	);
 
+	public function getHumanReadableValue()
+	{
+		$val = $this->getValue();
+		return '$' . $val;
+	}
+
 	// append 'behaviour' parameter to the input for JS validation
 	protected function getBuilderVars()
 	{

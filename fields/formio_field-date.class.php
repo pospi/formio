@@ -30,6 +30,11 @@ class FormIOField_Date extends FormIOField_Text
 		return $this->dateToUnix($val);
 	}
 
+	public function getHumanReadableValue()
+	{
+		return date("d/m/Y", $this->getValue());
+	}
+
 	protected function getBuilderVars()
 	{
 		$inputVars = parent::getBuilderVars();

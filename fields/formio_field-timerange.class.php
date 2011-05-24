@@ -36,6 +36,12 @@ class FormIOField_Timerange extends FormIOField_DateTime
 		return array($this->dateTimeToUnix($val[0]), $this->dateTimeToUnix($val[1]));
 	}
 
+	public function getHumanReadableValue()
+	{
+		$val = $this->getValue();
+		return $this->dateTimeToHuman($val[0]) . ' to '. $this->dateTimeToHuman($val[1]);
+	}
+
 	protected function getBuilderVars()
 	{
 		$inputVars = FormIOField_Text::getBuilderVars();

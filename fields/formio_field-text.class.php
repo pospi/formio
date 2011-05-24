@@ -59,9 +59,19 @@ class FormIOField_Text extends FormIOField_Raw
 		return $this->getRawValue();
 	}
 
+	// this function should not be subclassed, except in special circumstances (repeater)
 	public function getRawValue()
 	{
 		return $this->value === '' || $this->value === null || (is_array($this->value) && sizeof($this->value) == 0) ? null : $this->value;
+	}
+
+	/**
+	 * returns the value in a format readable by the form's end-user
+	 * @return	string
+	 */
+	public function getHumanReadableValue()
+	{
+		return $this->value === null ? '' : $this->getValue();
 	}
 
 	// DISPLAY

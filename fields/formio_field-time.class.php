@@ -32,6 +32,12 @@ class FormIOField_Time extends FormIOField_Date
 		return $this->timeTo24hr($val);
 	}
 
+	public function getHumanReadableValue()
+	{
+		$val = $this->getRawValue();
+		return ltrim($val[0], '0') . $val[1];
+	}
+
 	protected function getBuilderVars()
 	{
 		$inputVars = parent::getBuilderVars();

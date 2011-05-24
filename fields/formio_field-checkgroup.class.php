@@ -6,6 +6,19 @@ class FormIOField_Checkgroup extends FormIOField_Radiogroup
 {
 	public $subfieldBuildString = '<label><input type="checkbox" name="{$name}[{$value}]"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>';
 
+	public function getHumanReadableValue()
+	{
+		$output = array();
+		$val = $this->getValue();
+		foreach ($val as $idx => $choice) {
+			if ($choice) {		// this is the only check we need here since unsent checkboxes will not even be set
+				$output[] = $this->options[$idx];
+			}
+		}
+
+		return implode("\n", $output);
+	}
+
 	protected function getNextOptionVars()
 	{
 		if (!$vars = parent::getNextOptionVars()) {

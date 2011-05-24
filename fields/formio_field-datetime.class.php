@@ -30,6 +30,11 @@ class FormIOField_Datetime extends FormIOField_Time
 		return $this->dateTimeToUnix($val);
 	}
 
+	public function getHumanReadableValue()
+	{
+		return $this->dateTimeToHuman($this->getValue());
+	}
+
 	protected function getBuilderVars()
 	{
 		$inputVars = FormIOField_Text::getBuilderVars();
@@ -82,6 +87,17 @@ class FormIOField_Datetime extends FormIOField_Time
 			$hr = 0;
 		}
 		return $this->dateToUnix($val[0]) + $hr*3600 + $min*60 + ($sec ? $sec : 0);
+	}
+
+	public function dateTimeToHuman($val)
+	{
+		$secs = date('s', $val);
+		if (intval($secs) > 0) {
+			$secs = ':' . $secs;
+		} else {
+			$secs = '';
+		}
+		return ltrim(date("h:i{$secs}a D d/m/Y", $val), '0');
 	}
 
 	// performs date and time normalisation

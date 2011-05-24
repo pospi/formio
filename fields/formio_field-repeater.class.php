@@ -42,6 +42,15 @@ class FormIOField_Repeater extends FormIOField_Text
 		return empty($values) ? null : $values;
 	}
 
+	public function getHumanReadableValue()
+	{
+		$values = array();
+		foreach ($this->children as $i => $subField) {
+			$values[$i] = $subField->getHumanReadableValue();
+		}
+		return implode("\n", $values);
+	}
+
 	public function getRawValue()
 	{
 		$values = array();
