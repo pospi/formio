@@ -763,7 +763,7 @@ class FormIO implements ArrayAccess
 	public function getData($param = false)
 	{
 		list($includeSubmit, $fieldName) = $this->interpretDataParam($param);
-		return $this->walkData(array('_field', 'getName'), array(), array('_field', 'getValue'), array(), $includeSubmit, $fieldName);
+		return $this->walkData(array('$field', 'getName'), array(), array('$field', 'getValue'), array(), $includeSubmit, $fieldName);
 	}
 
 	/**
@@ -773,7 +773,7 @@ class FormIO implements ArrayAccess
 	public function getRawData($param = false)
 	{
 		list($includeSubmit, $fieldName) = $this->interpretDataParam($param);
-		return $this->walkData(array('_field', 'getName'), array(), array('_field', 'getRawValue'), array(), $includeSubmit, $fieldName);
+		return $this->walkData(array('$field', 'getName'), array(), array('$field', 'getRawValue'), array(), $includeSubmit, $fieldName);
 	}
 
 	/**
@@ -807,14 +807,15 @@ class FormIO implements ArrayAccess
 	public function getHumanReadableData($param = false)
 	{
 		list($includeSubmit, $fieldName) = $this->interpretDataParam($param);
-		return $this->walkData(array('_field', 'getHumanReadableName'), array(), array('_field', 'getHumanReadableValue'), array(), $includeSubmit, $fieldName);
+		return $this->walkData(array('$field', 'getHumanReadableName'), array(), array('$field', 'getHumanReadableValue'), array(), $includeSubmit, $fieldName);
 	}
 
 	/**
 	 * Walk over the field data with your own callbacks to generate the keys and values of the array returned
 	 *
-	 * The callbacks passed to this function may have the object set to the special string '_field', which will
+	 * The callbacks passed to this function may have the object set to the special string '$field', which will
 	 * cause the methods to be called on the field objects in the loop themselves.
+	 * If the object is anything else (or absent), the field object is passed to the callback as the first parameter.
 	 *
 	 * @param	callback	$keyMethod		callback func to call on each field to generate array keys
 	 * @param	array		$keyArgs		arguments to pass to the key method
@@ -822,6 +823,8 @@ class FormIO implements ArrayAccess
 	 * @param	array		$valueArgs		arguments to pass to the value method
 	 * @param	bool		$includeSubmit	whether or not to return submit button data in the results
 	 * @param	string		$fieldName		if given, the returned array only contains this field's data
+	 *
+	 * @return	array		associative array of field-derived data
 	 */
 	public function walkData($keyMethod, $keyArgs, $valueMethod, $valueArgs, $includeSubmit = false, $fieldName = null)
 	{
@@ -832,17 +835,27 @@ class FormIO implements ArrayAccess
 			$fields = array($fieldName => $this->fields[$fieldName]);
 		}
 
+		// add a empty arguments to the start of the args array so we can easily assign the loop's field
+		if ($keyMethod[0] != '$field') {
+			array_unshift($keyArgs, null);
+		}
+		if ($valueMethod[0] != '$field') {
+			array_unshift($valueArgs, null);
+		}
+
 		foreach ($fields as $name => $field) {
-			if (!$field->isPresentational() && !$field->excludeFromData && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
-				if (is_array($keyMethod) && $keyMethod[0] == '_field') {
+			if (!$field->isPresentational() && !$field->hiddenByDependency() && !$field->excludeFromData && ($includeSubmit || !$field instanceof FormIOField_Submit)) {
+				if (is_array($keyMethod) && $keyMethod[0] == '$field') {
 					$myKeyMethod = array($field, $keyMethod[1]);
 				} else {
 					$myKeyMethod = $keyMethod;
+					$keyArgs[0] = $field;
 				}
-				if (is_array($valueMethod) && $valueMethod[0] == '_field') {
+				if (is_array($valueMethod) && $valueMethod[0] == '$field') {
 					$myValueMethod = array($field, $valueMethod[1]);
 				} else {
 					$myValueMethod = $valueMethod;
+					$valueArgs[0] = $field;
 				}
 
 				$key = call_user_func_array($myKeyMethod, $keyArgs);
