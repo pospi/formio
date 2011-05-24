@@ -226,6 +226,7 @@ form.clean .err, form.clean .errSummary {
 
 form.clean li.sectionErrors { border-color: #E8AEAE; }
 form.clean li.sectionErrors a {	color: #A82626; }
+form.clean div.tabNav { float: right; }
 
 form.clean p.hint {
 	color: #5F5F5F;

@@ -77,7 +77,8 @@ FormIO.prototype.options = {
 		"[data-fio-type='date']"	: 'initDateField',
 		"[data-fio-type='securimage']" : 'initSecurImageField',
 		"[data-fio-searchurl]"		: 'initAutoCompleteField',
-		"[data-fio-depends]"		: 'initDependencies'
+		"[data-fio-depends]"		: 'initDependencies',
+		"input[type=submit], input[type=reset], input[type=button]" : 'initButton'
 	}
 };
 
@@ -116,6 +117,41 @@ FormIO.prototype.restripeForm = function()
 			striperSkips[fieldName]--;
 		}
 	});
+};
+
+// refresh tab display after an update to the form
+FormIO.prototype.refreshTabs = function()
+{
+	var tabs = this.elements.find('.tab:not(.header):not(.footer)');
+	var navbar = this.elements.find('ul.formnav');
+
+	tabs.each(function() {
+		if ($(this).find('p.err:parent').length > 0) {
+			var a = navbar.find('a[href=#' + $(this).attr('id') + ']');
+			a.parent().addClass('sectionErrors');
+		}
+	});
+};
+
+FormIO.prototype.nextTab = function()
+{
+	var next = this.getCurrentTab().next();
+	if (next.length) {
+		this.elements.tabs('select', next.attr('id'));
+	}
+};
+
+FormIO.prototype.prevTab = function()
+{
+	var prev = this.getCurrentTab().prev();
+	if (prev.length) {
+		this.elements.tabs('select', prev.attr('id'));
+	}
+};
+
+FormIO.prototype.getCurrentTab = function()
+{
+	return this.elements.find('.tab:not(.header):not(.footer):visible');
 };
 
 //==========================================================================
@@ -250,28 +286,51 @@ FormIO.prototype.initTabs = function()
 		return;
 	}
 	var that = this;
+
+	// add navigation buttons to the base of the form
+	var nextBtn = $("<input type=\"button\" class=\"navNext\" value=\"Next page\" />");
+	var prevBtn = $("<input type=\"button\" class=\"navPrev\" value=\"Previous page\" />");
+
+	// create the tab handler
 	this.elements.tabs({
 		show: function(evt, ui) {
 			that.restripeForm();
+
+			// scroll back to the top of the form, focus the first input
+			tabs.filter(':visible').find('input, textarea, select').get(0).focus();
+		},
+		select: function(event, ui) {
+			if (ui.index == 0) {
+				nextBtn.button('enable');
+				prevBtn.button('disable');
+			} else if (ui.index == tabs.length - 1) {
+				nextBtn.button('disable');
+				prevBtn.button('enable');
+			} else {
+				nextBtn.button('enable');
+				prevBtn.button('enable');
+			}
 		}
+	});
+
+	this.elements.find('.tab.footer').prepend("<div class=\"tabNav\"></div>");
+	this.elements.find('.tab.footer div.tabNav').prepend(nextBtn).prepend(prevBtn);
+	prevBtn.button();
+	nextBtn.button();
+	prevBtn.click(function() {
+		that.prevTab();
+	}).button('disable');
+	nextBtn.click(function() {
+		that.nextTab();
 	});
 
 	this.refreshTabs();
 };
 
-// refresh tab display after an update to the form
-FormIO.prototype.refreshTabs = function()
+FormIO.prototype.initButton = function(el)
 {
-	var tabs = this.elements.find('.tab:not(.header):not(.footer)');
-	var navbar = this.elements.find('ul.formnav');
-
-	tabs.each(function() {
-		if ($(this).find('p.err:parent').length > 0) {
-			var a = navbar.find('a[href=#' + $(this).attr('id') + ']');
-			a.parent().addClass('sectionErrors');
-		}
-	});
-};
+	el.button();
+}
 
 FormIO.prototype.initDateField = function(el)
 {
