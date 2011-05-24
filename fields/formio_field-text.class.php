@@ -284,8 +284,8 @@ class FormIOField_Text extends FormIOField_Raw
 		}
 
 		$i = 1;
-		// turn the field name parameter into our readable name
-		$params[0] = $this->getHumanReadableName();
+		// turn the field name parameter into our readable name and add it to the substitution parameters
+		array_unshift($params, $this->getHumanReadableName());
 		foreach ($params as $param) {
 			$str = str_replace('$' . $i++, $param, $str);
 		}
