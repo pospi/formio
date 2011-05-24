@@ -106,7 +106,7 @@ class FormIOField_Text extends FormIOField_Raw
 	public function validate()
 	{
 		// if field is being hidden, it's not required so it is nullified and ignored
-		if ($this->fieldHiddenByDependency()) {
+		if ($this->hiddenByDependency()) {
 			return true;
 		}
 
@@ -323,7 +323,7 @@ class FormIOField_Text extends FormIOField_Raw
 	 * This will cause all validation for this field to be skipped.
 	 * Also erases field values when being hidden.
 	 */
-	private function fieldHiddenByDependency()
+	public function hiddenByDependency()
 	{
 		$shown = false;
 		$hidden = false;
