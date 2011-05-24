@@ -35,6 +35,9 @@ class FormIOField_Recaptcha extends FormIOField_Captcha
 						$_POST["recaptcha_challenge_field"],
 						$_POST["recaptcha_response_field"]);
 
+		// also set the field's value for external code to inspect, now that we know it's valid
+		$this->value = $_POST["recaptcha_challenge_field"];
+
 		if ($resp->is_valid) {
 			$this->storeCaptchaPass();
 		}

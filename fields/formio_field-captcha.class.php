@@ -50,6 +50,8 @@ abstract class FormIOField_Captcha extends FormIOField_Text
 	{
 		if (session_id()) {
 			$_SESSION[$this->form->CAPTCHA_session_var] = true;
+		} else {
+			trigger_error("CAPTCHA field unable to save session - user must reauthenticate every refresh", E_USER_NOTICE);
 		}
 	}
 }
