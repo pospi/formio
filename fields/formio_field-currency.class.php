@@ -18,7 +18,7 @@ class FormIOField_Currency extends FormIOField_Text
 	public function getHumanReadableValue()
 	{
 		$val = $this->getValue();
-		return '$' . $val;
+		return isset($val) ? '$' . $val : '';
 	}
 
 	// append 'behaviour' parameter to the input for JS validation

@@ -11,7 +11,10 @@ abstract class FormIOField_Multiple extends FormIOField_Text
 
 	public function getHumanReadableValue()
 	{
-		return $this->options[$this->value];
+		if (is_array($this->options) && isset($this->options[$this->value])) {
+			return $this->options[$this->value];
+		}
+		return '';
 	}
 
 	public function setOption($optionKey, $optionValue, $dependentField = null)

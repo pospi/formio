@@ -36,6 +36,9 @@ class FormIOField_Daterange extends FormIOField_Date
 	public function getHumanReadableValue()
 	{
 		$val = $this->getRawValue();
+		if (!is_array($val) || empty($val[0]) || empty($val[1])) {
+			return '';
+		}
 		return $val[0] . ' to '. $val[1];
 	}
 

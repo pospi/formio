@@ -30,7 +30,7 @@ class FormIOField_Timerange extends FormIOField_DateTime
 	public function getValue()
 	{
 		$val = $this->getRawValue();
-		if ($val === null) {
+		if (!is_array($val) || !is_array($val[0]) || !is_array($val[1])) {
 			return null;
 		}
 		return array($this->dateTimeToUnix($val[0]), $this->dateTimeToUnix($val[1]));
@@ -39,6 +39,9 @@ class FormIOField_Timerange extends FormIOField_DateTime
 	public function getHumanReadableValue()
 	{
 		$val = $this->getValue();
+		if (!is_array($val) || !isset($val[0]) || !isset($val[1])) {
+			return '';
+		}
 		return $this->dateTimeToHuman($val[0]) . ' to '. $this->dateTimeToHuman($val[1]);
 	}
 

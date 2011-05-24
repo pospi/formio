@@ -35,7 +35,7 @@ class FormIOField_Time extends FormIOField_Date
 	public function getHumanReadableValue()
 	{
 		$val = $this->getRawValue();
-		return ltrim($val[0], '0') . $val[1];
+		return strlen($val[0]) ? ltrim($val[0], '0') . $val[1] : '';
 	}
 
 	protected function getBuilderVars()

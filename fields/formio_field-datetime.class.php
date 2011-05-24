@@ -32,7 +32,11 @@ class FormIOField_Datetime extends FormIOField_Time
 
 	public function getHumanReadableValue()
 	{
-		return $this->dateTimeToHuman($this->getValue());
+		$val = $this->getValue();
+		if (!isset($val)) {
+			return '';
+		}
+		return $this->dateTimeToHuman($val);
 	}
 
 	protected function getBuilderVars()

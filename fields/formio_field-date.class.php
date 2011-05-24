@@ -32,7 +32,11 @@ class FormIOField_Date extends FormIOField_Text
 
 	public function getHumanReadableValue()
 	{
-		return date("d/m/Y", $this->getValue());
+		$val = $this->getValue();
+		if (!isset($val)) {
+			return '';
+		}
+		return date("d/m/Y", $val);
 	}
 
 	protected function getBuilderVars()
