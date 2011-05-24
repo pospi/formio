@@ -23,6 +23,15 @@ abstract class FormIOField_Multiple extends FormIOField_Text
 	}
 
 	/**
+	 * If it is not a requirement that your field have dependencies attached to its options, or
+	 * you wish to add those dependencies manually, you may set the entire options array at once.
+	 */
+	public function setOptions($array)
+	{
+		$this->options = $array;
+	}
+
+	/**
 	 * We also build a string for the '$options' wildcard by processing $this->options
 	 */
 	protected function getBuilderVars()

@@ -423,6 +423,21 @@ class FormIO implements ArrayAccess
 		return $this->addFieldOption($this->lastAddedField, $optionVal, $optionText, $dependentField);
 	}
 
+	// :CHAINABLE:
+	public function setFieldOptions()
+	{
+		$a = func_get_args();
+		if (sizeof($a) < 2) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $array) = $a;
+		if (!$this->fields[$k] instanceof FormIOField_Multiple) {
+			trigger_error("Wrong field type for setting field options with field '$k'", E_USER_WARNING);
+		}
+		$this->fields[$k]->setOptions($array);
+		return $this;
+	}
+
 	/**
 	 * Adds a dependency between one field and another. This sets up the javascript
 	 * to toggle visibility of a field when the value of another changes.
