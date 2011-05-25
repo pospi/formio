@@ -40,7 +40,7 @@ class FormIOField_Text extends FormIOField_Raw
 		'inArrayValidator'	=> "Must be one of \$2",
 	);
 
-	public function __construct($form, $name, $displayText, $defaultValue = null)
+	public function __construct($form, $name, $displayText = null, $defaultValue = null)
 	{
 		$this->value = $defaultValue;
 		parent::__construct($form, $name, $displayText);

@@ -50,7 +50,11 @@ class FormIOField_Raw
 	public function getHTML(&$spinVar)
 	{
 		++$spinVar;
-		return $this->replaceInputVars($this->buildString, $this->getBuilderVars(array('alt' => $spinVar)));
+		$vars = $this->getBuilderVars();
+		if ($spinVar % 2 == 0) {
+			$vars['alt'] = true;
+		}
+		return $this->replaceInputVars($this->buildString, $vars);
 	}
 
 	// Field attribute manipulation
