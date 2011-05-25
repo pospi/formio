@@ -135,6 +135,7 @@ form.clean .checkbox input, form.clean .checkbox label.checkbox, form.clean inpu
 	font-weight: normal;
 	border: 0;
 }
+form.clean .checkbox label.checkbox { font-weight: bold; }
 
 form.clean input[type=text], form.clean input[type=password] {
 	padding-right: 1em;		/* this balances out the currency input's left padding... */
