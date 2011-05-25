@@ -684,6 +684,11 @@ class FormIO implements ArrayAccess
 		return $this->fields[$name];
 	}
 
+	public function getLastField()
+	{
+		return $this->fields[$this->lastAddedField];
+	}
+
 	public function getErrors()
 	{
 		return $this->errors;
