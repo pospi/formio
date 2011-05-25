@@ -162,22 +162,34 @@ class FormIO implements ArrayAccess
 	 */
 	public static function loadFieldByClass($fieldClass, $name, $displayText = '', $formObj = null)
 	{
-		// If a class matching the field's name with the 'FormIOField_' prefix is found, we use this as our field.
-		// Otherwise, we attempt loading one from the 'fields/' subdirectory, and if unsuccessful, throw an error.
-		$className = 'FormIOField_' . ucfirst($fieldClass);
+		$className = FormIO::preloadFieldClass($fieldClass);
+
+		if (!isset($this)) {
+			$field = new $className($formObj, $name, $displayText);
+		} else {
+			$field = new $className($this, $name, $displayText);
+		}
+		return $field;
+	}
+
+	public static function getFieldClassName($formIOName)
+	{
+		return 'FormIOField_' . ucfirst($formIOName);
+	}
+
+	// Attempts to ensure that a field's class file is loaded, given the FormIOField_ class suffix.
+	// If a class matching the field's name with the 'FormIOField_' prefix is found, return the full class name.
+	// Otherwise, we attempt loading one from the 'fields/' subdirectory, and if unsuccessful, throw an error.
+	public static function preloadFieldClass($fieldClass)
+	{
+		$className = FormIO::getFieldClassName($fieldClass);
 		if (!class_exists($className) && file_exists(FORMIO_FIELDS . 'formio_field-' . $fieldClass . '.class.php')) {
 			require_once(FORMIO_FIELDS . 'formio_field-' . $fieldClass . '.class.php');
 		}
-		if (class_exists($className)) {
-			if (!isset($this)) {
-				$field = new $className($formObj, $name, $displayText);
-			} else {
-				$field = new $className($this, $name, $displayText);
-			}
-		} else {
-			trigger_error("Unknown FormIO field type '$type'", E_USER_ERROR);
+		if (!class_exists($className)) {
+			trigger_error("Unknown FormIO field type '$fieldClass'", E_USER_ERROR);
 		}
-		return $field;
+		return $className;
 	}
 
 	/**
