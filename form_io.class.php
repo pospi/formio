@@ -1070,7 +1070,7 @@ class FormIO implements ArrayAccess
 	}
 	public function offsetUnset($offset)
 	{
-		unset($this->fields[$offset]);		// :TODO: check reference counting here
+		unset($this->fields[$offset]);
 	}
 	public function offsetGet($offset)
 	{

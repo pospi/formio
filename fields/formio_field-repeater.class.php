@@ -133,7 +133,7 @@ class FormIOField_Repeater extends FormIOField_Group
 			if ($remove) {
 				if (sizeof($this->value) == $numSent) {
 					end($this->value);
-					unset($this->value[key($this->value)]);	// :TODO: check reference counting here
+					unset($this->value[key($this->value)]);
 					reset($this->value);
 				}
 				$this->setAttribute('numinputs', $this->getMinRequiredInputs($numSent - 1));

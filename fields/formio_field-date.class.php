@@ -67,13 +67,14 @@ class FormIOField_Date extends FormIOField_Text
 	final protected function dateValidator() {
 		preg_match(FormIOField_Date::dateRegex, $this->value, $matches);
 		$success = sizeof($matches) == 4;
-		if ($matches[1] > 31 || $matches[2] > 12) {
-			return false;
-		}
 		if ($success) {
+			if ($matches[1] > 31 || $matches[2] > 12) {
+				return false;
+			}
 			$this->value = $this->normaliseDate($matches[1], $matches[2], $matches[3]);
+			return true;
 		}
-		return $success != false;
+		return false;
 	}
 
 	protected function normaliseDate($d, $m, $y) {				// dd/mm/yyyy

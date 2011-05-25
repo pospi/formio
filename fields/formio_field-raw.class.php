@@ -6,7 +6,7 @@
 
 class FormIOField_Raw
 {
-	protected $form;					// form to which this field is attached :TODO: check handling of reference deletion on destructing
+	protected $form;					// form to which this field is attached
 
 	protected $name;					// field name (data key)
 	protected $attributes = array();	// field attributes (mainly DOM attributes but subclasses will use it for other stuff)
@@ -29,6 +29,12 @@ class FormIOField_Raw
 		}
 
 		$this->handleCreation($this->form);
+	}
+
+	// unreference the form when we are destroyed
+	public function __destruct()
+	{
+		$this->form = null;
 	}
 
 	/**
