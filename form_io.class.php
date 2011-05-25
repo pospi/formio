@@ -25,8 +25,9 @@ define('FORMIO_FIELDS', dirname(__FILE__) . '/fields/');
 // Important base field classes. Others can be loaded via FormIO::loadFieldByClass()
 require_once(FORMIO_FIELDS . 'formio_field-raw.class.php');			// base field class for presentational fields
 require_once(FORMIO_FIELDS . 'formio_field-text.class.php');		// base field class for input fields
+require_once(FORMIO_FIELDS . 'formio_field-group.class.php');		// base class for a group of fields
 require_once(FORMIO_FIELDS . 'formio_field-multiple.class.php');	// base field class for array-type fields
-require_once(FORMIO_FIELDS . 'formio_field-submit.class.php');		// base field class for input fields where the value is for submission only
+require_once(FORMIO_FIELDS . 'formio_field-submit.class.php');		// base field class for input fields where the value is for triggering submission only
 require_once(FORMIO_FIELDS . 'formio_field-captcha.class.php');		// base field class for CAPTCHA fields
 // These remaining field types aren't that important, but their names & functions are used as checks
 // in this class and in other fields, and so will cause __autoload() to be executed unless already declared.
@@ -89,6 +90,7 @@ class FormIO implements ArrayAccess
 	const T_SPACER = 'spacer';			// does nothing. Use this to increment the row striper, etc
 	const T_PASSWORDCHANGE = 'passwordchange';	// outputs two password inputs which must match to validate. :TODO: also does complexity check ?
 	const T_REPEATER = 'repeater';		// give an input type to repeat an arbitrary number of times
+	const T_GROUP = 'group';			// a logical grouping of form fields. Best used in tandem with T_REPEATER
 
 	//===============================================================================================\/
 	//	Stuff you might want to change

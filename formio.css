@@ -17,7 +17,7 @@ form.clean {
 	border: 0;
 }
 
-form.clean div.row, form.clean fieldset {
+form.clean div.row, form.clean fieldset, form.clean div.group div.row {
 	clear: left;
 	padding: 0.5em;
 	margin: 0;
@@ -39,6 +39,7 @@ form.clean div.blck { position: relative; }
 form.clean div.blck .row { margin: 0 0 0 25%; padding: 0.5em 0 0 0; background: transparent; }
 form.clean div.blck label { position: absolute; }
 form.clean div.blck .row label { display: none; }
+form.clean div.group .row label { display: inline; left: 1%; }
 form.clean div.blck input { display: inline; width: 93%; }
 form.clean div.blck input[type=checkbox], form.clean div.blck input[type=radio], form.clean div.blck input[type=submit], form.clean div.blck input[type=reset], form.clean div.blck input[type=button] { width: auto; }
 form.clean div.blck .pad { width: 25%; height: 1em; float: left; }
