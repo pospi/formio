@@ -101,12 +101,14 @@ FormIO.prototype.restripeForm = function()
 		striperSkips[bits[0]] = bits[1];
 	});
 
+	var shownRows = this.elements.find('div.tab>.row:visible');
+
 	// remove all highlighting first
-	this.elements.find('.row:visible').removeClass('alt');
+	shownRows.removeClass('alt');
 
 	// redo new striping
 	var spin = 1;
-	this.elements.find('.row:visible').each(function(i, row) {
+	shownRows.each(function(i, row) {
 		if (spin % 2 == 0) {
 			$(row).addClass('alt');
 		}
