@@ -9,7 +9,7 @@ class FormIOField_Fieldsetstart extends FormIOField_Raw
 
 	public function getHTML(&$spinVar)
 	{
-		$spinVar = 0;		// reset the striper
+		$spinVar = -1;		// reset the striper
 		return parent::getHTML($spinVar);
 	}
 }
