@@ -579,8 +579,11 @@ class FormIO implements ArrayAccess
 		return $this->addField($name, null, FormIO::T_HIDDEN, $value);
 	}
 
-	public function startFieldset($title) {
-		return $this->addField('__fs' . $this->autoNameCounter++, $title, FormIO::T_INDENT);
+	public function startFieldset($title, $name = null) {
+		if (!$name) {
+			$name = '__fs' . $this->autoNameCounter++;
+		}
+		return $this->addField($name, $title, FormIO::T_INDENT);
 	}
 
 	public function endFieldset() {
