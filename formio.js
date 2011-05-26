@@ -51,8 +51,10 @@ $.fn.formio = function(func) {
  */
 var FormIO = function(formEl, options)
 {
+	var that = this;
+
 	this.elements = formEl;
-	this.elements.submit(this.onSubmit);
+	this.elements.submit(function() { return that.onSubmit() });
 
 	this.setOptions(options);
 
@@ -575,10 +577,16 @@ FormIO.prototype.onSubmit = function()
 
 	$.each(this.validators, function(field, validator) {
 		$.each(validator, function(name, params) {
+			var fieldEl = $('#' + field);
+			// check that we should run the validator
+			if (that.shouldSkipValidator(fieldEl, name)) {
+				return true;		// continue;
+			}
+
 			if (!$.isArray(params)) {	// ensure validator params get sent through as an array
 				params = [params];
 			}
-			params.unshift($('#' + field));			// pass element through as parameter 0
+			params.unshift(fieldEl);				// pass element through as parameter 0
 			if (typeof that[name] == 'function') {	// look in FormIO scope
 				if (!(that[name]).apply(that, params)) {
 					allOk = false;
@@ -587,13 +595,27 @@ FormIO.prototype.onSubmit = function()
 				if (!name.apply(that, params)) {
 					allOk = false;
 				}
-			} else {
+			} else if (console && typeof console.error == 'function') {
 				console.error("Unknown FormIO validator: " + name);		// :DEBUG:
 			}
 		});
 	});
 
 	return allOk;
+};
+
+// If a field is required, but its parent is as well - skip it
+// :TODO: detect partially filled out records for group fields
+FormIO.prototype.shouldSkipValidator = function(el, validatorName)
+{
+	if (validatorName == 'requiredValidator') {
+		var parentField = el.closest('.row.group[data-fio-validation*=requiredValidator], .row[data-fio-type=repeater][data-fio-validation*=requiredValidator]');
+		if (parentField.length > 0) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 FormIO.prototype.highlightError = function(field)
