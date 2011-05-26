@@ -9,8 +9,8 @@ class FormIOField_Repeater extends FormIOField_Group
 		<label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}
 		{$isfiles?<input type="hidden" name="$isfiles[isfiles]" value="1" />}
 		<div class="pad"></div>
-			<input type="submit" name="{$name}[__add]" value="Add another" />
-			<input type="submit" name="{$name}[__remove]" value="Remove last" />
+			<input type="submit" name="{$name}[__add]" class="add" value="Add another" />
+			<input type="submit" name="{$name}[__remove]" class="remove" value="Remove last" />
 		{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
 
 	public static $VALIDATOR_ERRORS = array(
