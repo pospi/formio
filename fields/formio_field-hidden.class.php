@@ -6,7 +6,7 @@
 
 class FormIOField_Hidden extends FormIOField_Text
 {
-	public $buildString = '<input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"} />';
+	public $buildString = '<input type="hidden" name="{$name}" id="{$id}"{$value? value="$value"}{$validation? data-fio-validation="$validation"} />';
 
 	public function getHTML(&$spinVar)
 	{

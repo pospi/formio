@@ -49,34 +49,43 @@ $.fn.formio = function(func) {
  * in a jQuery selector, rather than one for an entire array. I was contemplating making it
  * throw an error for this, but I can see valid uses for multiple element selectors as well.
  */
-var FormIO = function(el, options)
+var FormIO = function(formEl, options)
 {
-	this.elements = el;
+	this.elements = formEl;
+	var t = this;
+	this.elements.submit(function() { console.log(t.onSubmit()); return false; });	// DEBUGGING
 
 	this.setOptions(options);
 
-	this.setupFields(el);
+	this.setupFields(this.elements);
 	this.initTabs();
 };
 
-//==========================================================================
+//=============================================================================================================
+//=============================================================================================================
 //	Properties
 
 FormIO.prototype.fieldDependencies = {};		// dependent element data for JavaScript element visibility toggling
+FormIO.prototype.validators = {};				// map of field names & validator callbacks to run when form is submitted
 FormIO.prototype.elements = null;				// jQuery element (or elements) we are creating the form inside
 FormIO.prototype.options = {
 	setupRoutines : {
+		// interactions
 		"[data-fio-type='date']"	: 'initDateField',
 		"[data-fio-type='securimage']" : 'initSecurImageField',
 		"[data-fio-type='repeater']"	: 'initRepeater',
 		"[data-fio-searchurl]"		: 'initAutoCompleteField',
 		"[data-fio-depends]"		: 'initDependencies',
-		"input[type=submit], input[type=reset], input[type=button]" : 'initButton'
+		"input[type=submit], input[type=reset], input[type=button]" : 'initButton',
+
+		// validators
+		"[data-fio-validation]" : "setValidation"
 	},
 	repeaterRefreshCallbacks : []
 };
 
-//==========================================================================
+//=============================================================================================================
+//=============================================================================================================
 //	Form methods
 
 // Accessor to return the FormIO object from within jQuery plugin -> $(...).formio('get');
@@ -547,6 +556,62 @@ FormIO.prototype.initDependencies = function(el)
 
 	// also set initial visibility
 	this.checkDependencies(el);
+};
+
+//=============================================================================================================
+//=============================================================================================================
+//	VALIDATION
+
+FormIO.prototype.setValidation = function(el)
+{
+	var validatorData = this.splitParams(el.data("fio-validation"));
+
+	this.validators[el.attr('id')] = validatorData;
+};
+
+FormIO.prototype.onSubmit = function()
+{
+	var that = this;
+	var allOk = true;
+
+	$.each(this.validators, function(field, validator) {
+		$.each(validator, function(name, params) {
+			if (!$.isArray(params)) {	// ensure validator params get sent through as an array
+				params = [params];
+			}
+			params.unshift($('#' + field));			// pass element through as parameter 0
+			if (typeof that[name] == 'function') {	// look in FormIO scope
+				if (!(that[name]).apply(that, params)) {
+					allOk = false;
+				}
+			} else if (typeof name == 'function') {	// look for external validation function
+				if (!name.apply(that, params)) {
+					allOk = false;
+				}
+			} else {
+				console.error("Unknown FormIO validator: " + name);		// :DEBUG:
+			}
+		});
+	});
+
+	return allOk;
+};
+
+FormIO.prototype.highlightError = function(field)
+{
+	// :TODO: show error messages, replicate the backend functionality
+	field.animate({
+		backgroundColor: "#ff9393",
+	}, 1000 );
+};
+
+//=============================================================================================================
+//=============================================================================================================
+//	VALIDATORS
+
+FormIO.prototype.requiredValidator = function(el) {
+	this.highlightError(el);
+	return el.val().length > 0;
 };
 
 })(jQuery);
