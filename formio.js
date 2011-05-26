@@ -52,8 +52,7 @@ $.fn.formio = function(func) {
 var FormIO = function(formEl, options)
 {
 	this.elements = formEl;
-	var t = this;
-	this.elements.submit(function() { console.log(t.onSubmit()); return false; });	// DEBUGGING
+	this.elements.submit(this.onSubmit);
 
 	this.setOptions(options);
 
