@@ -62,6 +62,9 @@ class FormIOField_Group extends FormIOField_Text
 
 	public function getValue()
 	{
+		if (!is_array($this->value)) {
+			return null;
+		}
 		$values = array();
 		foreach ($this->value as $i => $subField) {
 			if (!$subField->isPresentational() && !$subField->excludeFromData) {
@@ -76,6 +79,9 @@ class FormIOField_Group extends FormIOField_Text
 
 	public function getHumanReadableValue()
 	{
+		if (!is_array($this->value)) {
+			return null;
+		}
 		$values = array();
 		foreach ($this->value as $i => $subField) {
 			if (!$subField->isPresentational() && !$subField->excludeFromData) {
@@ -87,6 +93,9 @@ class FormIOField_Group extends FormIOField_Text
 
 	public function getRawValue()
 	{
+		if (!is_array($this->value)) {
+			return null;
+		}
 		$values = array();
 		foreach ($this->value as $i => $subField) {
 			if (!$subField->isPresentational() && !$subField->excludeFromData) {
@@ -129,14 +138,16 @@ class FormIOField_Group extends FormIOField_Text
 	{
 		$success = parent::validate();
 
-		foreach ($this->value as $subKey => $subField) {
-			// ignore any presentational fields
-			if ($subField->isPresentational()) {
-				continue;
-			}
-			// Run internal validation routines for subfields
-			if (!$subField->validate()) {
-				$success = false;
+		if (is_array($this->value)) {
+			foreach ($this->value as $subKey => $subField) {
+				// ignore any presentational fields
+				if ($subField->isPresentational()) {
+					continue;
+				}
+				// Run internal validation routines for subfields
+				if ($subField->getValue() !== null && !$subField->validate()) {
+					$success = false;
+				}
 			}
 		}
 

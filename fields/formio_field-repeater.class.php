@@ -51,14 +51,17 @@ class FormIOField_Repeater extends FormIOField_Group
 		$vars['inputs'] = '';
 
 		// output all present child fields first, and work out the max array key to potentially add more
-		foreach ($this->value as $idx => $childField) {
-			if ($maxKey < $idx) {
-				$maxKey = $idx;
+
+		if (is_array($this->value)) {
+			foreach ($this->value as $idx => $childField) {
+				if ($maxKey < $idx) {
+					$maxKey = $idx;
+				}
+
+				$vars['inputs'] .= $childField->getHTML($spin);
+
+				$numInputs--;
 			}
-
-			$vars['inputs'] .= $childField->getHTML($spin);
-
-			$numInputs--;
 		}
 
 		// create and output any remaining fields required to fill the number requested
@@ -118,9 +121,11 @@ class FormIOField_Repeater extends FormIOField_Group
 		$success = parent::validate();
 
 		// kill any fields which don't have a value
-		foreach ($this->value as $idx => $subField) {
-			if ($subField->getRawValue() === null || $subField->getRawValue() === '') {
-				unset($this->value[$idx]);
+		if (is_array($this->value)) {
+			foreach ($this->value as $idx => $subField) {
+				if ($subField->getValue() === null) {
+					unset($this->value[$idx]);
+				}
 			}
 		}
 
