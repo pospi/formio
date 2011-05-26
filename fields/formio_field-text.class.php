@@ -358,12 +358,10 @@ class FormIOField_Text extends FormIOField_Raw
 		}
 		$params = array();
 		foreach ($this->validators as $validator) {
-			if (!is_array($validator)) {
-				continue;		// parameterless validator
+			if (is_array($validator)) {
+				$params[] = $validator['func'] . '=' . implode(';', $validator['params']);
 			} else {
-				if (isset($validator['params'])) {
-					$params[] = $validator['func'] . '=' . implode(';', $validator['params']);
-				}
+				$params[] = $validator;
 			}
 		}
 		return sizeof($params) ? implode('&', $params) : '';
