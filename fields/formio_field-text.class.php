@@ -357,11 +357,14 @@ class FormIOField_Text extends FormIOField_Raw
 			return null;
 		}
 		$params = array();
-		foreach ($this->validators as $validator) {
+		foreach ($this->validators as $validator) {	// do not manipulate class validator array
 			if (is_array($validator)) {
-				$params[] = $validator['func'] . '=' . implode(';', $validator['params']);
+				foreach ($validator['params'] as &$param) {	// but do manipulate temporary one for encoding
+					$param = urlencode($param);
+				}
+				$params[] = urlencode($validator['func']) . '=' . implode(';', $validator['params']);
 			} else {
-				$params[] = $validator;
+				$params[] = urlencode($validator);
 			}
 		}
 		return sizeof($params) ? implode('&', $params) : '';
@@ -371,7 +374,10 @@ class FormIOField_Text extends FormIOField_Raw
 	{
 		$depends = array();
 		foreach ($this->dependencies as $fieldVal => $visibleFields) {
-			$depends[] = "$fieldVal=" . implode(';', $visibleFields);
+			foreach ($visibleFields as &$field) {
+				$field = urlencode($field);
+			}
+			$depends[] = urlencode($fieldVal) . "=" . implode(';', $visibleFields);
 		}
 		return implode('&', $depends);
 	}

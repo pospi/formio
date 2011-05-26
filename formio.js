@@ -167,8 +167,9 @@ FormIO.prototype.getCurrentTab = function()
 	return this.elements.find('.tab:not(.header):not(.footer):visible');
 };
 
-//==========================================================================
-//	Callbacks & helpers
+//=============================================================================================================
+//=============================================================================================================
+//	Callbacks & behaviours
 //		These functions run on targeted elements / inputs, not the form
 
 FormIO.prototype.getFieldRowElement = function(el)
@@ -281,6 +282,35 @@ FormIO.prototype.getFieldName = function(fldId)
 	return fldId.replace(new RegExp('^' + this.elements.attr('id') + '_'), '');
 };
 
+// serialised form property decoder for dependencies & validators
+FormIO.prototype.splitParams = function(str)
+{
+	var params = {};
+
+	str = str.split('&');
+
+	$.each(str, function(unused, v) {
+		var parts = v.split('=');
+		// may be a string-only value
+		if (parts.length == 1 && parts[0] == v) {
+			params[unescape(v)] = null;	// in which case, set it to be returned in parent scope variable as parameterless
+			return false;	// and abort the loop
+		}
+		var values = parts[1].split(';');
+		if (values.length == 1 && parts[1] == values[0]) {	// may have subvalues or just be a string
+			values = unescape(parts[1]);
+		} else {
+			$.each(values, function(i, val) {
+				values[i] = unescape(val);
+			});
+		}
+
+		params[unescape(parts[0])] = values;
+	});
+
+	return params;
+};
+
 // input type helpers
 FormIO.prototype.elementIsRadioOrSelect = function(el)
 {
@@ -295,7 +325,80 @@ FormIO.prototype.elementIsTextual = function(el)
 	return elType == 'textarea' || (elType == 'input' && inType == 'text');
 };
 
-//==========================================================================
+/**
+ * Clones a field row (without events), and negates its values
+ */
+FormIO.prototype.getNewEmptyField = function(row)
+{
+	var newField = row.clone(false);
+	// reset the value of the new field
+	newField.find(':input').val('');
+
+	return newField;
+};
+
+// :TODO: handle repeated file inputs
+FormIO.prototype.reorderRepeaterFields = function(el)
+{
+	var counter = 0;
+
+	// strings to replace in subelements
+	var nameBase = this.getFieldName(el.attr('id'));
+	var idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)');
+	var nameFind = new RegExp('^' + nameBase + '\\[(\\d+)\\](.*)');
+
+	el.find('>.row').each(function() {
+		var currId = $(this).attr('id');
+
+		// renumber the row's ID
+		$(this).attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'))
+			// renumber all ID, NAME and FOR attributes in child inputs
+			.find('[name],[id],[for]').each(function() {
+				var $this = $(this);
+
+				var currName = $this.attr('name');
+				var currId = $this.attr('id');
+				var currFor = $this.attr('for');
+
+				if (currName && currName.match(nameFind)) {
+					$this.attr('name', currName.replace(nameFind, nameBase + '[' + counter + ']$2'));
+				}
+				if (currId && currId.match(idFind)) {
+					$this.attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'));
+				}
+				if (currFor && currFor.match(idFind)) {
+					$this.attr('for', currFor.replace(idFind, el.attr('id') + '_' + counter + '$2'));
+				}
+
+				// clear jQueryUI flags from applicable elements so that setupFields() triggers work
+				if (this.tagName.toLowerCase() == 'input' && $this.hasClass('hasDatepicker')) {
+					$this.removeClass('hasDatepicker');
+				}
+			});
+
+		++counter;
+	});
+
+	this.reinitRepeaterFields(el);
+};
+
+FormIO.prototype.reinitRepeaterFields = function(el)
+{
+	// clear ALL events from all repeater subinputs (not the row handlers)
+	el.unbind().find('*:not(input.add):not(input.remove)').unbind();
+	// rebind events, interfaces and stuff using form field initialiser
+	this.setupFields(el);
+
+	// trigger any repeater refresh callbacks defined
+	if (this.options.repeaterRefreshCallbacks && this.options.repeaterRefreshCallbacks.length) {
+		$.each(this.options.repeaterRefreshCallbacks, function(i, callback) {
+			callback(el);
+		});
+	}
+};
+
+//=============================================================================================================
+//=============================================================================================================
 //	Initialisation routines.
 
 FormIO.prototype.initTabs = function()
@@ -406,92 +509,21 @@ FormIO.prototype.initRepeater = function(el)
 	});
 };
 
-/**
- * Clones a field row (without events), and negates its values
- */
-FormIO.prototype.getNewEmptyField = function(row)
-{
-	var newField = row.clone(false);
-	// reset the value of the new field
-	newField.find(':input').val('');
-
-	return newField;
-};
-
-// :TODO: handle repeated file inputs
-FormIO.prototype.reorderRepeaterFields = function(el)
-{
-	var counter = 0;
-
-	// strings to replace in subelements
-	var nameBase = this.getFieldName(el.attr('id'));
-	var idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)');
-	var nameFind = new RegExp('^' + nameBase + '\\[(\\d+)\\](.*)');
-
-	el.find('>.row').each(function() {
-		var currId = $(this).attr('id');
-
-		// renumber the row's ID
-		$(this).attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'))
-			// renumber all ID, NAME and FOR attributes in child inputs
-			.find('[name],[id],[for]').each(function() {
-				var $this = $(this);
-
-				var currName = $this.attr('name');
-				var currId = $this.attr('id');
-				var currFor = $this.attr('for');
-
-				if (currName && currName.match(nameFind)) {
-					$this.attr('name', currName.replace(nameFind, nameBase + '[' + counter + ']$2'));
-				}
-				if (currId && currId.match(idFind)) {
-					$this.attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'));
-				}
-				if (currFor && currFor.match(idFind)) {
-					$this.attr('for', currFor.replace(idFind, el.attr('id') + '_' + counter + '$2'));
-				}
-
-				// clear jQueryUI flags from applicable elements so that setupFields() triggers work
-				if (this.tagName.toLowerCase() == 'input' && $this.hasClass('hasDatepicker')) {
-					$this.removeClass('hasDatepicker');
-				}
-			});
-
-		++counter;
-	});
-
-	this.reinitRepeaterFields(el);
-};
-
-FormIO.prototype.reinitRepeaterFields = function(el)
-{
-	// clear ALL events from all repeater subinputs (not the row handlers)
-	el.unbind().find('*:not(input.add):not(input.remove)').unbind();
-	// rebind events, interfaces and stuff using form field initialiser
-	this.setupFields(el);
-
-	// trigger any repeater refresh callbacks defined
-	if (this.options.repeaterRefreshCallbacks && this.options.repeaterRefreshCallbacks.length) {
-		$.each(this.options.repeaterRefreshCallbacks, function(i, callback) {
-			callback(el);
-		});
-	}
-};
-
 FormIO.prototype.initDependencies = function(el)
 {
 	var t = this;
-	var dependencies = {};
+	var dependencies = this.splitParams(el.data('fio-depends'));
 	var affectedFields = [];
 
-	var dependent = el.data('fio-depends');
-	dependent = dependent.split('&');
-
-	$.each(dependent, function(unused, v) {
-		var parts = v.split('=');
-		var affected = parts[1].split(';');
-		dependencies[parts[0]] = affected;
-		affectedFields = affectedFields.concat(affected);
+	$.each(dependencies, function(depName, depParams) {
+		if (typeof depParams != "string") {
+			$.each(depParams, function(i, str) {
+				affectedFields.push(str);
+			});
+		} else {
+			affectedFields.push(depParams);
+			dependencies[depName] = [depParams];	// convert to array for easy interrogation later
+		}
 	});
 
 	this.fieldDependencies[el.attr('id')] = dependencies;
