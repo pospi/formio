@@ -969,10 +969,16 @@ class FormIO implements ArrayAccess
 			$form .= "</div>";
 		}
 
+		return $this->getFormTag() . "\n" . $form . "</form>\n";
+	}
+
+	// generates and returns the opening <form> tag for this form
+	public function getFormTag()
+	{
 		return "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method)
 				. "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '')
 				. " data-fio-stripe=\"" . http_build_query($this->getRowStriperIncrements()) . "\""
-				. '>' . "\n" . $form . "</form>\n";
+				. '>';
 	}
 
 	public function getFieldsHTML($statusMessage)
