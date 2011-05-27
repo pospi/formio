@@ -39,6 +39,25 @@ class FormIOField_Repeater extends FormIOField_Group
 		parent::setValue($values);
 	}
 
+	public function getHumanReadableValue()
+	{
+		if (!is_array($this->value)) {
+			return null;
+		}
+		$values = array();
+		foreach ($this->value as $i => $subField) {
+			if (!$subField->isPresentational() && !$subField->excludeFromData) {
+				$values[$i] = $subField->getHumanReadableValue();
+			}
+		}
+
+		$sep = "\n";
+		if ($fieldType == 'group' || is_subclass_of(FormIO::preloadFieldClass($this->getAttribute('fieldtype')), FormIO::preloadFieldClass('group'))) {
+			$sep = "\n\n";
+		}
+		return implode($sep, $values);
+	}
+
 	protected function getBuilderVars()
 	{
 		$vars = FormIOField_Text::getBuilderVars();
