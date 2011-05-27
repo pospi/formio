@@ -65,8 +65,8 @@ class FormIO_ConfirmPage
 			return null;
 		}
 
-		$this->tableText .= "<tr><td>" . htmlentities($field->getHumanReadableName()) . "</td>"
-						  . "<td>" . htmlentities($field->getHumanReadableValue()) . $this->makeHiddenInputs($field->getName(), $field->getRawValue()) . "</td></tr>";
+		$this->tableText .= "<tr><td>" . nl2br(htmlentities($field->getHumanReadableName())) . "</td>"
+						  . "<td>" . nl2br(htmlentities($field->getHumanReadableValue())) . $this->makeHiddenInputs($field->getName(), $field->getRawValue()) . "</td></tr>";
 
 		return null;
 	}
