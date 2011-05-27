@@ -199,12 +199,12 @@ class FormIOField_Text extends FormIOField_Raw
 	{
 		$this->removeValidator($validatorName);		// remove it if it exists, so we can use the most recently applied parameters
 
-		$class = get_class($this);
 		if ($errorMsg) {
-			if (!isset($class::$VALIDATOR_ERRORS)) {
-				$class::$VALIDATOR_ERRORS = array();
+			$vars = get_class_vars(get_class($this));
+			if (!isset($vars['VALIDATOR_ERRORS'])) {
+				self::$VALIDATOR_ERRORS = array();
 			}
-			$class::$VALIDATOR_ERRORS[$validatorName] = $errorMsg;
+			self::$VALIDATOR_ERRORS[$validatorName] = $errorMsg;
 		}
 		if (sizeof($params) || $customFunc) {
 			$validatorName = array(
@@ -273,8 +273,10 @@ class FormIOField_Text extends FormIOField_Raw
 				break;		// reached top of the class chain: parent class is same as the current one
 			}
 			$prevClass = $class;
-			if (isset($class::$VALIDATOR_ERRORS) && isset($class::$VALIDATOR_ERRORS[$callbackName])) {
-				$str = $class::$VALIDATOR_ERRORS[$callbackName];
+
+			$vars = get_class_vars($class);
+			if (isset($vars['VALIDATOR_ERRORS']) && isset($vars['VALIDATOR_ERRORS'][$callbackName])) {
+				$str = $vars['VALIDATOR_ERRORS'][$callbackName];
 				break;
 			}
 		} while ($class = get_parent_class($class));
