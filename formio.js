@@ -589,10 +589,12 @@ FormIO.prototype.onSubmit = function()
 			params.unshift(fieldEl);				// pass element through as parameter 0
 			if (typeof that[name] == 'function') {	// look in FormIO scope
 				if (!(that[name]).apply(that, params)) {
+					that.highlightError(fieldEl);
 					allOk = false;
 				}
 			} else if (typeof name == 'function') {	// look for external validation function
 				if (!name.apply(that, params)) {
+					that.highlightError(fieldEl);
 					allOk = false;
 				}
 			} else if (console && typeof console.error == 'function') {
@@ -631,7 +633,6 @@ FormIO.prototype.highlightError = function(field)
 //	VALIDATORS
 
 FormIO.prototype.requiredValidator = function(el) {
-	this.highlightError(el);
 	return el.val().length > 0;
 };
 
