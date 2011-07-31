@@ -100,7 +100,7 @@ class FormIOField_Repeater extends FormIOField_Group
 			unset($vars['error']);
 		}
 		if ($this->getAttribute('fieldtype') == FormIO::T_FILE) {
-			$vars['isfiles'] = $this->name;		// we pass the fieldname as it's the only thing we need to output in that builder string
+			$vars['isfiles'] = $this->getName();		// we pass the fieldname as it's the only thing we need to output in that builder string
 		}
 
 		unset($vars['value']);

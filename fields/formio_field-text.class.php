@@ -137,7 +137,7 @@ class FormIOField_Text extends FormIOField_Raw
 				$valid = $dataSubmitted;
 			} else {
 				if ($externalValidator) {
-					array_unshift($params, $this->name);
+					array_unshift($params, $this->getName());
 					array_unshift($params, $this->form);
 					array_unshift($params, $this->value);
 				}
@@ -153,7 +153,7 @@ class FormIOField_Text extends FormIOField_Raw
 			}
 
 			if (!$valid) {
-				$this->form->addError($this->name, $this->buildErrorString($this, $func, $params));
+				$this->form->addError($this->getName(), $this->buildErrorString($this, $func, $params));
 				$allValid = false;
 			}
 		}
@@ -334,7 +334,7 @@ class FormIOField_Text extends FormIOField_Raw
 		foreach ($fields as $field) {
 			if (!$field->isPresentational()) {
 				foreach ($field->getDependencies() as $postValue => $targetFields) {
-					if (in_array($this->name, $targetFields)) {				// field is dependant on another field's submission
+					if (in_array($this->getName(), $targetFields)) {				// field is dependant on another field's submission
 						if ($field->getValue() != $postValue) {				// and value for master field means this field is hidden
 							$hidden = true;
 						} else {

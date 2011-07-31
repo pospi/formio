@@ -226,23 +226,31 @@ class FormIO implements ArrayAccess
 
 		$unhandledFields = $this->fields;               // reference the fields array so we can remove the processed ones
 
+		$fieldNames = $this->getInputFieldNames();
+
 		// now we add the new data
 		foreach ($assoc as $k => $val) {
-			if (!array_key_exists($k, $this->fields)) {
+			if (!array_key_exists($k, $fieldNames)) {
 				unset($assoc[$k]);
 				continue;
 			}
 
-			// if we are POSTing, and the input variable is a repeated file input, act accordingly.
-			if ($isPost
-			  && $this->fields[$k] instanceof FormIOField_Repeater
-			  && $this->fields[$k]->getAttribute('fieldtype') == FormIO::T_FILE
-			  && isset($val['isfiles'])) {
-				$val = $this->importData($k, false, true);
-			}
+			// get the field objects related to this data value, eg for when submit buttons share a name
+			$relatedFields = $fieldNames[$k];
 
-			$this->fields[$k]->setValue($val);
-			unset($unhandledFields[$k]);		// remove the processed field from the list
+			foreach ($relatedFields as $fieldIndex) {
+				$field = $this->fields[$fieldIndex];
+				// if we are POSTing, and the input variable is a repeated file input, act accordingly.
+				if ($isPost
+				  && $field instanceof FormIOField_Repeater
+				  && $field->getAttribute('fieldtype') == FormIO::T_FILE
+				  && isset($val['isfiles'])) {
+					$val = $this->importData($k, false, true);
+				}
+
+				$field->setValue($val);
+				unset($unhandledFields[$fieldIndex]);		// remove the processed field from the list
+			}
 		}
 
 		// go through all unhandled fields and give them an opportunity to reset their value to an 'unprovided' state
@@ -275,17 +283,20 @@ class FormIO implements ArrayAccess
 	 */
 	public function addField($name, $displayText, $type, $value = null)
 	{
-		if (isset($this->fields[$name])) {
-			trigger_error("Attempted to add new FormIO field, but field name already exists", E_USER_ERROR);
-			return null;
-		}
-
 		// mimic old CAPTCHA behaviour by reading class captcha type variable
 		if ($type == FormIO::T_CAPTCHA) {
 			$type = $this->captchaType;
 		}
 
+		// create field
 		$field = FormIO::loadFieldByClass($type, $name, $displayText, $this);
+
+		$arrayKey = $field->getInternalName();
+
+		if (isset($this->fields[$arrayKey])) {
+			trigger_error("Attempted to add new FormIO field, but field name already exists", E_USER_ERROR);
+			return null;
+		}
 
 		// repeater type must be set before value, hence this little hack!
 		if ($this->nextRepeaterFieldType !== false) {
@@ -298,9 +309,9 @@ class FormIO implements ArrayAccess
 			$field->setValue($value);
 		}
 
-		$this->fields[$name] = $field;
+		$this->fields[$arrayKey] = $field;
 
-		$this->lastAddedField = $name;
+		$this->lastAddedField = $arrayKey;
 		return $this;
 	}
 
@@ -656,7 +667,7 @@ class FormIO implements ArrayAccess
 		$this->addField($name, $text, FormIO::T_SUBMIT, $text);
 
 		if ($defaultAction || !isset($this->defaultSubmit)) {
-			$this->defaultSubmit = $name;
+			$this->defaultSubmit = $this->lastAddedField;
 		}
 
 		return $this;
@@ -916,7 +927,9 @@ class FormIO implements ArrayAccess
 				$key = call_user_func_array($myKeyMethod, $keyArgs);
 				$value = call_user_func_array($myValueMethod, $valueArgs);
 
-				$data[$key] = $value;
+				if (!isset($data[$key]) || $value) {
+					$data[$key] = $value;
+				}
 			}
 		}
 
@@ -936,6 +949,23 @@ class FormIO implements ArrayAccess
 			$fieldName = $param;
 		}
 		return array($includeSubmit, $fieldName);
+	}
+
+	// retrieve an array mapping the names of all fields in the form to instances of
+	// inputs with those field names - multiple fields may share the same input name
+	private function getInputFieldNames()
+	{
+		$names = array();
+		foreach ($this->fields as $key => $field) {
+			$name = $field->getName();
+			if (!$field->isPresentational()) {
+				if (isset($names[$name])) {
+					$names[$name][] = $key;
+				}
+				$names[$name] = array($key);
+			}
+		}
+		return $names;
 	}
 
 	//==========================================================================

@@ -8,7 +8,7 @@ class FormIOField_Raw
 {
 	protected $form;					// form to which this field is attached
 
-	protected $name;					// field name (data key)
+	private $name;						// field name (data key)
 	protected $attributes = array();	// field attributes (mainly DOM attributes but subclasses will use it for other stuff)
 
 	public $buildString = '{$desc}';
@@ -23,7 +23,7 @@ class FormIOField_Raw
 	{
 		$this->form = $form;
 
-		$this->name = $name;
+		$this->setName($name);
 		if (isset($displayText)) {
 			$this->setAttribute('desc', $displayText);
 		}
@@ -95,7 +95,22 @@ class FormIOField_Raw
 
 	public function getHumanReadableName()
 	{
-		return isset($this->attributes['desc']) ? $this->attributes['desc'] : $this->name;
+		return isset($this->attributes['desc']) ? $this->attributes['desc'] : $this->getName();
+	}
+
+	/**
+	 * This allows fields to modify the array key under which to store them whist
+	 * masquerading a name value underneath by overriding getName() and setName()
+	 * @see FormIOField_Submit
+	 */
+	final public function getInternalName()
+	{
+		return $this->name;
+	}
+
+	public function setName($newName)
+	{
+		$this->name = $newName;
 	}
 
 	/**
@@ -113,7 +128,7 @@ class FormIOField_Raw
 		if ($this->form->delaySubmission) {
 			return null;
 		}
-		return $this->form->getError($this->name);
+		return $this->form->getError($this->getName());
 	}
 
 	protected function getBuilderVars()
@@ -123,7 +138,7 @@ class FormIOField_Raw
 		$vars = $this->attributes;
 
 		$vars['id']		= $this->getFieldId();
-		$vars['name']	= $this->name;
+		$vars['name']	= $this->getName();
 
 		if ($errors = $this->getErrors()) {
 			$errArray = is_array($errors) ? $errors : array($errors);
@@ -138,7 +153,7 @@ class FormIOField_Raw
 	public function getFieldId($nameToEncode = null)
 	{
 		if (!isset($nameToEncode)) {
-			$nameToEncode = $this->name;
+			$nameToEncode = $this->getName();
 		}
 		return $this->form->name . '_' . str_replace(array('[', ']'), array('_', ''), $nameToEncode);
 	}

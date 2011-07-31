@@ -12,7 +12,7 @@ class FormIOField_Radiogroup extends FormIOField_Dropdown
 		if (!$vars = parent::getNextOptionVars()) {
 			return false;
 		}
-		$vars['name'] = $this->name;
+		$vars['name'] = $this->getName();
 		return $vars;
 	}
 }

@@ -35,9 +35,9 @@ class FormIOField_Group extends FormIOField_Text
 		}
 		// we don't array index subfields for file inputs, as they don't support array sending
 		if ($fieldType == 'file' || is_subclass_of(FormIO::preloadFieldClass($fieldType), FormIO::preloadFieldClass('file'))) {
-			$name = $this->name . '_f' . $index;
+			$name = $this->getName() . '_f' . $index;
 		} else {
-			$name = $this->name . '[' . $index . ']';
+			$name = $this->getName() . '[' . $index . ']';
 		}
 		$field = FormIO::loadFieldByClass($fieldType, $name, $desc, $this->form);
 

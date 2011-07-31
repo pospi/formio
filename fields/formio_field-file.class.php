@@ -39,7 +39,7 @@ class FormIOField_File extends FormIOField_Text
 			case UPLOAD_ERR_CANT_WRITE:
 			case UPLOAD_ERR_EXTENSION:
 				$ok = false;
-				$this->form->addError($this->name, FormIOField_File::$VALIDATOR_ERRORS['fileInvalid' . $this->value['error']]);
+				$this->form->addError($this->getName(), FormIOField_File::$VALIDATOR_ERRORS['fileInvalid' . $this->value['error']]);
 		}
 		return $ok;
 	}
