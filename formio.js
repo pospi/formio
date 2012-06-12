@@ -284,7 +284,7 @@ FormIO.prototype.inputIsMatching = function(el, value)
 // field ID helpers
 FormIO.prototype.getFieldId = function(fldname)
 {
-	return this.elements.attr('id') + '_' + fldname.replace(/\[/g, '_').replace(/\]/g, '');
+	return (this.elements.attr('id') ? this.elements.attr('id') + '_' : '') + fldname.replace(/\[/g, '_').replace(/\]/g, '');
 };
 
 FormIO.prototype.getFieldName = function(fldId)

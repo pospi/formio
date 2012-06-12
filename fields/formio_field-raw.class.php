@@ -155,7 +155,7 @@ class FormIOField_Raw
 		if (!isset($nameToEncode)) {
 			$nameToEncode = $this->getName();
 		}
-		return $this->form->name . '_' . str_replace(array('[', ']'), array('_', ''), $nameToEncode);
+		return ($this->form->name ? $this->form->name . '_' : '') . str_replace(array('[', ']'), array('_', ''), $nameToEncode);
 	}
 
 	final public function getFieldType()

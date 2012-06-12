@@ -1011,7 +1011,7 @@ class FormIO implements ArrayAccess
 				. '>';
 	}
 
-	public function getFieldsHTML($statusMessage)
+	public function getFieldsHTML($statusMessage = '')
 	{
 		$hasHeader = isset($this->sections[0]) && $this->sections[0]->getAttribute('classes') == 'header';
 		$foundFirstSection = false;
