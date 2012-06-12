@@ -18,7 +18,7 @@
 (function($) {
 
 $(document).ready(function() {
-	$('form.clean').formio();
+	$('form.formio').formio();
 });
 
 $.fn.formio = function(func) {

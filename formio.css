@@ -9,7 +9,7 @@
 
 /* General */
 
-form.clean {
+.formio, form.formio {
 	line-height: 1.25em;
 	text-align:left;
 	position:relative;
@@ -17,17 +17,17 @@ form.clean {
 	border: 0;
 }
 
-form.clean div.row, form.clean fieldset, form.clean div.group div.row {
+.formio div.row, .formio fieldset, .formio div.group div.row {
 	clear: left;
 	padding: 0.5em;
 	margin: 0;
 }
 
-form.clean .alt {
+.formio .alt {
 	background: #E8F3FF;
 }
 
-form.clean label {
+.formio label {
 	padding:0;
 	margin:0.3em 0;
 	float: left;
@@ -35,40 +35,40 @@ form.clean label {
 	margin-right: 1%;
 }
 
-form.clean div.blck { position: relative; }
-form.clean div.blck .row { margin: 0 0 0 25%; padding: 0.5em 0 0 0; background: transparent; }
-form.clean div.blck label { position: absolute; }
-form.clean div.blck .row label { display: none; }
-form.clean div.group .row label { display: inline; left: 1%; }
-form.clean div.blck input { display: inline; width: 93%; }
-form.clean div.blck input[type=checkbox], form.clean div.blck input[type=radio], form.clean div.blck input[type=submit], form.clean div.blck input[type=reset], form.clean div.blck input[type=button] { width: auto; }
-form.clean div.blck .pad { width: 25%; height: 1em; float: left; }
+.formio div.blck { position: relative; }
+.formio div.blck .row { margin: 0 0 0 25%; padding: 0.5em 0 0 0; background: transparent; }
+.formio div.blck label { position: absolute; }
+.formio div.blck .row label { display: none; }
+.formio div.group .row label { display: inline; left: 1%; }
+.formio div.blck input { display: inline; width: 93%; }
+.formio div.blck input[type=checkbox], .formio div.blck input[type=radio], .formio div.blck input[type=submit], .formio div.blck input[type=reset], .formio div.blck input[type=button] { width: auto; }
+.formio div.blck .pad { width: 25%; height: 1em; float: left; }
 
-form.clean fieldset {
+.formio fieldset {
 	border:1px solid #ddd;
 	margin-bottom: 1em;
 }
 
-form.clean fieldset legend {
+.formio fieldset legend {
 	font-size: 1.2em;
 	font-weight: bold;
 	padding: 0;											/* IE only (see overrides at bottom) */
 }
 
-form.clean label, form.clean .multiple legend {
+.formio label, .formio .multiple legend {
 	font-weight:bold;
 	position: relative;
 	font-size: 1em;
 }
 
-form.clean input, form.clean div.readonly {
+.formio input, .formio div.readonly {
 	width:70%;
 	padding:0.15em;
 	line-height:1em;
 }
-form.clean div.readonly { padding-top: 0.25em; }
+.formio div.readonly { padding-top: 0.25em; }
 
-form.clean input, form.clean textarea, form.clean select {
+.formio input, .formio textarea, .formio select {
 	display:block;
 	font-size:1em;
 	border:1px solid #bbb;
@@ -76,33 +76,33 @@ form.clean input, form.clean textarea, form.clean select {
 	margin-right:1em;
 }
 
-form.clean textarea, form.clean select {
+.formio textarea, .formio select {
 	width: 50%;
 }
 
-form.clean textarea {
+.formio textarea {
 	height: 8em;
 }
 
-form.clean .multiple {
+.formio .multiple {
 	border: 0;
 	padding: 0 0.25em 0 0.25em;
 	margin-bottom: 0;
 }
 
-form.clean .multiple label, form.clean .multiple input {
+.formio .multiple label, .formio .multiple input {
 	display:inline;
 }
 
 
-form.clean .multiple input {
+.formio .multiple input {
 	width:auto;
 	border:none;
 	margin:0 0.3em 0 0;
 	cursor:pointer;
 }
 
-form.clean .multiple label {
+.formio .multiple label {
 	float:left;
 	overflow:hidden;
 	font-weight: normal;
@@ -111,78 +111,78 @@ form.clean .multiple label {
 	margin: 0 3% 0.5em 0;
 	width: 96%;
 }
-form.clean .multiple.col2 label { width:46%; }
-form.clean .multiple.col3 label { width:29%; }
-form.clean .multiple.col4 label { width:21%; }
-form.clean .multiple.col5 label { width:16%; }
+.formio .multiple.col2 label { width:46%; }
+.formio .multiple.col3 label { width:29%; }
+.formio .multiple.col4 label { width:21%; }
+.formio .multiple.col5 label { width:16%; }
 
-form.clean .multiple legend {
+.formio .multiple legend {
 	padding: 0.5em 0.25em 0.5em 0;
 	margin-left: -0.25em;								/* IE only (see overrides at bottom) */
 }
 
-form.clean .multiple legend .required {
+.formio .multiple legend .required {
 	top: 0.25em;
 }
 
-form.clean .multiple p.hint, form.clean .multiple p.err { padding: 1em 0 0 0; margin-left: 0; }
-form.clean .blck .row p.hint, form.clean .blck .row p.err { margin-left: 0; }
+.formio .multiple p.hint, .formio .multiple p.err { padding: 1em 0 0 0; margin-left: 0; }
+.formio .blck .row p.hint, .formio .blck .row p.err { margin-left: 0; }
 
 /* Type-specific */
 
-form.clean .checkbox input, form.clean .checkbox label.checkbox, form.clean input[type=radio] {
+.formio .checkbox input, .formio .checkbox label.checkbox, .formio input[type=radio] {
 	width: auto;
 	display: inline;
 	font-weight: normal;
 	border: 0;
 }
-form.clean .checkbox label.checkbox { font-weight: bold; }
+.formio .checkbox label.checkbox { font-weight: bold; }
 
-form.clean input[type=text], form.clean input[type=password] {
+.formio input[type=text], .formio input[type=password] {
 	padding-right: 1em;		/* this balances out the currency input's left padding... */
 }
 
-form.clean .daterange input, form.clean .datetime input, form.clean .datetime select {
+.formio .daterange input, .formio .datetime input, .formio .datetime select {
 	width: auto !important;
 	display: inline;
 	margin: 0;
 }
 
-form.clean input.date {
+.formio input.date {
 	width: 7em !important;
 }
 
-form.clean input.time {
+.formio input.time {
 	text-align: right;
 	width: 5em !important;
 }
 
-form.clean img.captcha {
+.formio img.captcha {
 	vertical-align: middle;
 }
 
-form.clean .currency {
+.formio .currency {
 	position: relative;
 }
 
-form.clean .currency input {
+.formio .currency input {
 	padding-left: 1em;
 }
 
-form.clean .currency span {
+.formio .currency span {
 	position: absolute;
 	left: 0.3em;
 	top: 0.15em;
 	line-height:2em;								/* IE only (see overrides at bottom) */
 }
 
-form.clean .currency input, form.clean .datetime input {
+.formio .currency input, .formio .datetime input {
 	padding-right: 0.15em;
 }
 
 /* Button */
 
-form.clean button, form.clean input[type=submit], form.clean input[type=reset], form.clean input[type=button] {
+.formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button] {
 	margin:0.3em 0;
 	border:1px solid #ccc;
 	background-color:#eee;
@@ -193,13 +193,13 @@ form.clean button, form.clean input[type=submit], form.clean input[type=reset], 
 	display: inline;
 }
 
-form.clean button:hover, form.clean input[type=submit]:hover, form.clean input[type=reset]:hover, form.clean input[type=button]:hover {
+.formio button:hover, .formio input[type=submit]:hover, .formio input[type=reset]:hover, .formio input[type=button]:hover {
 	background-color:#C2D6EF;
 	border:1px solid #000;
 	color:#000;
 }
 
-form.clean button:active, form.clean input[type=submit]:active, form.clean input[type=reset]:active, form.clean input[type=button]:active {
+.formio button:active, .formio input[type=submit]:active, .formio input[type=reset]:active, .formio input[type=button]:active {
 	background-color:#333;
 	color:white;
 	border:1px solid #000;
@@ -207,12 +207,12 @@ form.clean button:active, form.clean input[type=submit]:active, form.clean input
 
 /* information */
 
-form.clean .status {
+.formio .status {
 	margin-bottom:1em;
 	text-align: justify;
 }
 
-form.clean .required {
+.formio .required {
 	color:#ff3838;
 	font-weight:bold;
 	font-size:0.8em;
@@ -221,26 +221,26 @@ form.clean .required {
 	top: -0.5em;
 }
 
-form.clean .err, form.clean .errSummary {
+.formio .err, .formio .errSummary {
 	color:#DF4545;
 	font-weight:bold;
 }
 
-form.clean li.sectionErrors { border-color: #E8AEAE; }
-form.clean li.sectionErrors a {	color: #A82626; }
-form.clean div.tabNav { float: right; }
+.formio li.sectionErrors { border-color: #E8AEAE; }
+.formio li.sectionErrors a {	color: #A82626; }
+.formio div.tabNav { float: right; }
 
-form.clean p.hint {
+.formio p.hint {
 	color: #5F5F5F;
 }
 
-form.clean p.hint, form.clean p.err {
+.formio p.hint, .formio p.err {
 	font-size: 0.8em;
 	clear: left;
 	margin: 0 0 0 25%;
 }
 
-form.clean .errSummary {
+.formio .errSummary {
 	margin: 0.5em 0;
 	font-size: 1em;
 }
@@ -248,24 +248,24 @@ form.clean .errSummary {
 /* Browser-specific style overrides (by which I mean hacks) */
 
 @-moz-document url-prefix() {							/* Gecko overrides */
-	form.clean .multiple legend {
+	.formio .multiple legend {
 		margin-left: 0.25em;
 	}
-	form.clean fieldset legend {
+	.formio fieldset legend {
 		padding: 0 0.25em;
 	}
-	form.clean .currency span {
+	.formio .currency span {
 		line-height:1.2em;
 	}
 }
 @media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit overrides */
-	form.clean .multiple legend {
+	.formio .multiple legend {
 		margin-left: 0.25em;
 	}
-	form.clean fieldset legend {
+	.formio fieldset legend {
 		padding: 0 0.25em;
 	}
-	form.clean .currency span {
+	.formio .currency span {
 		line-height:1.5em;
 	}
 }

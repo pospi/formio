@@ -1005,7 +1005,7 @@ class FormIO implements ArrayAccess
 	// generates and returns the opening <form> tag for this form
 	public function getFormTag()
 	{
-		return "<form id=\"$this->name\" class=\"clean\" method=\"" . strtolower($this->method)
+		return "<form id=\"$this->name\" class=\"formio\" method=\"" . strtolower($this->method)
 				. "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '')
 				. " data-fio-stripe=\"" . http_build_query($this->getRowStriperIncrements()) . "\""
 				. '>';
