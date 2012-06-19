@@ -37,7 +37,7 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	public function setValue($value)
 	{
 		if (is_array($value)) {
-			$value = implode($this->getAttribute('deimiter', self::DEFAULT_DELIM), $value);
+			$value = implode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $value);
 		}
 		parent::setValue($value);
 	}
