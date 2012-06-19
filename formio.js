@@ -10,6 +10,7 @@
 
 	@depends	JQuery 1.4.4
 	@depends	JQuery UI 1.8.6
+	@depends	JQuery tokeninput - http://loopj.com/jquery-tokeninput/
 	----------------------------------------------------------------------------
 	@author		Sam Pospischil <pospi@spadgos.com>
 	@date		2010-11-23
