@@ -477,7 +477,53 @@ FormIO.prototype.initDateField = function(el)
 
 FormIO.prototype.initAutoCompleteField = function(el)
 {
-	el.autocomplete({'source' : el.data('fio-searchurl')});
+	var multiple = el.data('fio-multiple') || false;
+	if (multiple) {
+		var delim = el.data('fio-delimiter') || ',';
+		// input tokenisation helpers
+		function split( val ) {
+			return val.split( /,\s*/ );
+		}
+		function extractLast( term ) {
+			return split( term ).pop();
+		}
+
+		// don't navigate away from the field on tab when selecting an item
+		el.bind( "keydown", function( event ) {
+			if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
+				event.preventDefault();
+			}
+		}).autocomplete({
+			source : el.data('fio-searchurl'),
+
+			// prevent value inserted on focus
+			focus: function() {
+				return false;
+			},
+
+			// search callback to split value on delimiter
+			search : function() {
+				// custom minLength
+				var term = extractLast( this.value );
+				if ( term.length < 2 ) {
+					return false;
+				}
+			},
+			select: function( event, ui ) {
+				var terms = split( this.value );
+				// remove the current input
+				terms.pop();
+				// add the selected item
+				terms.push( ui.item.value );
+				// add placeholder to get the comma-and-space at the end
+				terms.push( "" );
+				this.value = terms.join( delim + " " );
+				return false;
+			}
+		});
+	} else {
+		el.autocomplete({'source' : el.data('fio-searchurl')});
+	}
 };
 
 FormIO.prototype.initSecurImageField = function(el)		// adds 'reload image' behaviour

@@ -516,7 +516,27 @@ class FormIO implements ArrayAccess
 			trigger_error("Wrong field type for autocomplete URL with field '$k'", E_USER_WARNING);
 		}
 
-		$this->fields[$k]->setAttribute('searchurl', $url);
+		$this->fields[$k]->setAutocompleteUrl($url);
+
+		return $this;
+	}
+
+	/**
+	 * Sets an autocomplete field to accept multiple values. $k may be ommitted in calling.
+	 * :CHAINABLE:
+	 */
+	public function setAutocompleteMultiple($k, $delim = ',')
+	{
+		if (func_num_args() < 2) {
+			$delim = $k;
+			$k = $this->lastAddedField;
+		}
+
+		if (!$this->fields[$k] instanceof FormIOField_Autocomplete) {
+			trigger_error("Wrong field type for autocomplete URL with field '$k'", E_USER_WARNING);
+		}
+
+		$this->fields[$k]->setMultiple($delim);
 
 		return $this;
 	}
