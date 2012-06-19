@@ -482,7 +482,7 @@ FormIO.prototype.initDateField = function(el)
 	});
 };
 
-FormIO.prototype.initAutoCompleteField = function(el)
+FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 {
 	var multiple = el.data('fio-multiple') || false;
 	if (multiple) {
@@ -515,14 +515,14 @@ FormIO.prototype.initAutoCompleteField = function(el)
 		el.attr('name', realName);
 
 		// init tokeninput
-		el.tokenInput(el.data('fio-searchurl'), {
+		el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
 			prePopulate : currentData,
 			queryParam : 'term',
 			hintText : '',
 			preventDuplicates : true,
 			tokenDelimiter : el.data('fio-delimiter') || ',',
 			tokenValue : 'id'
-		});
+		}, otherOptions || {}));
 	} else {
 		el.autocomplete({'source' : el.data('fio-searchurl')});
 	}
