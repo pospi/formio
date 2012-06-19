@@ -480,7 +480,6 @@ FormIO.prototype.initAutoCompleteField = function(el)
 {
 	var multiple = el.data('fio-multiple') || false;
 	if (multiple) {
-		var delim = el.data('fio-delimiter') || ',';
 		// input tokenisation helpers
 		function split( val ) {
 			return (val || '').split( /,\s*/ );
@@ -489,51 +488,34 @@ FormIO.prototype.initAutoCompleteField = function(el)
 			return split( term ).pop();
 		}
 
-		// don't navigate away from the field on tab when selecting an item
-		el.bind( "keydown", function( event ) {
-			if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
-				event.preventDefault();
+		// parse and read values for tokeninput plugin
+		var realInput = el.prev(),
+			ids = realInput.val(),
+			labels = el.val(),
+			currentData = [],
+			i = 0;
+		ids = split(ids);
+		labels = split(labels);
+		for (; i < ids.length; ++i) {
+			if ($.trim(ids[i]) == '') {
+				continue;
 			}
-		}).autocomplete({
-			// only send last term to seach endpoint
-			source: function( request, response ) {
-				$.getJSON( el.data('fio-searchurl'), {
-					term: extractLast( request.term )
-				}, response);
-			},
+			currentData.push({id: ids[i], name: labels[i]});
+		}
 
-			// prevent value inserted on focus
-			focus: function() {
-				return false;
-			},
+		// switch names of the visible and hidden input since it will now be sending back correct ID list data
+		var realName = realInput.attr('name');
+		realInput.attr('name', el.attr('name'));
+		el.attr('name', realName);
 
-			// search callback to split value on delimiter
-			search : function() {
-				// custom minLength
-				var term = extractLast( this.value );
-				if ( term.length < 2 ) {
-					return false;
-				}
-			},
-
-			// update readable selection & selection IDs when chosen
-			select: function( event, ui ) {
-				var actualInput = $(this).prev(),
-					labels = split( this.value ),
-					ids = split( actualInput.val() );
-
-				// remove the current input
-				labels.pop();
-				// add the selected item
-				labels.push( ui.item.label );
-				ids.push( ui.item.value );
-				// add placeholder to get the comma-and-space at the end
-				labels.push( "" );
-
-				this.value = labels.join( delim + " " );
-				actualInput.val(ids.join( delim + " " ));
-				return false;
-			}
+		// init tokeninput
+		el.tokenInput(el.data('fio-searchurl'), {
+			prePopulate : currentData,
+			queryParam : 'term',
+			hintText : '',
+			preventDuplicates : true,
+			tokenDelimiter : el.data('fio-delimiter') || ',',
+			tokenValue : 'id'
 		});
 	} else {
 		el.autocomplete({'source' : el.data('fio-searchurl')});

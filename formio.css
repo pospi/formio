@@ -180,6 +180,33 @@
 	padding-right: 0.15em;
 }
 
+/* Tokenised multivalue autocomplete */
+
+.formio ul.token-input-list {
+	border: 1px solid #dfdfdf;
+	color: #333;
+	margin-right: 1em;
+	width: 100%;
+	line-height: 1em;
+}
+
+.formio li.token-input-token {
+	float: left;
+	background-color: #C2E0FF;
+}
+
+.formio li.token-input-token span {
+	color: #333;
+}
+
+div.token-input-dropdown ul li.token-input-selected-dropdown-item {
+	background-color: #C2E0FF;
+}
+
+.formio .token-input-delete-token {
+	margin-left: 0.3em;
+}
+
 /* Button */
 
 .formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button] {
