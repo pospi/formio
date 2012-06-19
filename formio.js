@@ -109,7 +109,11 @@ FormIO.prototype.setupFields = function(inside)
 		var ofInterest = $(selector, inside);
 
 		ofInterest.each(function(j) {
-			(t[method])($(this));
+			if ($.isFunction(method)) {
+				method.call(t, $(this));
+			} else {
+				(t[method])($(this));
+			}
 		});
 	});
 };
