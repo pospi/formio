@@ -482,7 +482,7 @@ FormIO.prototype.initAutoCompleteField = function(el)
 		var delim = el.data('fio-delimiter') || ',';
 		// input tokenisation helpers
 		function split( val ) {
-			return val.split( /,\s*/ );
+			return (val || '').split( /,\s*/ );
 		}
 		function extractLast( term ) {
 			return split( term ).pop();
@@ -494,7 +494,12 @@ FormIO.prototype.initAutoCompleteField = function(el)
 				event.preventDefault();
 			}
 		}).autocomplete({
-			source : el.data('fio-searchurl'),
+			// only send last term to seach endpoint
+			source: function( request, response ) {
+				$.getJSON( el.data('fio-searchurl'), {
+					term: extractLast( request.term )
+				}, response);
+			},
 
 			// prevent value inserted on focus
 			focus: function() {
@@ -509,15 +514,23 @@ FormIO.prototype.initAutoCompleteField = function(el)
 					return false;
 				}
 			},
+
+			// update readable selection & selection IDs when chosen
 			select: function( event, ui ) {
-				var terms = split( this.value );
+				var actualInput = $(this).prev(),
+					labels = split( this.value ),
+					ids = split( actualInput.val() );
+
 				// remove the current input
-				terms.pop();
+				labels.pop();
 				// add the selected item
-				terms.push( ui.item.value );
+				labels.push( ui.item.label );
+				ids.push( ui.item.value );
 				// add placeholder to get the comma-and-space at the end
-				terms.push( "" );
-				this.value = terms.join( delim + " " );
+				labels.push( "" );
+
+				this.value = labels.join( delim + " " );
+				actualInput.val(ids.join( delim + " " ));
 				return false;
 			}
 		});
