@@ -1,0 +1,3 @@
+[submodule "lib/jquery-tokeninput"]
+	path = lib/jquery-tokeninput
+	url = git://github.com/loopj/jquery-tokeninput.git
