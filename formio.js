@@ -16,6 +16,8 @@
 	@date		2010-11-23
   ===============================================================================*/
 
+var FormIO;	// exports
+
 (function($) {
 
 $(document).ready(function() {
@@ -50,7 +52,7 @@ $.fn.formio = function(func) {
  * in a jQuery selector, rather than one for an entire array. I was contemplating making it
  * throw an error for this, but I can see valid uses for multiple element selectors as well.
  */
-var FormIO = function(formEl, options)
+FormIO = function(formEl, options)
 {
 	var that = this;
 
@@ -76,7 +78,7 @@ FormIO.prototype.options = {
 		"[data-fio-type='date']"	: 'initDateField',
 		"[data-fio-type='securimage']" : 'initSecurImageField',
 		"[data-fio-type='repeater']"	: 'initRepeater',
-		"[data-fio-searchurl]"		: 'initAutoCompleteField',
+		"[data-fio-type='autocomplete']" : 'initAutoCompleteField',
 		"[data-fio-depends]"		: 'initDependencies',
 		"input[type=submit], input[type=reset], input[type=button]" : 'initButton',
 

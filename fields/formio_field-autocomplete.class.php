@@ -95,6 +95,7 @@ class FormIOField_Autocomplete extends FormIOField_Text
 			$name .= '_friendly';
 		}
 		$vars['friendlyName'] = $name;
+		$vars['behaviour'] = 'autocomplete';
 
 		return $vars;
 	}
