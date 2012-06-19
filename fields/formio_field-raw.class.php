@@ -69,9 +69,9 @@ class FormIOField_Raw
 		return $this->attributes;
 	}
 
-	public function getAttribute($key)
+	public function getAttribute($key, $default = null)
 	{
-		return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
+		return isset($this->attributes[$key]) ? $this->attributes[$key] : $default;
 	}
 
 	public function setAttributes($array)
