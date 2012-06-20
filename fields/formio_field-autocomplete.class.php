@@ -6,7 +6,7 @@
 class FormIOField_Autocomplete extends FormIOField_Text
 {
 	public $singleBuildString = '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}"{$multiple? data-fio-multiple="$multiple"}{$delimiter? data-fio-delimiter="$delimiter"}{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
-	public $multiBuildString = '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="hidden" name="{$name}"{$value? value="$value"} /><input type="text" name="{$friendlyName}" id="{$id}"{$friendlyValue? value="$friendlyValue"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}"{$multiple? data-fio-multiple="$multiple"}{$delimiter? data-fio-delimiter="$delimiter"}{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+	public $multiBuildString = '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="hidden" name="{$name}"{$value? value="$value"}{$extradata? data-fio-value-metadata="$extradata"} /><input type="text" name="{$friendlyName}" id="{$id}"{$friendlyValue? value="$friendlyValue"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"} data-fio-searchurl="{$searchurl}"{$multiple? data-fio-multiple="$multiple"}{$delimiter? data-fio-delimiter="$delimiter"}{$dependencies? data-fio-depends="$dependencies"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
 
 	const DEFAULT_DELIM = ',';
 
@@ -81,7 +81,16 @@ class FormIOField_Autocomplete extends FormIOField_Text
 		return $val;
 	}
 
-	// add output variables for the friendly prepopulated data
+	/**
+	 * Add output variables for the friendly prepopulated data
+	 *
+	 * Child classes may wish to override this method and add other data
+	 * to an 'extradata' field - this can take any format but would generally
+	 * be an array of extra metadata (beyond key and name as present by default in the
+	 * hidden input and friendly text field respectively) to output in JSON for
+	 * some client code to pick up and play with. The data attribute this goes into
+	 * is named 'fio-value-metadata'.
+	 */
 	protected function getBuilderVars()
 	{
 		$vars = parent::getBuilderVars();

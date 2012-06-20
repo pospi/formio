@@ -498,15 +498,18 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 		var realInput = el.prev(),
 			ids = realInput.val(),
 			labels = el.val(),
+			meta = realInput.data('fio-value-metadata'),
 			currentData = [],
 			i = 0;
 		ids = split(ids);
 		labels = split(labels);
+
+		// combine all data together
 		for (; i < ids.length; ++i) {
 			if ($.trim(ids[i]) == '') {
 				continue;
 			}
-			currentData.push({id: ids[i], name: labels[i]});
+			currentData.push($.extend(true, (meta ? meta[i] : {}), {id: ids[i], name: labels[i]}));
 		}
 
 		// switch names of the visible and hidden input since it will now be sending back correct ID list data
