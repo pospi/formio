@@ -59,7 +59,7 @@ FormIO = function(formEl, options)
 	this.elements = formEl;
 	this.elements.submit(function() { return that.onSubmit() });
 
-	this.setOptions(options);
+	this.setOptions(options || {});
 
 	this.setupFields(this.elements);
 	this.initTabs();
@@ -99,6 +99,7 @@ FormIO.prototype.get = function() {
 
 // overrides any keys provided with those in options
 FormIO.prototype.setOptions = function(options) {
+	options.setupRoutines = $.extend(true, {}, FormIO.prototype.options.setupRoutines, options.setupRoutines || {}),
 	$.extend(this.options, options);
 };
 
