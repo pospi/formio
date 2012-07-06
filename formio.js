@@ -528,7 +528,14 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 			tokenValue : 'id'
 		}, otherOptions || {}));
 	} else {
-		el.autocomplete({'source' : el.data('fio-searchurl')});
+		el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
+			queryParam : 'term',
+			hintText : '',
+			preventDuplicates : true,
+			tokenDelimiter : el.data('fio-delimiter') || ',',
+			tokenValue : 'id',
+			tokenLimit : 1
+		}, otherOptions || {}));
 	}
 };
 
