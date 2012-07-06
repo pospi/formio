@@ -88,6 +88,11 @@ class FormIOField_Raw
 		$this->attributes[$name] = $value;
 	}
 
+	public function clearAttribute($name)
+	{
+		unset($this->attributes[$name]);
+	}
+
 	public function getName()
 	{
 		return $this->name;

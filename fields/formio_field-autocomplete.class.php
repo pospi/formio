@@ -41,6 +41,7 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	public function setSingle()
 	{
 		$this->multiple = false;
+		$this->clearAttribute('multiple');
 		$this->buildString = $this->singleBuildString;
 	}
 
