@@ -37,12 +37,10 @@
 
 .formio fieldset legend {
 	font-size: 1.2em;
-	font-weight: bold;
 	padding: 0;											/* IE only (see overrides at bottom) */
 }
 
 .formio label, .formio .multiple legend {
-	font-weight:bold;
 	position: relative;
 	font-size: 1em;
 }
@@ -108,10 +106,12 @@
 
 .formio .currency {
 	position: relative;
+	white-space: nowrap;
 }
 
 .formio .currency input {
 	padding-left: 1em;
+	padding-right: 0;
 }
 
 .formio .currency span {
@@ -121,12 +121,21 @@
 	line-height:2em;								/* IE only (see overrides at bottom) */
 }
 
+.formio .repeater .row {
+	padding-bottom: 0;
+}
+
+.formio input.date { width: 6em !important; }
+.formio input.time { width: 3em !important; }
+
 /* Tokenised multivalue autocomplete */
 
 .formio ul.token-input-list {
 	line-height: 1em;
 	margin-right: 1em;
 	width: 100%;
+	padding: 0;
+	list-style-type: none;
 }
 
 .formio li.token-input-token {
@@ -135,6 +144,10 @@
 
 .formio .token-input-delete-token {
 	margin-left: 0.3em;
+}
+
+.formio li.token-input-input-token input {
+	border: 0;
 }
 
 /* Button */

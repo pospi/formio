@@ -21,6 +21,10 @@
 	border: 1px solid #ddd;
 }
 
+.formio label, .formio fieldset legend, .formio .multiple legend {
+	font-weight: bold;
+}
+
 .formio input, .formio div.readonly {
 	width:70%;
 	padding:0.15em;
@@ -92,9 +96,12 @@
 
 /* Tokenised multivalue autocomplete */
 
-.formio ul.token-input-list, .formio li.token-input-input-token {
+.formio ul.token-input-list {
 	border: 1px solid #dfdfdf;
 	color: #333;
+	margin-top: 0.2em;
+	float: left;
+    width: 72%;
 }
 
 .formio li.token-input-token {
@@ -166,6 +173,9 @@ div.token-input-dropdown ul li.token-input-selected-dropdown-item {
 	}
 	.formio fieldset legend {
 		padding: 0 0.25em;
+	}
+	.formio .currency span {
+		line-height: 1.1em;
 	}
 }
 @media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit overrides */

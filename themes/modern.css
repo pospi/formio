@@ -1,13 +1,31 @@
 /* General form colours & layout */
 
 .formio .alt {
-	background: #F2F9FF;
+	background: #F4FAFF;
 }
 
+.formio label {
+	clear: right;
+}
 
 .formio input, .formio textarea, .formio select {
-	display:block;
 	border: 1px solid #dfdfdf;
+	width: 80%;
+	display: block;
+}
+
+.formio select { width: auto; }
+
+.formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button],
+.formio input[type=checkbox], .formio input[type=radio],
+.formio input[type=password],
+.formio .daterange input,
+.formio .datetime input,
+.formio .daterange select,
+.formio .datetime select,
+.formio .pwdchange input {
+	display: inline;
+	width: auto;
 }
 
 .formio fieldset {
@@ -15,33 +33,20 @@
 	margin-bottom: 1em;
 }
 
-/* ellipsis multiple element label overflow - Eric Watson http://www.visibilityinherit.com/code/ellipsis.php */
-.formio .multiple label {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
-	-moz-binding: url('ellipsis.xml');
-}
-body:-moz-last-node .formio .multiple label:after {
-	content: "...";
-	padding: 0 10px 0 2px;
-	position: absolute;
-	right: 0;
-	background: #fff;
-}
-
 /* Type-specific */
 
+.formio span.currency { display: block; }
+
+.formio div.readonly { color: #999; }
 
 /* Tokenised multivalue autocomplete */
-.formio ul.token-input-list, .formio li.token-input-input-token {
+.formio ul.token-input-list {
 	border: 1px solid #dfdfdf;
 	color: #333;
 }
 
 .formio li.token-input-token {
-	background-color: #F2F9FF;
+	background-color: #F4FAFF;
 }
 
 .formio li.token-input-token span {
@@ -49,12 +54,12 @@ body:-moz-last-node .formio .multiple label:after {
 }
 
 div.token-input-dropdown ul li.token-input-selected-dropdown-item {
-	background-color: #F2F9FF;
+	background-color: #F4FAFF;
 }
 
 /* buttons */
 .formio button:hover, .formio input[type=submit]:hover, .formio input[type=reset]:hover, .formio input[type=button]:hover {
-	background-color:#F2F9FF;
+	background-color:#F4FAFF;
 	border:1px solid #000;
 	color:#000;
 }
@@ -81,4 +86,5 @@ div.token-input-dropdown ul li.token-input-selected-dropdown-item {
 .formio p.hint {
 	color: #666666;
     font-style: italic;
+    margin: 0.2em 0 0;
 }

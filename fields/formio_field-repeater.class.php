@@ -5,7 +5,7 @@
 
 class FormIOField_Repeater extends FormIOField_Group
 {
-	public $buildString = '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} data-fio-type="repeater">
+	public $buildString = '<div class="row repeater blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} data-fio-type="repeater">
 		<label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>
 		{$inputs}
 		{$isfiles?<input type="hidden" name="$isfiles[isfiles]" value="1" />}
