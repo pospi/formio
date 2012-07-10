@@ -12,6 +12,7 @@
 
 .formio fieldset {
 	border: 1px solid #ccc;
+	margin-bottom: 1em;
 }
 
 /* ellipsis multiple element label overflow - Eric Watson http://www.visibilityinherit.com/code/ellipsis.php */

@@ -5,7 +5,13 @@
 
 class FormIOField_Daterange extends FormIOField_Date
 {
-	public $buildString = '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}><label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}_start"{$value? value="$value"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} /> - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date"{$required? data-fio-validation="requiredValidator"} />{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+	public $buildString = '<div class="row daterange{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
+		<label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label>
+		<input type="text" name="{$name}[0]" id="{$id}_start"{$value? value="$value"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} />
+		 - <input type="text" name="{$name}[1]" id="{$id}_end" value="{$valueEnd}" data-fio-type="date"{$required? data-fio-validation="requiredValidator"} />
+		{$error?<p class="err">$error</p>}
+		{$hint? <p class="hint">$hint</p>}
+	</div>';
 
 	public static $VALIDATOR_ERRORS = array(
 		'dateRangeValidator'		=> "Dates must be in dd/mm/yyyy format",

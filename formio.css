@@ -25,20 +25,15 @@
 
 .formio label {
 	padding: 0;
-	margin: 0;
+	margin: 0 1em 0 0;
 }
 
 .formio div.blck { position: relative; }
 .formio div.blck .row { background: transparent; }
-.formio div.blck label { position: absolute; }
 .formio div.blck .row label { display: none; }
 .formio div.group .row label { display: inline; }
 .formio div.blck input[type=checkbox], .formio div.blck input[type=radio], .formio div.blck input[type=submit], .formio div.blck input[type=reset], .formio div.blck input[type=button] { width: auto; }
 .formio div.blck .pad { height: 1em; }
-
-.formio fieldset {
-	margin-bottom: 1em;
-}
 
 .formio fieldset legend {
 	font-size: 1.2em;
@@ -63,6 +58,7 @@
 
 .formio textarea {
 	height: 8em;		/* default textarea height */
+	vertical-align: top;
 }
 
 .formio .multiple {
@@ -79,6 +75,7 @@
 .formio .multiple label {
 	float:left;
 	font-weight: normal;
+	margin: 0;
 }
 .formio .multiple.col2 label { width:50%; }
 .formio .multiple.col3 label { width:33%; }
@@ -181,4 +178,17 @@
 .formio .errSummary {
 	font-size: 1em;
 	margin: 0.5em 0;
+}
+
+/* Browser-specific style overrides (by which I mean hacks) */
+
+@-moz-document url-prefix() {							/* Gecko overrides */
+	.formio .currency span {
+		line-height: 0.9em;
+	}
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit overrides */
+	.formio .currency span {
+		line-height: 1.5em;
+	}
 }

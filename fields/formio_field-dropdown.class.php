@@ -2,7 +2,14 @@
 
 class FormIOField_Dropdown extends FormIOField_Multiple
 {
-	public $buildString = '<div class="row{$alt? alt}{$classes? $classes}"><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>{$options}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+	public $buildString = '<div class="row{$alt? alt}{$classes? $classes}">
+		<label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label>
+		<select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
+			{$options}
+		</select>
+		{$error?<p class="err">$error</p>}
+		{$hint? <p class="hint">$hint</p>}
+	</div>';
 	public $subfieldBuildString = '<option{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>';
 
 	protected function getNextOptionVars()

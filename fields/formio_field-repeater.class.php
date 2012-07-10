@@ -6,12 +6,15 @@
 class FormIOField_Repeater extends FormIOField_Group
 {
 	public $buildString = '<div class="row blck{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} data-fio-type="repeater">
-		<label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>{$inputs}
+		<label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>
+		{$inputs}
 		{$isfiles?<input type="hidden" name="$isfiles[isfiles]" value="1" />}
 		<div class="pad"></div>
-			<input type="submit" name="{$name}[__add]" class="add" value="Add another" />
-			<input type="submit" name="{$name}[__remove]" class="remove" value="Remove last" />
-		{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+		<input type="submit" name="{$name}[__add]" class="add" value="Add another" />
+		<input type="submit" name="{$name}[__remove]" class="remove" value="Remove last" />
+		{$error?<p class="err">$error</p>}
+		{$hint? <p class="hint">$hint</p>}
+	</div>';
 
 	public static $VALIDATOR_ERRORS = array(
 		'requiredValidator' => 'You must provide at least 1 value',

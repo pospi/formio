@@ -7,7 +7,16 @@ class FormIOField_Time extends FormIOField_Date
 {
 	const timeRegex		= '/^\s*(\d{1,2})((:|\.)(\d{2}))?((:|\.)(\d{2}))?\s*$/';		// capture: hr, , , min, , , sec
 
-	public $buildString = '<div class="row datetime{$alt? alt}{$classes? $classes}"{$dependencies? data-fio-depends="$dependencies"}><label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label><input type="text" name="{$name}[0]" id="{$id}" value="{$value}" data-fio-type="time" class="time"{$required? data-fio-validation="requiredValidator"} /><select name="{$name}[1]" id="{$id}_meridian">{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}</select>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+	public $buildString = '<div class="row datetime{$alt? alt}{$classes? $classes}"{$dependencies? data-fio-depends="$dependencies"}>
+		<label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label>
+		<input type="text" name="{$name}[0]" id="{$id}" value="{$value}" data-fio-type="time" class="time"{$required? data-fio-validation="requiredValidator"} />
+		<select name="{$name}[1]" id="{$id}_meridian">
+			{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}
+			{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}
+		</select>
+		{$error?<p class="err">$error</p>}
+		{$hint? <p class="hint">$hint</p>}
+	</div>';
 
 	public static $VALIDATOR_ERRORS = array(
 		'timeValidator'		=> "Requires a valid time (hh:mm) and time of day",

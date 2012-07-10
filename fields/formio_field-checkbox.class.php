@@ -9,7 +9,14 @@
 
 class FormIOField_Checkbox extends FormIOField_Text
 {
-	public $buildString = '<div class="row checkbox{$alt? alt}{$classes? $classes}"><label class="checkbox"><input type="checkbox" name="{$name}" id="{$id}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} />{$desc}{$required? <span class="required">*</span>}</label>{$error?<p class="err">$error</p>}<p class="hint">{$hint}</p></div>';
+	public $buildString = '<div class="row checkbox{$alt? alt}{$classes? $classes}">
+		<label class="checkbox">
+			<input type="checkbox" name="{$name}" id="{$id}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} />
+			{$desc}{$required? <span class="required">*</span>}
+		</label>
+		{$error?<p class="err">$error</p>}
+		{$hint? <p class="hint">$hint</p>}
+	</div>';
 
 	protected $value = false;		// start with a value of FALSE, since checkboxes aren't sent at all when not checked
 
