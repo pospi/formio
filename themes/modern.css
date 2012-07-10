@@ -1,0 +1,83 @@
+/* General form colours & layout */
+
+.formio .alt {
+	background: #F2F9FF;
+}
+
+
+.formio input, .formio textarea, .formio select {
+	display:block;
+	border: 1px solid #dfdfdf;
+}
+
+.formio fieldset {
+	border: 1px solid #ccc;
+}
+
+/* ellipsis multiple element label overflow - Eric Watson http://www.visibilityinherit.com/code/ellipsis.php */
+.formio .multiple label {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+	-moz-binding: url('ellipsis.xml');
+}
+body:-moz-last-node .formio .multiple label:after {
+	content: "...";
+	padding: 0 10px 0 2px;
+	position: absolute;
+	right: 0;
+	background: #fff;
+}
+
+/* Type-specific */
+
+
+/* Tokenised multivalue autocomplete */
+.formio ul.token-input-list, .formio li.token-input-input-token {
+	border: 1px solid #dfdfdf;
+	color: #333;
+}
+
+.formio li.token-input-token {
+	background-color: #F2F9FF;
+}
+
+.formio li.token-input-token span {
+	color: #333;
+}
+
+div.token-input-dropdown ul li.token-input-selected-dropdown-item {
+	background-color: #F2F9FF;
+}
+
+/* buttons */
+.formio button:hover, .formio input[type=submit]:hover, .formio input[type=reset]:hover, .formio input[type=button]:hover {
+	background-color:#F2F9FF;
+	border:1px solid #000;
+	color:#000;
+}
+
+.formio button:active, .formio input[type=submit]:active, .formio input[type=reset]:active, .formio input[type=button]:active {
+	background-color: #004D8A;
+	color: white;
+	border: 1px solid #000;
+}
+
+/* information */
+
+.formio .required {
+	color: #B00000;
+}
+
+.formio .err, .formio .errSummary {
+	color: #B00000;
+}
+
+.formio li.sectionErrors { border-color: #E8AEAE; }
+.formio li.sectionErrors a { color: #B00000; }
+
+.formio p.hint {
+	color: #666666;
+    font-style: italic;
+}

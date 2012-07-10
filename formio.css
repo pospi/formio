@@ -23,29 +23,20 @@
 	margin: 0;
 }
 
-.formio .alt {
-	background: #E8F3FF;
-}
-
 .formio label {
-	padding:0;
-	margin:0.3em 0;
-	float: left;
-	width: 24%;
-	margin-right: 1%;
+	padding: 0;
+	margin: 0;
 }
 
 .formio div.blck { position: relative; }
-.formio div.blck .row { margin: 0 0 0 25%; padding: 0.5em 0 0 0; background: transparent; }
+.formio div.blck .row { background: transparent; }
 .formio div.blck label { position: absolute; }
 .formio div.blck .row label { display: none; }
-.formio div.group .row label { display: inline; left: 1%; }
-.formio div.blck input { display: inline; width: 93%; }
+.formio div.group .row label { display: inline; }
 .formio div.blck input[type=checkbox], .formio div.blck input[type=radio], .formio div.blck input[type=submit], .formio div.blck input[type=reset], .formio div.blck input[type=button] { width: auto; }
-.formio div.blck .pad { width: 25%; height: 1em; float: left; }
+.formio div.blck .pad { height: 1em; }
 
 .formio fieldset {
-	border:1px solid #ddd;
 	margin-bottom: 1em;
 }
 
@@ -62,66 +53,39 @@
 }
 
 .formio input, .formio div.readonly {
-	width:70%;
-	padding:0.15em;
-	line-height:1em;
+	line-height: 1em;
 }
 .formio div.readonly { padding-top: 0.25em; }
 
 .formio input, .formio textarea, .formio select {
-	display:block;
 	font-size:1em;
-	border:1px solid #bbb;
-	padding:0.15em;
-	margin-right:1em;
-}
-
-.formio textarea, .formio select {
-	width: 50%;
 }
 
 .formio textarea {
-	height: 8em;
+	height: 8em;		/* default textarea height */
 }
 
 .formio .multiple {
 	border: 0;
-	padding: 0 0.25em 0 0.25em;
-	margin-bottom: 0;
-}
-
-.formio .multiple label, .formio .multiple input {
-	display:inline;
 }
 
 
 .formio .multiple input {
 	width:auto;
 	border:none;
-	margin:0 0.3em 0 0;
 	cursor:pointer;
 }
 
 .formio .multiple label {
 	float:left;
-	overflow:hidden;
 	font-weight: normal;
-	white-space: nowrap;
-	padding: 0 0 0 1%;
-	margin: 0 3% 0.5em 0;
-	width: 96%;
 }
-.formio .multiple.col2 label { width:46%; }
-.formio .multiple.col3 label { width:29%; }
-.formio .multiple.col4 label { width:21%; }
-.formio .multiple.col5 label { width:16%; }
+.formio .multiple.col2 label { width:50%; }
+.formio .multiple.col3 label { width:33%; }
+.formio .multiple.col4 label { width:25%; }
+.formio .multiple.col5 label { width:20%; }
 
-.formio .multiple legend {
-	padding: 0.5em 0.25em 0.5em 0;
-	margin-left: -0.25em;								/* IE only (see overrides at bottom) */
-}
-
-.formio .multiple legend .required {
+.formio .multiple legend .required {	/* shift required asterisk up in fieldset element legends */
 	top: 0.25em;
 }
 
@@ -136,25 +100,9 @@
 	font-weight: normal;
 	border: 0;
 }
-.formio .checkbox label.checkbox { font-weight: bold; }
 
 .formio input[type=text], .formio input[type=password] {
 	padding-right: 1em;		/* this balances out the currency input's left padding... */
-}
-
-.formio .daterange input, .formio .datetime input, .formio .datetime select {
-	width: auto !important;
-	display: inline;
-	margin: 0;
-}
-
-.formio input.date {
-	width: 7em !important;
-}
-
-.formio input.time {
-	text-align: right;
-	width: 5em !important;
 }
 
 .formio img.captcha {
@@ -176,31 +124,16 @@
 	line-height:2em;								/* IE only (see overrides at bottom) */
 }
 
-.formio .currency input, .formio .datetime input {
-	padding-right: 0.15em;
-}
-
 /* Tokenised multivalue autocomplete */
 
 .formio ul.token-input-list {
-	border: 1px solid #dfdfdf;
-	color: #333;
+	line-height: 1em;
 	margin-right: 1em;
 	width: 100%;
-	line-height: 1em;
 }
 
 .formio li.token-input-token {
 	float: left;
-	background-color: #C2E0FF;
-}
-
-.formio li.token-input-token span {
-	color: #333;
-}
-
-div.token-input-dropdown ul li.token-input-selected-dropdown-item {
-	background-color: #C2E0FF;
 }
 
 .formio .token-input-delete-token {
@@ -210,26 +143,8 @@ div.token-input-dropdown ul li.token-input-selected-dropdown-item {
 /* Button */
 
 .formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button] {
-	margin:0.3em 0;
-	border:1px solid #ccc;
-	background-color:#eee;
 	font-size:1em;
 	cursor:pointer;
-	padding:0.5em;
-	width: auto;
-	display: inline;
-}
-
-.formio button:hover, .formio input[type=submit]:hover, .formio input[type=reset]:hover, .formio input[type=button]:hover {
-	background-color:#C2D6EF;
-	border:1px solid #000;
-	color:#000;
-}
-
-.formio button:active, .formio input[type=submit]:active, .formio input[type=reset]:active, .formio input[type=button]:active {
-	background-color:#333;
-	color:white;
-	border:1px solid #000;
 }
 
 /* information */
@@ -240,17 +155,14 @@ div.token-input-dropdown ul li.token-input-selected-dropdown-item {
 }
 
 .formio .required {
-	color:#ff3838;
-	font-weight:bold;
-	font-size:0.8em;
-	position: absolute;
-	left: -0.75em;
-	top: -0.5em;
+	font-weight: bold;
+	font-size: 0.8em;
+	color: #900;
 }
 
 .formio .err, .formio .errSummary {
-	color:#DF4545;
 	font-weight:bold;
+	color: #900;
 }
 
 .formio li.sectionErrors { border-color: #E8AEAE; }
@@ -264,35 +176,9 @@ div.token-input-dropdown ul li.token-input-selected-dropdown-item {
 .formio p.hint, .formio p.err {
 	font-size: 0.8em;
 	clear: left;
-	margin: 0 0 0 25%;
 }
 
 .formio .errSummary {
-	margin: 0.5em 0;
 	font-size: 1em;
-}
-
-/* Browser-specific style overrides (by which I mean hacks) */
-
-@-moz-document url-prefix() {							/* Gecko overrides */
-	.formio .multiple legend {
-		margin-left: 0.25em;
-	}
-	.formio fieldset legend {
-		padding: 0 0.25em;
-	}
-	.formio .currency span {
-		line-height:1.2em;
-	}
-}
-@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit overrides */
-	.formio .multiple legend {
-		margin-left: 0.25em;
-	}
-	.formio fieldset legend {
-		padding: 0 0.25em;
-	}
-	.formio .currency span {
-		line-height:1.5em;
-	}
+	margin: 0.5em 0;
 }
