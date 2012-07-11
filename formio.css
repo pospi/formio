@@ -112,6 +112,7 @@
 .formio .currency input {
 	padding-left: 1em;
 	padding-right: 0;
+	width: 100%;
 }
 
 .formio .currency span {

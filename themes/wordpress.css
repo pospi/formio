@@ -51,7 +51,7 @@
 
 .formio span.currency { display: inline-block; }
 
-.formio div.readonly { color: #999; }
+.formio div.readonly { color: #999; display: inline; }
 
 .formio .multiple label { clear: none; }
 
