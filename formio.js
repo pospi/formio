@@ -244,7 +244,12 @@ FormIO.prototype.checkDependencies = function(el)
 	delete depends['__affected'];
 
 	$.each(affected, function(k, elId) {
-		t.getFieldRowElement($('#' + t.getFieldId(elId))).hide();
+		if (elId[0] != '#') {
+			elId = t.getFieldRowElement($('#' + t.getFieldId(elId)));
+		} else {
+			elId = $(elId);
+		}
+		elId.hide();
 		formModified = true;
 	});
 
@@ -264,7 +269,13 @@ FormIO.prototype.checkDependencies = function(el)
 
 		if (show) {
 			$.each(visible, function(unused, showEl) {
-				var row = t.getFieldRowElement($('#' + t.getFieldId(showEl)));
+				var row;
+				if (showEl[0] != '#') {
+					row = t.getFieldRowElement($('#' + t.getFieldId(showEl)));
+				} else {
+					row = $(showEl);
+				}
+
 				if (!row.is(':visible')) {
 					row.show();
 					formModified = true;
