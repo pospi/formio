@@ -10,7 +10,8 @@ class FormIOField_Group extends FormIOField_Text
 {
 	public $buildString = '<div class="row group{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
 		<label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label>
-		{$error?<p class="err">$error</p>}{$inputs}
+		{$error?<p class="err">$error</p>}
+		<div class="rows">{$inputs}</div>
 		{$hint? <p class="hint">$hint</p>}
 	</div>';
 

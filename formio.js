@@ -196,6 +196,8 @@ FormIO.prototype.getFieldRowElement = function(el)
 	var p = cl.parent();
 	if (p.hasClass('blck')) {
 		return p;
+	} else if (p.hasClass('rows')) {
+		return p.parent();
 	}
 	return cl;
 };
@@ -365,13 +367,17 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 	var idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)');
 	var nameFind = new RegExp('^' + nameBase + '\\[(\\d+)\\](.*)');
 
-	el.find('>.row').each(function() {
-		var currId = $(this).attr('id');
+	el.find('>.rows>.row').each(function() {
+		var $this1 = $(this),
+			currId = $this1.attr('id');
 
-		// renumber the row's ID
-		$(this).attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'))
-			// renumber all ID, NAME and FOR attributes in child inputs
-			.find('[name],[id],[for]').each(function() {
+		// renumber the row's ID if it has one
+		if (currId) {
+			$this1.attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'));
+		}
+
+		// renumber all ID, NAME and FOR attributes in child inputs
+		$this1.find('[name],[id],[for]').each(function() {
 				var $this = $(this);
 
 				var currName = $this.attr('name');
@@ -552,17 +558,17 @@ FormIO.prototype.initRepeater = function(el)
 	var that = this;
 
 	// hold a reference to the first field in this closure
-	var firstField = el.find('>.row').first();
+	var firstField = el.find('>.rows>.row').first();
 
 	el.find('.add').click(function() {
 		var newField = that.getNewEmptyField(firstField);
-		el.find('>.row').last().after(newField);
+		el.find('>.rows>.row').last().after(newField);
 
 		that.reorderRepeaterFields(el);
 		return false;	// prevent submission
 	});
 	el.find('.remove').click(function() {
-		var lastRow = el.find('>.row').last();
+		var lastRow = el.find('>.rows>.row').last();
 		if (lastRow.get(0) != firstField.get(0)) {
 			lastRow.remove();
 		}
