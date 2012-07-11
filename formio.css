@@ -126,7 +126,7 @@
 }
 
 .formio .daterange .fromtime, .formio .daterange .totime,
-.formio .datetime .timeinput {
+.formio .datetime .datetimeinput {
 	white-space: nowrap;
 }
 
