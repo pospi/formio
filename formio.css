@@ -130,8 +130,8 @@
 	white-space: nowrap;
 }
 
-.formio input.date { width: 6em !important; }
-.formio input.time { width: 3em !important; }
+.formio input.date { width: 6em !important; padding-right: 0; }
+.formio input.time { width: 3em !important; padding-right: 0; }
 
 /* Tokenised multivalue autocomplete */
 
