@@ -1,0 +1,122 @@
+/* General form colours & layout */
+
+.formio label {
+	clear: left;
+	display: inline-block;
+	width: 30%;
+}
+
+.formio input, .formio textarea, .formio select {
+	border: 1px solid #dfdfdf;
+	width: 45%;
+}
+
+.formio select { width: auto; }
+
+.formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button],
+.formio input[type=checkbox], .formio input[type=radio],
+.formio input[type=password],
+.formio .daterange input,
+.formio .datetime input,
+.formio .daterange select,
+.formio .datetime select,
+.formio .pwdchange input {
+	display: inline;
+	width: auto;
+}
+
+.formio fieldset {
+	border: 1px solid #ccc;
+	margin-bottom: 1em;
+}
+
+.formio div.blck .rows,
+.formio .datetime .timerange {
+	display: inline-block;
+	width: 45%;
+	vertical-align: top;
+}
+.formio div.blck .rows .row {
+	padding-left: 0;
+	padding-right: 0;
+}
+.formio div.blck .rows .row input {
+	width: 100%;
+}
+.formio div.blck input.add {
+	margin-left: 32%;
+}
+
+/* Type-specific */
+
+.formio span.currency { display: inline-block; }
+
+.formio div.readonly { color: #999; }
+
+.formio .multiple label { clear: none; }
+
+/* Tokenised multivalue autocomplete */
+.formio ul.token-input-list {
+	border: 1px solid #dfdfdf;
+	color: #333;
+	vertical-align: top;
+	display: inline-block;
+	width: 45%;
+}
+
+.formio li.token-input-token {
+	background-color: #F4FAFF;
+}
+
+.formio li.token-input-token span {
+	color: #333;
+}
+
+div.token-input-dropdown ul li.token-input-selected-dropdown-item {
+	background-color: #F4FAFF;
+}
+
+/* buttons */
+.formio button:hover, .formio input[type=submit]:hover, .formio input[type=reset]:hover, .formio input[type=button]:hover {
+	background-color:#F4FAFF;
+	border:1px solid #000;
+	color:#000;
+}
+
+.formio button:active, .formio input[type=submit]:active, .formio input[type=reset]:active, .formio input[type=button]:active {
+	background-color: #004D8A;
+	color: white;
+	border: 1px solid #000;
+}
+
+/* information */
+
+.formio .required {
+	color: #B00000;
+}
+
+.formio .err, .formio .errSummary {
+	color: #B00000;
+}
+
+.formio li.sectionErrors { border-color: #E8AEAE; }
+.formio li.sectionErrors a { color: #B00000; }
+
+.formio p.hint {
+	color: #666666;
+    font-style: italic;
+    margin: 0.2em 0 0;
+}
+
+/* Browser-specific style overrides (by which I mean hacks) */
+
+@-moz-document url-prefix() {							/* Gecko overrides */
+	.formio .currency span {
+		line-height: 1.7em;
+	}
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {	/* Webkit overrides */
+	.formio .currency span {
+		line-height: 2.2em;
+	}
+}
