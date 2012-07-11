@@ -125,6 +125,11 @@
 	padding-bottom: 0;
 }
 
+.formio .daterange .fromtime, .formio .daterange .totime,
+.formio .datetime .timeinput {
+	white-space: nowrap;
+}
+
 .formio input.date { width: 6em !important; }
 .formio input.time { width: 3em !important; }
 
@@ -132,7 +137,7 @@
 
 .formio ul.token-input-list {
 	line-height: 1em;
-	margin-right: 1em;
+	margin: 0 1em 0 0;
 	width: 100%;
 	padding: 0;
 	list-style-type: none;

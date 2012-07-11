@@ -73,6 +73,7 @@
 
 /* Type-specific */
 
+.formio .checkbox label { float: none; }
 .formio .checkbox label.checkbox { font-weight: bold; }
 
 .formio .daterange input, .formio .datetime input, .formio .datetime select {
