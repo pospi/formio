@@ -156,6 +156,10 @@
 	border: 0;
 }
 
+.formio li.token-input-selected-token {
+	color: #444;
+}
+
 /* Button */
 
 .formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button] {
