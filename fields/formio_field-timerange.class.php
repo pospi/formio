@@ -8,16 +8,16 @@ class FormIOField_Timerange extends FormIOField_DateTime
 	public $buildString = '<div class="row daterange datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
 		<label for="{$id}_start">{$desc}{$required? <span class="required">*</span>}</label>
 		<span class="timerange"><span class="fromtime">
-			<input type="text" name="{$name}[0][0]" id="{$id}_0_date"{$startdate? value="$startdate"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} class="date" />
-			 at <input type="text" name="{$name}[0][1]" id="{$id}_0_time"{$starttime? value="$starttime"} data-fio-type="time"{$required? data-fio-validation="requiredValidator"} class="time" />
-			<select name="{$name}[0][2]" id="{$id}_0_meridian">
+			<input type="text" name="{$name}[0][0]" id="{$id}_0_date"{$startdate? value="$startdate"}{$readonly? readonly="readonly"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} class="date" />
+			 at <input type="text" name="{$name}[0][1]" id="{$id}_0_time"{$starttime? value="$starttime"}{$readonly? readonly="readonly"} data-fio-type="time"{$required? data-fio-validation="requiredValidator"} class="time" />
+			<select name="{$name}[0][2]" id="{$id}_0_meridian"{$readonly? disabled="disabled"}>
 				{$startam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}
 				{$startpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}
 			</select>
 		</span> to <span class="totime">
-			<input type="text" name="{$name}[1][0]" id="{$id}_1_date"{$enddate? value="$enddate"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} class="date" />
-			 at <input type="text" name="{$name}[1][1]" id="{$id}_1_time"{$endtime? value="$endtime"} data-fio-type="time"{$required? data-fio-validation="requiredValidator"} class="time" />
-			<select name="{$name}[1][2]" id="{$id}_1_meridian">
+			<input type="text" name="{$name}[1][0]" id="{$id}_1_date"{$enddate? value="$enddate"}{$readonly? readonly="readonly"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} class="date" />
+			 at <input type="text" name="{$name}[1][1]" id="{$id}_1_time"{$endtime? value="$endtime"}{$readonly? readonly="readonly"} data-fio-type="time"{$required? data-fio-validation="requiredValidator"} class="time" />
+			<select name="{$name}[1][2]" id="{$id}_1_meridian"{$readonly? disabled="disabled"}>
 				{$endam?<option value="am" selected="selected">am</option><option value="pm">pm</option>}
 				{$endpm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}
 			</select>

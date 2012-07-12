@@ -10,8 +10,8 @@ class FormIOField_Time extends FormIOField_Date
 	public $buildString = '<div class="row datetime{$alt? alt}{$classes? $classes}"{$dependencies? data-fio-depends="$dependencies"}>
 		<label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label>
 		<span class="timeinput">
-			<input type="text" name="{$name}[0]" id="{$id}" value="{$value}" data-fio-type="time" class="time"{$required? data-fio-validation="requiredValidator"} />
-			<select name="{$name}[1]" id="{$id}_meridian">
+			<input type="text" name="{$name}[0]" id="{$id}" value="{$value}" data-fio-type="time" class="time"{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} />
+			<select name="{$name}[1]" id="{$id}_meridian"{$readonly? disabled="disabled"}>
 				{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}
 				{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}
 			</select>

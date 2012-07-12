@@ -11,7 +11,7 @@ class FormIOField_Checkbox extends FormIOField_Text
 {
 	public $buildString = '<div class="row checkbox{$alt? alt}{$classes? $classes}">
 		<label class="checkbox">
-			<input type="checkbox" name="{$name}" id="{$id}"{$disabled? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} />
+			<input type="checkbox" name="{$name}" id="{$id}"{$disabled? disabled="disabled"}{$readonly? disabled="disabled"}{$checked? checked="checked"}{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"} />
 			{$desc}{$required? <span class="required">*</span>}
 		</label>
 		{$error?<p class="err">$error</p>}

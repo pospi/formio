@@ -496,6 +496,10 @@ FormIO.prototype.initDateField = function(el)
 		beforeShow:	function(dateText, inst) {
 			// clearfix jQueryUI class can prevent the picker from showing in some documents
 			inst.dpDiv.removeClass('ui-helper-hidden-accessible');
+
+			if (el.attr('readonly')) {
+				return false;
+			}
 		}
 	});
 };

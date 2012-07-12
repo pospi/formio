@@ -4,7 +4,7 @@ class FormIOField_Dropdown extends FormIOField_Multiple
 {
 	public $buildString = '<div class="row{$alt? alt}{$classes? $classes}">
 		<label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label>
-		<select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
+		<select id="{$id}" name="{$name}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}{$readonly? disabled="disabled"}>
 			{$options}
 		</select>
 		{$error?<p class="err">$error</p>}
@@ -25,6 +25,10 @@ class FormIOField_Dropdown extends FormIOField_Multiple
 			if (isset($vars['desc']['disabled']))				$vars['disabled']	= $vars['desc']['disabled'];
 			if (isset($vars['desc']['checked']) && !$valueSent)	$vars['checked']	= $vars['desc']['checked'];
 			$vars['desc'] = $vars['desc']['desc'];
+		}
+
+		if (!empty($this->attributes['readonly'])) {
+			$vars['disabled'] = true;
 		}
 
 		// determine whether option should be selected if it hasn't explicitly been set

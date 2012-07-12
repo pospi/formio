@@ -8,7 +8,7 @@ class FormIOField_Text extends FormIOField_Raw
 {
 	public $buildString = '<div class="row{$alt? alt}{$classes? $classes}">
 		<label for="{$id}">{$desc}{$required? <span class="required">*</span>}</label>
-		<input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} />
+		<input type="text" name="{$name}" id="{$id}"{$value? value="$value"}{$readonly? readonly="readonly"}{$maxlen? maxlength="$maxlen"}{$behaviour? data-fio-type="$behaviour"}{$validation? data-fio-validation="$validation"}{$dependencies? data-fio-depends="$dependencies"} />
 		{$error?<p class="err">$error</p>}
 		{$hint? <p class="hint">$hint</p>}
 	</div>';

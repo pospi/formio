@@ -8,9 +8,9 @@ class FormIOField_Datetime extends FormIOField_Time
 	public $buildString = '<div class="row datetime{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
 		<label for="{$id}_time">{$desc}{$required? <span class="required">*</span>}</label>
 		<span class="datetimeinput">
-			<input type="text" name="{$name}[0]" id="{$id}_date"{$value? value="$value"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} class="date" />
-			 at <span class="timeinput"><input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}" data-fio-type="time"{$required? data-fio-validation="requiredValidator"} class="time" />
-			<select name="{$name}[2]" id="{$id}_meridian">
+			<input type="text" name="{$name}[0]" id="{$id}_date"{$value? value="$value"}{$readonly? readonly="readonly"} data-fio-type="date"{$required? data-fio-validation="requiredValidator"} class="date" />
+			 at <span class="timeinput"><input type="text" name="{$name}[1]" id="{$id}_time" value="{$valueTime}"{$readonly? readonly="readonly"} data-fio-type="time"{$required? data-fio-validation="requiredValidator"} class="time" />
+			<select name="{$name}[2]" id="{$id}_meridian"{$readonly? disabled="disabled"}>
 				{$am?<option value="am" selected="selected">am</option><option value="pm">pm</option>}
 				{$pm?<option value="am">am</option><option value="pm" selected="selected">pm</option>}
 			</select></span>
