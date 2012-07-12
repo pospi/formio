@@ -40,7 +40,7 @@ class FormIOField_Currency extends FormIOField_Numeric
 
 	// performs currency normalisation
 	final protected function currencyValidator() {
-		preg_match('/^\s*\$?(\d*)(\.(\d{0,2}))?\s*$/', $this->value, $matches);		// capture: dollars, , cents
+		preg_match('/^\s*\$?(-?\d*)(\.(\d{0,2}))?\s*$/', $this->value, $matches);		// capture: dollars, , cents
 		$success = sizeof($matches) > 0;
 		if ($success) {
 			$this->value = $this->normaliseCurrency($matches[1], (isset($matches[3]) ? $matches[3] : null));
