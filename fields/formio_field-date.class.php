@@ -93,6 +93,9 @@ class FormIOField_Date extends FormIOField_Text
 	// :TODO: move this somewhere more appropriate
 	private static function arrayAllNull($var)
 	{
+		if (!is_array($var)) {
+			return false;
+		}
 		foreach ($var as $val) {
 			if (is_array($val)) {
 				if (!FormIOField_Date::arrayAllNull($val)) {
