@@ -542,7 +542,7 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 		// init tokeninput
 		el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
 			prePopulate : currentData,
-			queryParam : 'term',
+			queryParam : el.data('fio-queryparam') || 'term',
 			hintText : '',
 			preventDuplicates : true,
 			tokenDelimiter : el.data('fio-delimiter') || ',',
@@ -550,7 +550,8 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 		}, otherOptions || {}));
 	} else {
 		el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
-			queryParam : 'term',
+			prePopulate : currentData,
+			queryParam : el.data('fio-queryparam') || 'term',
 			hintText : '',
 			preventDuplicates : true,
 			tokenDelimiter : el.data('fio-delimiter') || ',',
