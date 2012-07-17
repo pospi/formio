@@ -148,6 +148,11 @@ FormIO.prototype.restripeForm = function()
 			striperSkips[fieldName]--;
 		}
 	});
+
+	// run redraw callback if present
+	if (this.options.onRedraw) {
+		this.options.onRedraw.call(this);
+	}
 };
 
 // refresh tab display after an update to the form
