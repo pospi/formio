@@ -724,7 +724,7 @@ FormIO.prototype.highlightError = function(field)
 //	VALIDATORS
 
 FormIO.prototype.requiredValidator = function(el) {
-	return el.val().length > 0;
+	return this.getFieldValue(el).length > 0 || el.val().length > 0;
 };
 
 })(jQuery);
