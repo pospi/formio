@@ -513,58 +513,48 @@ FormIO.prototype.initDateField = function(el)
 FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 {
 	var multiple = el.data('fio-multiple') || false;
-	if (multiple) {
-		// input tokenisation helpers
-		function split( val ) {
-			return (val || '').split( /,\s*/ );
-		}
-		function extractLast( term ) {
-			return split( term ).pop();
-		}
 
-		// parse and read values for tokeninput plugin
-		var realInput = el.prev(),
-			ids = realInput.val(),
-			labels = el.val(),
-			meta = realInput.data('fio-value-metadata'),
-			currentData = [],
-			i = 0;
-		ids = split(ids);
-		labels = split(labels);
-
-		// combine all data together
-		for (; i < ids.length; ++i) {
-			if ($.trim(ids[i]) == '') {
-				continue;
-			}
-			currentData.push($.extend(true, (meta ? meta[i] : {}), {id: ids[i], name: labels[i]}));
-		}
-
-		// switch names of the visible and hidden input since it will now be sending back correct ID list data
-		var realName = realInput.attr('name');
-		realInput.attr('name', el.attr('name'));
-		el.attr('name', realName);
-
-		// init tokeninput
-		el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
-			prePopulate : currentData,
-			queryParam : el.data('fio-queryparam') || 'term',
-			hintText : '',
-			preventDuplicates : true,
-			tokenDelimiter : el.data('fio-delimiter') || ',',
-			tokenValue : 'id'
-		}, otherOptions || {}));
-	} else {
-		el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
-			prePopulate : currentData,
-			queryParam : el.data('fio-queryparam') || 'term',
-			hintText : '',
-			preventDuplicates : true,
-			tokenDelimiter : el.data('fio-delimiter') || ',',
-			tokenValue : 'id',
-			tokenLimit : 1
-		}, otherOptions || {}));
+	// input tokenisation helpers
+	function split( val ) {
+		return (val || '').split( /,\s*/ );
 	}
+	function extractLast( term ) {
+		return split( term ).pop();
+	}
+
+	// parse and read values for tokeninput plugin
+	var realInput = el.prev(),
+		ids = realInput.val(),
+		labels = el.val(),
+		meta = realInput.data('fio-value-metadata'),
+		currentData = [],
+		i = 0;
+	ids = split(ids);
+	labels = split(labels);
+
+	// combine all data together
+	for (; i < ids.length; ++i) {
+		if ($.trim(ids[i]) == '') {
+			continue;
+		}
+		currentData.push($.extend(true, (meta ? meta[i] : {}), {id: ids[i], name: labels[i]}));
+	}
+
+	// switch names of the visible and hidden input since it will now be sending back correct ID list data
+	var realName = realInput.attr('name');
+	realInput.attr('name', el.attr('name'));
+	el.attr('name', realName);
+
+	// init tokeninput
+	el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
+		prePopulate : currentData,
+		queryParam : el.data('fio-queryparam') || 'term',
+		hintText : '',
+		preventDuplicates : true,
+		tokenDelimiter : el.data('fio-delimiter') || ',',
+		tokenValue : 'id',
+		tokenLimit : multiple ? null : 1
+	}, otherOptions || {}));
 };
 
 FormIO.prototype.initSecurImageField = function(el)		// adds 'reload image' behaviour
