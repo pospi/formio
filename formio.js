@@ -71,6 +71,7 @@ FormIO = function(formEl, options)
 
 FormIO.prototype.fieldDependencies = {};		// dependent element data for JavaScript element visibility toggling
 FormIO.prototype.validators = {};				// map of field names & validator callbacks to run when form is submitted
+FormIO.prototype.failedValidators = {};			// validators which failed validation on last submission run
 FormIO.prototype.elements = null;				// jQuery element (or elements) we are creating the form inside
 FormIO.prototype.options = {
 	setupRoutines : {
@@ -661,6 +662,8 @@ FormIO.prototype.onSubmit = function()
 	var that = this;
 	var allOk = true;
 
+	this.failedValidators = {};
+
 	$.each(this.validators, function(field, validator) {
 		$.each(validator, function(name, params) {
 			var fieldEl = $('#' + field);
@@ -676,11 +679,13 @@ FormIO.prototype.onSubmit = function()
 			if (typeof that[name] == 'function') {	// look in FormIO scope
 				if (!(that[name]).apply(that, params)) {
 					that.highlightError(fieldEl);
+					that.failedValidators[field] = that[name];
 					allOk = false;
 				}
 			} else if (typeof name == 'function') {	// look for external validation function
 				if (!name.apply(that, params)) {
 					that.highlightError(fieldEl);
+					that.failedValidators[field] = name;
 					allOk = false;
 				}
 			} else if (console && typeof console.error == 'function') {
