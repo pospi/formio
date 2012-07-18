@@ -59,7 +59,7 @@
 .formio ul.token-input-list {
 	border: 1px solid #dfdfdf;
 	color: #333;
-	vertical-align: top;
+	vertical-align: middle;
 	display: inline-block;
 	width: 45%;
 }
