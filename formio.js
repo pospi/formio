@@ -547,7 +547,6 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 
 	// init tokeninput
 	el.tokenInput(el.data('fio-searchurl'), $.extend(true, {
-		prePopulate : currentData,
 		queryParam : el.data('fio-queryparam') || 'term',
 		hintText : '',
 		preventDuplicates : true,
@@ -555,6 +554,11 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 		tokenValue : 'id',
 		tokenLimit : multiple ? null : 1
 	}, otherOptions || {}));
+
+	// add items through API in order to fire onAdd callbacks for prepopulated data
+	$.each(currentData, function(i, data) {
+		el.tokenInput('add', data);
+	});
 };
 
 FormIO.prototype.initSecurImageField = function(el)		// adds 'reload image' behaviour
