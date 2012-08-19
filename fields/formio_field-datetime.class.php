@@ -54,12 +54,21 @@ class FormIOField_Datetime extends FormIOField_Time
 	protected function getBuilderVars()
 	{
 		$inputVars = FormIOField_Text::getBuilderVars();
-		if (is_array($this->value) && isset($this->value[0]) && isset($this->value[1]) && isset($this->value[2])) {
+		if (is_array($this->value) && !empty($this->value[0]) && !empty($this->value[1]) && !empty($this->value[2])) {
 			$inputVars['value']		= $this->value[0];
 			$inputVars['valueTime']	= $this->value[1];
 			$inputVars['pm']		= $this->value[2] == 'pm';
 			$inputVars['am']		= $this->value[2] != 'pm';
 		} else {
+			if (is_numeric($this->value)) {
+				$meridian = date('a', $inputVars['value']);
+				$inputVars['valueTime']	= date('g:i', $inputVars['value']);
+				$inputVars['pm']	= $meridian == 'pm';
+				$inputVars['am']	= $meridian != 'pm';
+				$inputVars['value']	= date('d/m/Y', $inputVars['value']);
+			} else {
+				$inputVars['value']		= '';
+			}
 			$inputVars['am']		= true;	// where no value is set, this must be present in order to output meridian values
 		}
 		return $inputVars;
