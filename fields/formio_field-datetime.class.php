@@ -88,7 +88,8 @@ class FormIOField_Datetime extends FormIOField_Time
 			return null;
 		}
 		$format = "h:i";
-		if ($secs = date('s', $val) && intval($secs) != 0) {
+		$secs = date('s', $val);
+		if (intval($secs) != 0) {
 			$format = $format . ":$secs";
 		}
 
