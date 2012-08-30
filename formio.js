@@ -256,6 +256,7 @@ FormIO.prototype.checkDependencies = function(el)
 			elId = $(elId);
 		}
 		elId.hide();
+		elId.data('fio-dependency-hidden', true);
 		formModified = true;
 	});
 
@@ -286,6 +287,7 @@ FormIO.prototype.checkDependencies = function(el)
 					row.show();
 					formModified = true;
 				}
+				elId.removeData('fio-dependency-hidden');
 			});
 		}
 	});
@@ -698,6 +700,11 @@ FormIO.prototype.shouldSkipValidator = function(el, validatorName)
 	if (validatorName == 'requiredValidator') {
 		var parentField = el.closest('.row.group[data-fio-validation*=requiredValidator], .row[data-fio-type=repeater][data-fio-validation*=requiredValidator]');
 		if (parentField.length > 0) {
+			return true;
+		}
+
+		// also skip required checks if the field is hidden by a dependency
+		if (el.data('fio-dependency-hidden')) {
 			return true;
 		}
 	}
