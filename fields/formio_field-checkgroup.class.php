@@ -6,6 +6,23 @@ class FormIOField_Checkgroup extends FormIOField_Radiogroup
 {
 	public $subfieldBuildString = '<label><input type="checkbox" name="{$name}[{$value}]"{$disabled? disabled="disabled"}{$checked? checked="checked"} /> {$desc}</label>';
 
+	/**
+	 * Coerce string values to booleans for each option
+	 */
+	public function setValue($newVal)
+	{
+		// if a normal array is passed, flip it and use as selection
+		if (is_array($newVal) && count($newVal) && array_keys($newVal) === range(0, count($newVal) - 1)) {
+			$newVal = array_combine($newVal, array_fill(0, count($newVal), true));
+		} else {
+			foreach ($newVal as &$v) {
+				$v = !!$v;
+			}
+		}
+
+		parent::setValue($newVal);
+	}
+
 	public function getHumanReadableValue()
 	{
 		$output = array();
