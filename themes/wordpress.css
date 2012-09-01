@@ -36,12 +36,21 @@
 	width: 45%;
 	vertical-align: top;
 }
+.formio div.blck .group .rows {
+	width: 100%;
+}
 .formio div.blck .rows .row {
 	padding-left: 0;
 	padding-right: 0;
 }
 .formio div.blck .rows .row input {
 	width: 100%;
+}
+.formio div.blck .rows .row input[type=checkbox],
+.formio div.blck .rows .row input[type=radio],
+.formio div.blck .rows .row input[type=button],
+.formio div.blck .rows .row input[type=submit] {
+	width: auto;
 }
 .formio div.blck input.add {
 	margin-left: 32%;
