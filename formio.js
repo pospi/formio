@@ -287,7 +287,7 @@ FormIO.prototype.checkDependencies = function(el)
 					row.show();
 					formModified = true;
 				}
-				elId.removeData('fio-dependency-hidden');
+				row.removeData('fio-dependency-hidden');
 			});
 		}
 	});
