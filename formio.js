@@ -702,11 +702,11 @@ FormIO.prototype.shouldSkipValidator = function(el, validatorName)
 		if (parentField.length > 0) {
 			return true;
 		}
+	}
 
-		// also skip required checks if the field is hidden by a dependency
-		if (el.data('fio-dependency-hidden')) {
-			return true;
-		}
+	// also skip required checks if the field is hidden by a dependency
+	if (el.data('fio-dependency-hidden') || this.getFieldRowElement(el).data('fio-dependency-hidden')) {
+		return true;
 	}
 
 	return false;
