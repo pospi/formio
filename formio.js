@@ -615,7 +615,7 @@ FormIO.prototype.initDependencies = function(el)
 			});
 		} else {
 			affectedFields.push(depParams);
-			dependencies[depName] = [depParams];	// convert to array for easy interrogation later
+			dependencies[depName.replace(/\+/g, ' ')] = [depParams];	// convert to array for easy interrogation later
 		}
 	});
 
