@@ -396,7 +396,12 @@ class FormIO implements ArrayAccess
 		}
 		list($k, $attr, $value) = $a;
 
-		$this->fields[$k]->setAttribute($attr, $value);
+		if ($attr == 'classes') {
+			// hack for appending CSS classes
+			$this->fields[$k]->addCSSClass($value);
+		} else {
+			$this->fields[$k]->setAttribute($attr, $value);
+		}
 
 		return $this;
 	}

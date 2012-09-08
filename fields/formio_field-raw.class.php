@@ -93,6 +93,23 @@ class FormIOField_Raw
 		unset($this->attributes[$name]);
 	}
 
+	public function addCSSClass($className)
+	{
+		$this->attributes['classes'] .= " " . (is_array($className) ? implode(' ', $className) : $className);
+	}
+
+	public function removeCSSClass($className)
+	{
+		$classes = explode(' ', $this->attributes['classes']);
+		foreach ($classes as $c => $class) {
+			$class = trim($class);
+			if (!$class || $class == $className) {
+				unset($classes[$c]);
+			}
+		}
+		$this->attributes['classes'] = implode(' ', $classes);
+	}
+
 	public function getName()
 	{
 		return $this->name;
