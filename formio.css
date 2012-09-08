@@ -215,3 +215,8 @@
 		line-height: 1.5em;
 	}
 }
+
+/* Contain floats: nicolasgallagher.com/micro-clearfix-hack/ */
+.clearfix:before, .clearfix:after { content: ""; display: table; }
+.clearfix:after { clear: both; }
+.clearfix { zoom: 1; }
