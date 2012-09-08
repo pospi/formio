@@ -10,7 +10,36 @@ class FormIOField_Dropdown extends FormIOField_Multiple
 		{$error?<p class="err">$error</p>}
 		{$hint? <p class="hint">$hint</p>}
 	</div>';
+
 	public $subfieldBuildString = '<option{$value? value="$value"}{$disabled? disabled="disabled"}{$checked? selected="selected"}>{$desc}</option>';
+
+	private $subgroupBuildString = '<optgroup label="{$desc}">';
+	private $subgroupEndBuildString = '</optgroup>';
+
+	protected function getBuilderVars()
+	{
+		$vars = parent::getBuilderVars();
+
+		// build all option elements by performing replacements and concatenating the output
+		reset($this->options);
+		$optionsStr = '';
+		while ($subVars = $this->getNextOptionVars()) {
+			// determine the build string we will be using when we process these vars
+			$subfieldStr = $this->subfieldBuildString;
+			if (!empty($subVars['group'])) {
+				$subfieldStr = $this->subgroupBuildString;
+			} else if (!empty($subVars['groupend'])) {
+				$subfieldStr = $this->subgroupEndBuildString;
+			}
+
+			$optionsStr .= $this->replaceInputVars($subfieldStr, $subVars);
+		}
+		reset($this->options);
+		$vars['options'] = $optionsStr;
+
+		$vars['columns'] = isset($this->attributes['columns']) ? $this->attributes['columns'] : 2;	// subclasses may or may not use this attribute
+		return $vars;
+	}
 
 	protected function getNextOptionVars()
 	{
@@ -24,7 +53,9 @@ class FormIOField_Dropdown extends FormIOField_Multiple
 		if (is_array($vars['desc'])) {
 			if (isset($vars['desc']['disabled']))				$vars['disabled']	= $vars['desc']['disabled'];
 			if (isset($vars['desc']['checked']) && !$valueSent)	$vars['checked']	= $vars['desc']['checked'];
-			$vars['desc'] = $vars['desc']['desc'];
+			if (isset($vars['desc']['group']))					$vars['group']		= $vars['desc']['group'];
+			if (isset($vars['desc']['groupend']))				$vars['groupend']	= $vars['desc']['groupend'];
+			$vars['desc'] = isset($vars['desc']['desc']) ? $vars['desc']['desc'] : '';
 		}
 
 		if (!empty($this->attributes['readonly'])) {
@@ -35,6 +66,7 @@ class FormIOField_Dropdown extends FormIOField_Multiple
 		if ($valueSent && $this->value == $vars['value']) {
 			$vars['checked'] = true;
 		}
+
 		return $vars;
 	}
 }
