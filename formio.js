@@ -327,6 +327,8 @@ FormIO.prototype.getFieldName = function(fldId)
 FormIO.prototype.splitParams = function(str)
 {
 	var params = {};
+	if (!str) return params;	// no string to parse
+	if ($.isPlainObject(str)) return str;	// already an object
 
 	str = str.split('&');
 
@@ -381,12 +383,14 @@ FormIO.prototype.getNewEmptyField = function(row)
 // :TODO: handle repeated file inputs
 FormIO.prototype.reorderRepeaterFields = function(el)
 {
-	var counter = 0;
+	var counter = 0,
+		that = this;
 
 	// strings to replace in subelements
-	var nameBase = this.getFieldName(el.attr('id'));
-	var idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)');
-	var nameFind = new RegExp('^' + nameBase + '\\[(\\d+)\\](.*)');
+	var nameBase = this.getFieldName(el.attr('id')),
+		idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)'),
+		nameFind = new RegExp('^' + nameBase + '\\[(\\d+)\\](.*)'),
+		idDepFind = new RegExp('^#' + el.attr('id') + '_(\\d+)(.*)');
 
 	el.find('>.rows>.row').each(function() {
 		var $this1 = $(this),
@@ -397,13 +401,14 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 			$this1.attr('id', currId.replace(idFind, el.attr('id') + '_' + counter + '$2'));
 		}
 
-		// renumber all ID, NAME and FOR attributes in child inputs
-		$this1.find('[name],[id],[for]').each(function() {
+		// renumber all ID, NAME and FOR attributes in child inputs, as well as dependency ID strings
+		$this1.find('[name],[id],[for],[data-fio-depends]').each(function() {
 				var $this = $(this);
 
-				var currName = $this.attr('name');
-				var currId = $this.attr('id');
-				var currFor = $this.attr('for');
+				var currName = $this.attr('name'),
+					currId = $this.attr('id'),
+					currFor = $this.attr('for'),
+					currDeps = that.splitParams($this.data('fio-depends'));
 
 				if (currName && currName.match(nameFind)) {
 					$this.attr('name', currName.replace(nameFind, nameBase + '[' + counter + ']$2'));
@@ -413,6 +418,17 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 				}
 				if (currFor && currFor.match(idFind)) {
 					$this.attr('for', currFor.replace(idFind, el.attr('id') + '_' + counter + '$2'));
+				}
+				if (currDeps) {
+					$.each(currDeps, function(k, v) {
+						for (var d, i = 0, l = v.length; i < l; ++i) {
+							d = v[i];
+							if (d.match(idDepFind)) {
+								currDeps[k][i] = d.replace(idDepFind, '#' + el.attr('id') + '_' + counter + '$2');
+							}
+						}
+					});
+					$this.data('fio-depends', currDeps);
 				}
 
 				// clear jQueryUI flags from applicable elements so that setupFields() triggers work
