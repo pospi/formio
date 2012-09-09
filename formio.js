@@ -619,8 +619,20 @@ FormIO.prototype.initDependencies = function(el)
 		}
 	});
 
+	function array_unique(ar){
+		var sorter = {};
+		for(var i=0,j=ar.length;i<j;i++){
+			sorter[ar[i]] = ar[i];
+		}
+		ar = [];
+		for(var i in sorter){
+			ar.push(i);
+		}
+		return ar;
+	}
+
 	this.fieldDependencies[el.attr('id')] = dependencies;
-	this.fieldDependencies[el.attr('id')]['__affected'] = affectedFields;
+	this.fieldDependencies[el.attr('id')]['__affected'] = array_unique(affectedFields);
 
 	// setup change events
 	var elType = el[0].tagName.toLowerCase();
