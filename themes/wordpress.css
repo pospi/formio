@@ -8,7 +8,7 @@
 
 .formio input, .formio textarea, .formio select {
 	border: 1px solid #dfdfdf;
-	width: 45%;
+	width: 67%;
 }
 
 .formio select { width: auto; }
@@ -33,7 +33,7 @@
 .formio div.blck .rows,
 .formio .datetime .timerange {
 	display: inline-block;
-	width: 45%;
+	width: 67%;
 	vertical-align: top;
 }
 .formio div.blck .group .rows {
@@ -70,7 +70,7 @@
 	color: #333;
 	vertical-align: middle;
 	display: inline-block;
-	width: 45%;
+	width: 67%;
 }
 
 .formio li.token-input-token {
