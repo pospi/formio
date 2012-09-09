@@ -22,6 +22,9 @@ class FormIOField_Repeater extends FormIOField_Group
 
 	private $internals = array();		// internal variables of the repeater (add / remove button submit values, etc)
 
+	// default to a repeating text field
+	protected $attributes = array('fieldtype' => FormIO::T_TEXT);
+
 	public function setValue($values)
 	{
 		$this->value = array();
