@@ -200,7 +200,9 @@ FormIO.prototype.getFieldRowElement = function(el)
 {
 	var cl = el.closest('.row');
 	var p = cl.parent();
-	if (p.hasClass('blck')) {
+	if (cl.hasClass('inputrow')) {
+		return cl;
+	} else if (p.hasClass('blck')) {
 		return p;
 	} else if (p.hasClass('rows')) {
 		return p.parent();
