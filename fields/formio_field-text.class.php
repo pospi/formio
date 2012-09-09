@@ -394,12 +394,17 @@ class FormIOField_Text extends FormIOField_Raw
 	// :NOTE: that validators are never run unless requiredvalidator() succeeds, so there is
 	// no need to check for !isset($this->value) in validators.
 
+	final private function requiredValidator() {
+		return isset($this->value) && $this->value !== '';
+	}
+
 	final private function regexValidator($regex) {
 		return preg_match($regex, $this->value) > 0;
 	}
 
-	final private function requiredValidator() {
-		return isset($this->value) && $this->value !== '';
+	final private function isRegexValidator() {
+		@preg_match($this->value, 'nothing');
+		return preg_last_error() == PREG_NO_ERROR;
 	}
 
 	// @param	array	$requiredKeys	a list of array keys which are required. When omitted, all keys are checked.
