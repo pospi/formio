@@ -578,14 +578,14 @@ FormIO.prototype.initRepeater = function(el)
 	// hold a reference to the first field in this closure
 	var firstField = el.find('>.rows>.row').first();
 
-	el.find('.add').click(function() {
+	el.find('>.add').unbind('click').click(function() {
 		var newField = that.getNewEmptyField(firstField);
 		el.find('>.rows>.row').last().after(newField);
 
 		that.reorderRepeaterFields(el);
 		return false;	// prevent submission
 	});
-	el.find('.remove').click(function() {
+	el.find('>.remove').unbind('click').click(function() {
 		var lastRow = el.find('>.rows>.row').last();
 		if (lastRow.get(0) != firstField.get(0)) {
 			lastRow.remove();
