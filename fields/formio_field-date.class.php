@@ -54,6 +54,14 @@ class FormIOField_Date extends FormIOField_Text
 		return date("d/m/Y", $val);
 	}
 
+	public static function timestampToSQLDate($val)
+	{
+		if (!$val || FormIOField_Date::arrayAllNull($val)) {
+			return null;
+		}
+		return date("Y-m-d H:i:s", $val);
+	}
+
 	public static function dateToUnix($val)
 	{
 		$bits = explode('/', $val);
