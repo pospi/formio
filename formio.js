@@ -371,7 +371,7 @@ FormIO.prototype.getNewEmptyField = function(row)
 {
 	var newField = row.clone(false);
 	// reset the value of the new field
-	newField.find(':input').val('');
+	newField.find(':input:not(:button):not(:submit):not(:reset)').val('');
 
 	return newField;
 };
