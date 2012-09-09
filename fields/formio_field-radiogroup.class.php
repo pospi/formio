@@ -4,7 +4,7 @@ require_once(FORMIO_FIELDS . 'formio_field-dropdown.class.php');
 
 class FormIOField_Radiogroup extends FormIOField_Dropdown
 {
-	public $buildString = '<fieldset id="{$id}" class="row multiple col{$columns}{$alt? alt}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
+	public $buildString = '<fieldset id="{$id}" class="row multiple col{$columns}{$alt? alt}{$classes? $classes}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
 		<legend>{$desc}{$required? <span class="required">*</span>}</legend>
 		{$options}
 		{$error?<p class="err">$error</p>}
