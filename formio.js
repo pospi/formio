@@ -715,13 +715,13 @@ FormIO.prototype.onSubmit = function()
 			if (typeof that[name] == 'function') {	// look in FormIO scope
 				if (!(that[name]).apply(that, params)) {
 					that.highlightError(fieldEl);
-					that.failedValidators[field] = that[name];
+					that.addValidationError(field, name);
 					allOk = false;
 				}
 			} else if (typeof name == 'function') {	// look for external validation function
 				if (!name.apply(that, params)) {
 					that.highlightError(fieldEl);
-					that.failedValidators[field] = name;
+					that.addValidationError(field, name);
 					allOk = false;
 				}
 			} else if (console && typeof console.error == 'function') {
@@ -731,6 +731,19 @@ FormIO.prototype.onSubmit = function()
 	});
 
 	return allOk;
+};
+
+/**
+ * Adds a validation error to the form.
+ * @param {string} fieldName field name the error was encountered in
+ * @param {mixed}  validator function name of the validator that failed, or the function itself if an external validator
+ */
+FormIO.prototype.addValidationError = function(fieldName, validator)
+{
+	if (!this.failedValidators[fieldName]) {
+		this.failedValidators[fieldName] = [];
+	}
+	this.failedValidators[fieldName].push(validator);
 };
 
 // If a field is required, but its parent is as well - skip it
