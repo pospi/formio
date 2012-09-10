@@ -312,8 +312,9 @@ FormIO.prototype.checkDependencies = function(el)
 // helper to determine whether a checkbox / radiobutton / text field is matching a value
 FormIO.prototype.inputIsMatching = function(el, value)
 {
-	var checkd	= el.attr('checked');
+	var checkd	= el.attr('checked') == 'checked';
 	var val		= el.val();
+
 	return ( (		// checkbox / radio
 				this.elementIsRadioOrSelect(el) && (checkd && value == 1 || !checkd && value == 0)
 			) || (	// simple input / fallback
