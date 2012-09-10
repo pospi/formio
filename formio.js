@@ -758,11 +758,19 @@ FormIO.prototype.shouldSkipValidator = function(el, validatorName)
 	}
 
 	// also skip required checks if the field is hidden by a dependency
-	if (el.data('fio-dependency-hidden') || this.getFieldRowElement(el).data('fio-dependency-hidden')) {
+	if (el.data('fio-dependency-hidden')) {
 		return true;
 	}
+	// check each parent for real data since they may not have the attribute attached
+	var parents = el.parents(),
+		skip = false;
+	$.each(parents, function(i, p) {
+		if ($(p).data('fio-dependency-hidden')) {
+			skip = true;
+		}
+	});
 
-	return false;
+	return skip;
 };
 
 FormIO.prototype.highlightError = function(field)
