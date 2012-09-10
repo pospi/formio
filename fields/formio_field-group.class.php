@@ -39,14 +39,12 @@ class FormIOField_Group extends FormIOField_Text
 		if ($fieldType == 'file' || is_subclass_of(FormIO::preloadFieldClass($fieldType), FormIO::preloadFieldClass('file'))) {
 			$name = $this->getName() . '_f' . $index;
 		} else {
-			$name = $this->getName() . '[' . (is_array($index) ? implode('][', $index) : $index) . ']';
+			$name = $this->getName() . '[' . $index . ']';
 		}
 		$field = FormIO::loadFieldByClass($fieldType, $name, $desc, $this->form);
 
 		if ($field) {
-			if (!is_array($index)) $index = array($index);
-			$first = array_shift($index);
-			$this->addChild($field, $first . ($index ? '[' . implode('][', $index) . ']' : ''));
+			$this->addChild($field, $index);
 		}
 
 		return $field;
