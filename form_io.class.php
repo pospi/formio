@@ -147,11 +147,7 @@ class FormIO implements ArrayAccess
 	public function __construct($formName, $method = "GET", $action = null, $multipart = false)
 	{
 		$this->name = $formName;
-		if ($action === null) {
-			$this->action = $_SERVER['PHP_SELF'] . ($method != "GET" && !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
-		} else {
-			$this->action = $action;
-		}
+		$this->action = $action;
 		$this->method = $method == "GET" ? "GET" : "POST";
 		$this->multipart = $multipart;
 	}
@@ -1031,7 +1027,7 @@ class FormIO implements ArrayAccess
 	public function getFormTag()
 	{
 		return "<form id=\"$this->name\" class=\"formio\" method=\"" . strtolower($this->method)
-				. "\" action=\"$this->action\"" . ($this->multipart ? ' enctype="multipart/form-data"' : '')
+				. "\"" . ($this->action ? " action=\"$this->action\"" : '') . ($this->multipart ? ' enctype="multipart/form-data"' : '')
 				. " data-fio-stripe=\"" . http_build_query($this->getRowStriperIncrements()) . "\""
 				. '>';
 	}
