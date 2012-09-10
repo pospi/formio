@@ -239,6 +239,16 @@ FormIO.prototype.getFieldValue = function(el)
 	return selected;
 };
 
+FormIO.prototype.getReadableFieldName = function(el)
+{
+	if (!el.hasClass('row')) {
+		el = this.getFieldRowElement(el);
+	}
+	var lbl = el.find('label').first().clone(false);
+	lbl.find('span.required').remove();
+	return $.trim(lbl.text());
+};
+
 // :TODO: handle complex conditions better. At present all are executed in order
 FormIO.prototype.checkDependencies = function(el)
 {
