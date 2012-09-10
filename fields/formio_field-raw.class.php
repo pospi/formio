@@ -183,8 +183,8 @@ class FormIOField_Raw
 	final public function getFieldType()
 	{
 		$class = get_class($this);
-		if (strpos('FormIOField_', $class) === 0) {
-			return strtolower(substr($class, 11));
+		if (strpos($class, 'FormIOField_') === 0) {
+			return strtolower(substr($class, 12));
 		}
 		return $class;
 	}
