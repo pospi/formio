@@ -557,8 +557,10 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 	var realInput = el.prev(),
 		ids = realInput.val(),
 		labels = el.val(),
-		meta = realInput.data('fio-value-metadata'),
+		meta = el.data('fio-value-metadata'),
+		displayKey = (el.data('fio-display-key') || 'name'),
 		currentData = [],
+		newDatum,
 		i = 0;
 	ids = split(ids);
 	labels = split(labels);
@@ -568,7 +570,9 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 		if ($.trim(ids[i]) == '') {
 			continue;
 		}
-		currentData.push($.extend(true, (meta ? meta[i] : {}), {id: ids[i], name: labels[i]}));
+		newDatum = {id: ids[i]};
+		newDatum[displayKey] = labels[i];
+		currentData.push($.extend(true, (meta ? meta[i] : {}), newDatum));
 	}
 
 	// switch names of the visible and hidden input since it will now be sending back correct ID list data
@@ -583,7 +587,8 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 		preventDuplicates : true,
 		tokenDelimiter : el.data('fio-delimiter') || ',',
 		tokenValue : 'id',
-		tokenLimit : multiple ? null : 1
+		tokenLimit : multiple ? null : 1,
+		propertyToSearch : displayKey
 	}, otherOptions || {}));
 
 	// add items through API in order to fire onAdd callbacks for prepopulated data
