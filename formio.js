@@ -141,15 +141,30 @@ FormIO.prototype.setupFields = function(inside)
 {
 	var t = this;
 	$.each(this.options.setupRoutines, function(selector, method) {
-		var ofInterest = $(selector, inside);
+		t.runSetup(selector, inside);
+	});
+};
 
-		ofInterest.each(function(j) {
-			if ($.isFunction(method)) {
-				method.call(t, $(this));
-			} else {
-				(t[method])($(this));
-			}
-		});
+FormIO.prototype.runSetup = function(selector, inside)
+{
+	if (typeof this.options.setupRoutines[selector] == 'undefined') {
+		return;
+	}
+
+	if (inside === undefined) {
+		inside = this.elements;
+	}
+
+	var t = this,
+		ofInterest = $(selector, inside),
+		method = this.options.setupRoutines[selector];
+
+	ofInterest.each(function(j) {
+		if ($.isFunction(method)) {
+			method.call(t, $(this));
+		} else {
+			(t[method])($(this));
+		}
 	});
 };
 
