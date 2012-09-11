@@ -134,7 +134,7 @@ FormIO.prototype.get = function() {
 // overrides any keys provided with those in options
 FormIO.prototype.setOptions = function(options) {
 	options.setupRoutines = $.extend(true, {}, FormIO.prototype.options.setupRoutines, options.setupRoutines || {}),
-	$.extend(this.options, options);
+	this.options = $.extend(true, {}, this.options, options);
 };
 
 FormIO.prototype.setupFields = function(inside)
