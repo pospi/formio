@@ -145,10 +145,16 @@
 
 .formio li.token-input-token {
 	float: left;
+	padding: 0.2em;
 }
 
 .formio .token-input-delete-token {
 	margin-left: 0.3em;
+}
+
+.formio ul.token-input-list li.token-input-input-token {
+	padding: 0.2em;
+	margin: 0 0.2em 0 0;
 }
 
 .formio li.token-input-input-token input {
