@@ -81,7 +81,7 @@ FormIO.prototype.options = {
 		"[data-fio-type='repeater']"	: 'initRepeater',
 		"[data-fio-type='autocomplete']" : 'initAutoCompleteField',
 		"[data-fio-depends]"		: 'initDependencies',
-		"input[type=submit], input[type=reset], input[type=button]" : 'initButton',
+		"input[type=submit]:not(.hidden_default_action), input[type=reset], input[type=button]" : 'initButton',
 
 		// validators
 		"[data-fio-validation]" : "setValidation"

@@ -1009,6 +1009,7 @@ class FormIO implements ArrayAccess
 			$unusedSpin = 0;
 			$hiddenSubmit = clone $this->fields[$this->defaultSubmit];
 			$hiddenSubmit->setAttribute('styles', 'display: none;');
+			$hiddenSubmit->setAttribute('hidden_default_action', true);
 			$form = $hiddenSubmit->getHTML($unusedSpin);
 		} else {
 			$form = '';

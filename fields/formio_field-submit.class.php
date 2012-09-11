@@ -7,7 +7,7 @@
 
 class FormIOField_Submit extends FormIOField_Text
 {
-	public $buildString = '<input type="submit" name="{$name}" id="{$id}"{$desc? value="$desc"}{$classes? class="$classes"}{$styles? style="$styles"} />';
+	public $buildString = '<input type="submit" name="{$name}" id="{$id}"{$desc? value="$desc"} class="{$hidden_default_action?hidden_default_action}{$classes? $classes}"{$styles? style="$styles"} />';
 
 	// Allows submit buttons to share the same field name
 	private $realName;
@@ -27,6 +27,15 @@ class FormIOField_Submit extends FormIOField_Text
 	{
 		$this->realName = $name;
 		parent::setName($name . '_' . (self::$totalSubmitButtons++));
+	}
+
+	protected function getBuilderVars()
+	{
+		$vars = parent::getBuilderVars();
+		if (!empty($vars['hidden_default_action'])) {
+			$vars['id'] = '_DEF_' . $vars['id'];
+		}
+		return $vars;
 	}
 }
 ?>
