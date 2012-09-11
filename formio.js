@@ -24,24 +24,57 @@ $(document).ready(function() {
 	$('form.formio').formio();
 });
 
-$.fn.formio = function(func) {
-	var t = this;
-	var myForm = t.data('formio');
-
-	// constructor to create a formIO object and bind it to our elements
-	var init = function (options) {
-		t.data('formio', new FormIO(t, options));
+$.fn.formio = function(func)
+{
+	// constructor to create a formIO object and bind it to each of our elements
+	var init = function(options) {
+		this.data('formio', new FormIO(this, options));
 	};
 
-	// Run the appropriate behaviour
-    if (func != undefined && myForm != undefined && typeof myForm[func] == 'function') {
-      return myForm[func].apply( myForm, Array.prototype.slice.call( arguments, 1 ));
-    } else if (typeof func === 'object' || !func ) {
-      init.apply( t, arguments );
-      return t;
-    } else {
-      $.error( 'Method ' +  func + ' does not exist in FormIO' );
-    }
+	var fnCall = false;	// function calls can either chain when no results are returned or return arrays of results
+	var results = [];
+
+	this.each(function() {
+		var t = $(this);
+		var myForm = t.data('formio');
+
+		// Run the appropriate behaviour
+	    if (func != undefined && myForm != undefined) {
+	    	if (typeof myForm[func] == 'function') {
+		    	// object function call
+		    	fnCall = true;
+				results.push(myForm[func].apply( myForm, Array.prototype.slice.call( args, 1 )));
+				return true;
+			} else {
+				// intance variable request
+				results.push(myForm[func]);
+				return true;
+			}
+	    } else if (typeof func === 'object' || !func ) {
+	    	// create a new object, optionally passing options map
+			init.call( t, func );
+			return true;	// continue creating for each matched element
+	    } else if (myForm) {
+			$.error( 'Method ' +  func + ' does not exist in FormIO' );
+			return false;
+	    }
+	});
+
+	// if the results from all function calls are undefined, there are no results!
+	if (fnCall) {
+		var allUndef = true;
+		for (var i = 0; i < results.length; i++) {
+			if (typeof results[i] != 'undefined') {
+				allUndef = false;
+				break;
+			}
+		}
+		if (allUndef) {
+			results = [];
+		}
+	}
+
+	return results.length ? (results.length == 1 ? results[0] : results) : this;
 };
 
 /**
