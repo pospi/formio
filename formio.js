@@ -605,7 +605,7 @@ FormIO.prototype.initAutoCompleteField = function(el, otherOptions)
 	var realInput = el.prev(),
 		ids = realInput.val(),
 		labels = el.val(),
-		meta = el.data('fio-value-metadata'),
+		meta = realInput.data('fio-value-metadata'),
 		displayKey = (el.data('fio-display-key') || 'name'),
 		currentData = [],
 		newDatum,
