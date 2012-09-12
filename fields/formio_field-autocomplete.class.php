@@ -103,6 +103,13 @@ class FormIOField_Autocomplete extends FormIOField_Text
 		$vars['friendlyName'] = $name;
 		$vars['behaviour'] = 'autocomplete';
 
+		if (isset($vars['extradata'])) {
+			if (!is_array($vars['extradata']) || (array_keys($vars['extradata']) !== range(0, count($vars['extradata']) - 1))) {
+				$vars['extradata'] = array($vars['extradata']);
+			}
+			$vars['extradata'] = htmlspecialchars(json_encode($vars['extradata']));
+		}
+
 		return $vars;
 	}
 }
