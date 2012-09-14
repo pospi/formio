@@ -436,6 +436,10 @@ class FormIOField_Text extends FormIOField_Raw
 		return strlen($this->value) <= $length;
 	}
 
+	final private function exactLengthValidator($length) {
+		return strlen($this->value) == $length;
+	}
+
 	final private function inArrayValidator($allowable) {
 		return in_array($this->value, $allowable);
 	}
