@@ -5,7 +5,7 @@
 
 class FormIOField_Fieldsetstart extends FormIOField_Raw
 {
-	public $buildString = '<fieldset id="{$id}"><legend>{$desc}</legend>';
+	public $buildString = '<fieldset class="row" id="{$id}"><legend>{$desc}</legend>';
 
 	public function getHTML(&$spinVar)
 	{
