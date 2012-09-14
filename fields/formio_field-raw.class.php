@@ -6,7 +6,7 @@
 
 class FormIOField_Raw
 {
-	protected $form;					// form to which this field is attached
+	public $form;					// form to which this field is attached
 
 	private $name;						// field name (data key)
 	protected $attributes = array();	// field attributes (mainly DOM attributes but subclasses will use it for other stuff)
