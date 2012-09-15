@@ -137,6 +137,15 @@ FormIO.prototype.setOptions = function(options) {
 	this.options = $.extend(true, {}, this.options, options);
 };
 
+FormIO.prototype.setOption = function(k, v) {
+	this.options[k] = v;
+
+	// hooks for post-option updates
+	if (k == 'onRedraw') {
+		this.options[k].call(this);
+	}
+};
+
 FormIO.prototype.setupFields = function(inside)
 {
 	var t = this;
