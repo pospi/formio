@@ -190,6 +190,39 @@ class FormIO implements ArrayAccess
 		return $className;
 	}
 
+	// determine inheritance using FormIO field name suffixes
+	public static function fieldIsSubclassOf($fieldClass, $checkClass)
+	{
+		$className = FormIO::preloadFieldClass($fieldClass);
+		$chkClassName = FormIO::preloadFieldClass($checkClass);
+
+		return is_subclass_of($className, $chkClassName);
+	}
+
+	// same as above but can be the checked class as well
+	public static function fieldIsInstanceOf($fieldClass, $checkClass)
+	{
+		if ($fieldClass == $checkClass) {
+			return true;
+		}
+
+		$className = FormIO::preloadFieldClass($fieldClass);
+		$chkClassName = FormIO::preloadFieldClass($checkClass);
+
+		return is_subclass_of($className, $chkClassName);
+	}
+
+	// inheritance check against multiple input types
+	public static function fieldIsInstanceOfAny($fieldClass, Array $checkClasses)
+	{
+		foreach ($checkClasses as $class) {
+			if (self::fieldIsInstanceOf($fieldClass, $class)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Imports a data map from some other array. This does not erase existing values
 	 * unless the source array overrides those properties.
