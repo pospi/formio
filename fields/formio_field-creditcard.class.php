@@ -72,10 +72,17 @@ class FormIOField_Creditcard extends FormIOField_Dropdown
 		return $inputVars;
 	}
 
+	public function setValue($val)
+	{
+		if (is_array($val) && isset($val['number'])) {
+			$val['number'] = preg_replace('/[^0-9]/', '', $val['number']);
+		}
+		parent::setValue($val);
+	}
+
 	// mod10 validation for the card number before sending to any gateway
 	final protected function creditcardValidator() {
-		$val = preg_replace('/[^0-9]/', '', $this->getValue());
-		$this->setValue($val);
+		$val = $this->getValue();
 
 		// no number means nothing set
 		if (!isset($val['number']) || !isset($val['type'])) {
@@ -83,7 +90,7 @@ class FormIOField_Creditcard extends FormIOField_Dropdown
 		}
 
 		// check other possible errors with this field before the main event
-		if (!preg_match('/^\d\d\/\d\d$/', $val['expiry']) || !preg_match('/^\d{3-4}$/', $val['ccv'])) {
+		if (!preg_match('/^\d\d\/\d\d$/', $val['expiry']) || !preg_match('/^\d{3,4}$/', $val['ccv'])) {
 			return false;
 		}
 
@@ -95,7 +102,7 @@ class FormIOField_Creditcard extends FormIOField_Dropdown
 		}
 
 		// run mod10 validator
-		$cardNumber = strrev($val);
+		$cardNumber = strrev($val['number']);
 		$numSum = 0;
 		for ($i = 0; $i < strlen($cardNumber); $i++) {
 			$currentNum = substr($cardNumber, $i, 1);
