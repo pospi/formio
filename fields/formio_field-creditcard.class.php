@@ -1,24 +1,75 @@
 <?php
 /**
- *
+ * Credit card input field. Contains separate inputs for card information.
  */
 
-class FormIOField_Creditcard extends FormIOField_Text
+class FormIOField_Creditcard extends FormIOField_Dropdown
 {
+	public $buildString = '<div class="row blck credit{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
+		<label for="{$id}_type">{$desc}{$required? <span class="required">*</span>}</label>
+		<div class="rows">
+		<div class="row card-type">
+			<label>Card type: <select name="{$name}[type]" id="{$id}_type"{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"}>{$options}</select></label>
+		</div>
+		<div class="row card-name">
+			<label>Name on card: <input type="text" name="{$name}[name]" id="{$id}_name"{$cardname? value="$cardname"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
+		</div>
+		<div class="row card-number">
+			<label>Card number: <input type="text" name="{$name}[number]" id="{$id}_number"{$cardnumber? value="$cardnumber"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
+		</div>
+		<div class="row card-details clearfix">
+			<label class="card-expiry">Expiry: <input type="text" name="{$name}[expiry]" id="{$id}_expiry"{$cardexpiry? value="$cardexpiry"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
+			<label class="card-ccv">CCV: <input type="text" name="{$name}[ccv]" id="{$id}_ccv"{$cardccv? value="$cardccv"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
+		</div>
+		</div>
+		{$error?<p class="err">$error</p>}
+		{$hint? <p class="hint">$hint</p>}
+	</div>';
+
 	public static $VALIDATOR_ERRORS = array(
-		'creditcardValidator'	=> "Invalid card number",
+		'creditcardValidator'	=> "Invalid card details",
 	);
 
 	protected $validators = array(
 		'creditcardValidator'
 	);
 
+	protected $cardFormats = array();		// credit card regex formats
+
+	public function __construct($form, $name, $displayText = null, $defaultValue = null)
+	{
+		parent::__construct($form, $name, $displayText, $defaultValue);
+
+		$this->addCardType('mastercard', 'MasterCard',	"/^5[1-5][0-9]{14}$/");
+		$this->addCardType('visa',		'Visa',			"/^4[0-9]{12}([0-9]{3})?$/");
+		$this->addCardType('amex', 		'Amex',			"/^3[47][0-9]{13}$/");
+		$this->addCardType('discover',	'Discover',		"/^6011[0-9]{12}$/");
+		$this->addCardType('diners',	'Diner\'s Club', "/^3(0[0-5]|[68][0-9])[0-9]{11}$/");
+		$this->addCardType('jcb',		'JCB', 			"/^(3[0-9]{4}|2131|1800)[0-9]{11}$/");
+	}
+
+	public function addCardType($name, $humanName, $regex)
+	{
+		$this->setOption($name, $humanName);
+		$this->cardFormats[$name] = $regex;
+	}
+
 	// append 'behaviour' parameter to the input for JS validation
 	protected function getBuilderVars()
 	{
-		$vars = parent::getBuilderVars();
-		$vars['behaviour'] = 'credit';
-		return $vars;
+		$inputVars = FormIOField_Text::getBuilderVars();
+		if (is_array($this->value) && !empty($this->value[0]) && !empty($this->value[1]) && !empty($this->value[2])) {
+			$inputVars['cardnumber']	= $this->value['number'];
+			$inputVars['cardname']		= $this->value['name'];
+			$inputVars['cardexpiry']	= $this->value['expiry'];
+			$inputVars['cardccv']		= $this->value['ccv'];
+		}
+
+		// bring option string across from dropdown parent class
+		$ddVars = parent::getBuilderVars();
+		$inputVars['options'] = $ddVars['options'];
+
+		return $inputVars;
 	}
 
 	// mod10 validation for the card number before sending to any gateway
@@ -26,13 +77,18 @@ class FormIOField_Creditcard extends FormIOField_Text
 		$val = preg_replace('/[^0-9]/', '', $this->getValue());
 		$this->setValue($val);
 
-		// check number format - it has to match one of the major card formats to be valid
-		$validFormat = preg_match("/^5[1-5][0-9]{14}$/", $val) ||			// mastercard
-					preg_match("/^4[0-9]{12}([0-9]{3})?$/", $val) ||		// visa
-					preg_match("/^3[47][0-9]{13}$/", $val) ||				// amex
-					preg_match("/^6011[0-9]{12}$/", $val) ||				// discover
-					preg_match("/^3(0[0-5]|[68][0-9])[0-9]{11}$/", $val) ||	// diners club
-					preg_match("/^(3[0-9]{4}|2131|1800)[0-9]{11}$/", $val);	// JCB
+		// no number means nothing set
+		if (!isset($val['number']) || !isset($val['type'])) {
+			return true;
+		}
+
+		// check other possible errors with this field before the main event
+		if (!preg_match('/^\d\d\/\d\d$/', $val['expiry']) || !preg_match('/^\d{3-4}$/', $val['ccv'])) {
+			return false;
+		}
+
+		// check number format
+		$validFormat = preg_match($this->cardFormats[$val['type']], $val['number']);
 
 		if (!$validFormat) {
 			return false;

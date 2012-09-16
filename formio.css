@@ -165,6 +165,13 @@
 	color: #444;
 }
 
+/* Block-level input types with visible sublabels */
+.formio div.blck.credit .row label { display: inline; }
+.formio div.blck.credit .row.card-number label input { width: auto; }
+.formio div.blck.credit .row.card-details label { float: left; display: block; }
+.formio div.blck.credit .row label.card-expiry input { width: 4em; }
+.formio div.blck.credit .row label.card-ccv input { width: 2em; }
+
 /* Button */
 
 .formio button, .formio input[type=submit], .formio input[type=reset], .formio input[type=button] {
