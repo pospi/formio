@@ -320,7 +320,12 @@ FormIO.prototype.checkDependencies = function(el)
 
 	$.each(affected, function(k, elId) {
 		if (elId[0] != '#') {
-			elId = t.getFieldRowElement($('#' + t.getFieldId(elId)));
+			var targetEl = $('#' + t.getFieldId(elId));
+			if (targetEl.attr('type') == 'submit') {
+				elId = targetEl;
+			} else {
+				elId = t.getFieldRowElement(targetEl);
+			}
 		} else {
 			elId = $(elId);
 		}
@@ -345,9 +350,14 @@ FormIO.prototype.checkDependencies = function(el)
 
 		if (show) {
 			$.each(visible, function(unused, showEl) {
-				var row;
+				var row, targetEl;
 				if (showEl[0] != '#') {
-					row = t.getFieldRowElement($('#' + t.getFieldId(showEl)));
+					targetEl = $('#' + t.getFieldId(showEl));
+					if (targetEl.attr('type') == 'submit') {
+						row = targetEl;
+					} else {
+						row = t.getFieldRowElement(targetEl);
+					}
 				} else {
 					row = $(showEl);
 				}
