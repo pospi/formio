@@ -435,6 +435,25 @@ class FormIO implements ArrayAccess
 		return $this;
 	}
 
+	/**
+	 * Adds an CSS class to a field.
+	 * If called with 1 parameter, the last added field is used as the key.
+	 *
+	 * :CHAINABLE:
+	 */
+	public function addCSSClass()
+	{
+		$a = func_get_args();
+		if (sizeof($a) < 2) {
+			array_unshift($a, $this->lastAddedField);
+		}
+		list($k, $class) = $a;
+
+		$this->fields[$k]->addCSSClass($class);
+
+		return $this;
+	}
+
 	// Allows you to add an error message to the form from external scripts
 	// :TODO: handle nested repeater fields
 	public function addError($dataKey, $msg)
