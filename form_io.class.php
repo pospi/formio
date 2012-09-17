@@ -944,7 +944,8 @@ class FormIO implements ArrayAccess
 	 * @param	bool		$includeSubmit	whether or not to return submit button data in the results
 	 * @param	string		$fieldName		if given, the returned array only contains this field's data
 	 *
-	 * @return	array		associative array of field-derived data
+	 * @return	array		associative array of field-derived data, or the array of field-derived data
+	 *                      for a single field when $fieldName is provided.
 	 */
 	public function walkData($keyMethod, $keyArgs, $valueMethod, $valueArgs, $includeSubmit = false, $fieldName = null)
 	{
@@ -987,6 +988,9 @@ class FormIO implements ArrayAccess
 			}
 		}
 
+		if (is_string($fieldName)) {
+			return $data[$fieldName];
+		}
 		return $data;
 	}
 
