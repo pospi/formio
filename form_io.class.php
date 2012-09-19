@@ -230,9 +230,13 @@ class FormIO implements ArrayAccess
 	 *
 	 * :NOTE: To import from repeated file inputs, you must send:
 	 *	$assoc = the repeater field's name
-	 *	$isFile = true
+	 *	$isRepeatedFile = true
 	 *
 	 * @param	array	$assoc			Associative data array to import
+	 * @param	bool	$isPost			true if the data is being imported from $_POST. Required for correct functioning of repeated file inputs.
+	 *                       			If you do not have this form setup, this parameter can be ignored.
+	 * @param	bool	$isRepeatedFile	if true, we are reading a repeated file input and should read from the top-level $_FILES array instead of the data provided.
+	 *                             		Used internally after calling with $isPost and finding repeated file inputs present in the form.
 	 */
 	public function importData($assoc, $isPost = false, $isRepeatedFile = false)
 	{
@@ -283,8 +287,10 @@ class FormIO implements ArrayAccess
 		}
 
 		// go through all unhandled fields and give them an opportunity to reset their value to an 'unprovided' state
-		foreach ($unhandledFields as $name => $field) {
-			$field->inputNotProvided();
+		if (!$this->submitted) {
+			foreach ($unhandledFields as $name => $field) {
+				$field->inputNotProvided();
+			}
 		}
 
 		$this->submitted = true;
