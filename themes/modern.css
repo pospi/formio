@@ -31,6 +31,13 @@
 .formio fieldset {
 	border: 1px solid #ccc;
 	margin-bottom: 1em;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+
+.formio fieldset legend {
+	padding: 0 0.5em;
 }
 
 /* Type-specific */
