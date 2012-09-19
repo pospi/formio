@@ -823,6 +823,11 @@ class FormIO implements ArrayAccess
 		$this->method = $gorp == 'GET' ? $gorp : 'POST';
 	}
 
+	public function getMethod($gorp)
+	{
+		return $this->method;
+	}
+
 	public function setMultipart($mult)
 	{
 		$this->multipart = (bool)$mult;
