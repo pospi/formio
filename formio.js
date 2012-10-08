@@ -574,6 +574,10 @@ FormIO.prototype.initTabs = function()
 		}
 	});
 
+	if (!this.elements.find('.tab.footer').length) {
+		tabs.last().after($('<div class="tab footer clearfix"></div>'));
+	}
+
 	this.elements.find('.tab.footer').prepend("<div class=\"tabNav\"></div>");
 	this.elements.find('.tab.footer div.tabNav').prepend(nextBtn).prepend(prevBtn);
 	prevBtn.button();
