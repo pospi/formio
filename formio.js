@@ -203,10 +203,9 @@ FormIO.prototype.restripeForm = function()
 	// redo new striping
 	var spin = 1;
 	shownRows.each(function(i, row) {
-		if (spin % 2 == 0) {
+		if (spin++ % 2 == 0) {
 			$(row).addClass('alt');
 		}
-		++spin;
 		var fieldName = $(row).find('input[name], select[name]').attr('name');
 		if (typeof striperSkips[fieldName] != 'undefined' && striperSkips[fieldName] > 0) {
 			--spin;
@@ -475,11 +474,18 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 	var nameBase = this.getFieldName(el.attr('id')),
 		idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)'),
 		nameFind = new RegExp('^' + nameBase + '\\[(\\d+)\\](.*)'),
-		idDepFind = new RegExp('^#' + el.attr('id') + '_(\\d+)(.*)');
+		idDepFind = new RegExp('^#' + el.attr('id') + '_(\\d+)(.*)'),
+		spin = 1;
 
 	el.find('>.rows>.row').each(function() {
 		var $this1 = $(this),
 			currId = $this1.attr('id');
+
+		if (spin++ % 2 == 0) {
+			$this1.addClass('alt');
+		} else {
+			$this1.removeClass('alt');
+		}
 
 		// renumber the row's ID if it has one
 		if (currId) {
