@@ -517,6 +517,9 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 							if (d.match(idDepFind)) {
 								currDeps[k][i] = d.replace(idDepFind, '#' + el.attr('id') + '_' + counter + '$2');
 							}
+							if (d.match(nameFind)) {
+								currDeps[k][i] = d.replace(nameFind, nameBase + '[' + counter + ']$2');
+							}
 						}
 					});
 					$this.data('fio-depends', currDeps);
