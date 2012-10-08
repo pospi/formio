@@ -91,7 +91,7 @@ FormIO = function(formEl, options)
 	var that = this;
 
 	this.elements = formEl;
-	this.elements.submit(function() { return that.onSubmit() });
+	this.setupForm(formEl);
 
 	this.setOptions(options || {});
 
@@ -145,6 +145,12 @@ FormIO.prototype.setOption = function(k, v) {
 	if (k == 'onRedraw') {
 		this.options[k].call(this);
 	}
+};
+
+FormIO.prototype.setupForm = function(formEl)
+{
+	var that = this;
+	formEl.submit(function() { return that.onSubmit() });
 };
 
 FormIO.prototype.setupFields = function(inside)
