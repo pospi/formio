@@ -31,8 +31,9 @@ $.fn.formio = function(func)
 		this.data('formio', new FormIO(this, options));
 	};
 
-	var fnCall = false;	// function calls can either chain when no results are returned or return arrays of results
-	var results = [];
+	var fnCall = false,	// function calls can either chain when no results are returned or return arrays of results
+		results = [],
+		args = arguments;
 
 	this.each(function() {
 		var t = $(this);
