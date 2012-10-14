@@ -540,22 +540,19 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 FormIO.prototype.reinitRepeaterFields = function(el)
 {
 	// clear ALL events from all repeater subinputs (not the row handlers)
-	el.unbind().find('*:not(input.add):not(input.remove)').unbind();
+	el.find('>.rows').unbind().find('*:not(input.add):not(input.remove)').unbind();
 	// rebind events, interfaces and stuff using form field initialiser
 	this.setupFields(el);
 
 	// refresh the repeater sortables if present
 	if (el.data('fio-sortable')) {
-		if (el.data('sortable')) {
+		if (el.html5sortable) {
+ 			el.html5sortable('destroy');
+	 		el.html5sortable({ items : '>.rows>.row' });
+		} else if (el.sortable) {
  			el.sortable('destroy');
+	 		el.sortable({ items : '>.rows>.row' });
  		}
- 		el.sortable({
- 			containment : el,
-			items : '>.rows>.row',
-			cursor : 'move',
-			tolerance : 'pointer',
-			revert : true
-		});
 	}
 
 	// trigger any repeater refresh callbacks defined
