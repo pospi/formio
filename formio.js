@@ -544,6 +544,20 @@ FormIO.prototype.reinitRepeaterFields = function(el)
 	// rebind events, interfaces and stuff using form field initialiser
 	this.setupFields(el);
 
+	// refresh the repeater sortables if present
+	if (el.data('fio-sortable')) {
+		if (el.data('sortable')) {
+ 			el.sortable('destroy');
+ 		}
+ 		el.sortable({
+ 			containment : el,
+			items : '>.rows>.row',
+			cursor : 'move',
+			tolerance : 'pointer',
+			revert : true
+		});
+	}
+
 	// trigger any repeater refresh callbacks defined
 	if (this.options.repeaterRefreshCallbacks && this.options.repeaterRefreshCallbacks.length) {
 		$.each(this.options.repeaterRefreshCallbacks, function(i, callback) {
@@ -699,6 +713,18 @@ FormIO.prototype.initRepeater = function(el)
 	// hold a reference to the first field in this closure
 	var firstField = el.find('>.rows>.row').first();
 
+	// init sortable behaviour if defined
+	if (el.data('fio-sortable')) {
+		el.sortable({
+			containment : el,
+			items : '>.rows>.row',
+			cursor : 'move',
+			tolerance : 'pointer',
+			revert : true
+		});
+	}
+
+	// bind add / remove button behaviours
 	el.find('>.add').unbind('click').click(function() {
 		var newField = that.getNewEmptyField(firstField);
 		el.find('>.rows>.row').last().after(newField);
