@@ -727,6 +727,9 @@ FormIO.prototype.initRepeater = function(el)
 		el.find('>.rows>.row').last().after(newField);
 
 		that.reorderRepeaterFields(el);
+
+		el.trigger('formio.repeaterFieldAdded', [newField]);
+
 		return false;	// prevent submission
 	});
 	el.find('>.remove').unbind('click').click(function() {
@@ -742,6 +745,9 @@ FormIO.prototype.initRepeater = function(el)
 		}
 
 		that.reorderRepeaterFields(el);
+
+		el.trigger('formio.repeaterFieldRemoved', [lastRow]);
+
 		return false;	// prevent submission
 	});
 };
