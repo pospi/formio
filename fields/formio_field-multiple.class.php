@@ -22,8 +22,10 @@ abstract class FormIOField_Multiple extends FormIOField_Text
 
 	public function getHumanReadableValue()
 	{
-		if (is_array($this->options) && isset($this->options[$this->value])) {
+		if (is_array($this->options) && is_scalar($this->value) && isset($this->options[$this->value])) {
 			return $this->options[$this->value];
+		} else if (is_array($this->value)) {
+			return implode(', ', $this->value);
 		}
 		return '';
 	}
