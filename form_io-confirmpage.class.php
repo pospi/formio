@@ -8,11 +8,11 @@
 
 class FormIO_ConfirmPage
 {
-	private $form;
-	private $callback;
-	private $ignoreFields = array();
+	protected $form;
+	protected $callback;
+	protected $ignoreFields = array();
 
-	private $tableText = "";
+	protected $tableText = "";
 
 	/**
 	 * @param	FormIO		$form					form to generate a confirmation page for
