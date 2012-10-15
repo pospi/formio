@@ -221,7 +221,7 @@ class FormIOField_Raw
 	private function formInputBuildCallback($matches)
 	{
 		if (isset($matches[3]) && isset($this->lastBuilderReplacement)) {
-			return preg_replace('/\$' . $matches[1] . '/', $this->lastBuilderReplacement, $matches[3]);
+			return preg_replace('/\$' . $matches[1] . '/', addcslashes($this->lastBuilderReplacement, '$'), $matches[3]);
 		} else {
 			return $this->lastBuilderReplacement;
 		}
