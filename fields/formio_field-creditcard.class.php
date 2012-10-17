@@ -18,7 +18,7 @@ class FormIOField_Creditcard extends FormIOField_Dropdown
 			<label>Card number: <input type="text" name="{$name}[number]" id="{$id}_number"{$cardnumber? value="$cardnumber"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
 		</div>
 		<div class="row card-details clearfix">
-			<label class="card-expiry">Expiry: <input type="text" name="{$name}[expiry]" id="{$id}_expiry"{$cardexpiry? value="$cardexpiry"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
+			<label class="card-expiry">Expiry <em>(MM/YY)</em>: <input type="text" name="{$name}[expiry]" id="{$id}_expiry"{$cardexpiry? value="$cardexpiry"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
 			<label class="card-ccv">CCV: <input type="text" name="{$name}[ccv]" id="{$id}_ccv"{$cardccv? value="$cardccv"}{$readonly? readonly="readonly"}{$required? data-fio-validation="requiredValidator"} /></label>
 		</div>
 		</div>
