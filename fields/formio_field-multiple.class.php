@@ -38,6 +38,11 @@ abstract class FormIOField_Multiple extends FormIOField_Text
 		}
 	}
 
+	public function removeOption($optionKey)
+	{
+		unset($this->options[$optionKey]);
+	}
+
 	/**
 	 * If it is not a requirement that your field have dependencies attached to its options, or
 	 * you wish to add those dependencies manually, you may set the entire options array at once.
