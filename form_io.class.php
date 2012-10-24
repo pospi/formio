@@ -351,6 +351,15 @@ class FormIO implements ArrayAccess
 	}
 
 	/**
+	 * Remove a previously added field from the form
+	 * @param  string $name ID of the field to remove
+	 */
+	public function removeField($name)
+	{
+		unset($this->fields[$name]);
+	}
+
+	/**
 	 * Set some fields to be required. Either pass as many field names to the function as you
 	 * desire, or call immediately after adding the field, with no parameters.
 	 *
