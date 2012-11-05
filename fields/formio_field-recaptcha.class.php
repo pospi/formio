@@ -28,7 +28,7 @@ class FormIOField_Recaptcha extends FormIOField_Captcha
 		} else {
 			require_once(FORMIO_LIB . FormIO::$reCAPTCHA_inc);
 		}
-		$inputVars['captcha'] = recaptcha_get_html(FormIO::$reCAPTCHA_pub);
+		$inputVars['captcha'] = recaptcha_get_html(FormIO::$reCAPTCHA_pub, null, !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off');
 		return $inputVars;
 	}
 
