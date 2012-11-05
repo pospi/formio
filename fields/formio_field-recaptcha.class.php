@@ -23,8 +23,12 @@ class FormIOField_Recaptcha extends FormIOField_Captcha
 	protected function getBuilderVars()
 	{
 		$inputVars = parent::getBuilderVars();
-		require_once($this->form->reCAPTCHA_inc);
-		$inputVars['captcha'] = recaptcha_get_html($this->form->reCAPTCHA_pub);
+		if (strpos(FormIO::$reCAPTCHA_inc, '/') === 0) {
+			require_once(FormIO::$reCAPTCHA_inc);
+		} else {
+			require_once(FORMIO_LIB . FormIO::$reCAPTCHA_inc);
+		}
+		$inputVars['captcha'] = recaptcha_get_html(FormIO::$reCAPTCHA_pub);
 		return $inputVars;
 	}
 
@@ -34,8 +38,8 @@ class FormIOField_Recaptcha extends FormIOField_Captcha
 			return true;
 		}
 
-		require_once($this->form->reCAPTCHA_inc);
-		$resp = recaptcha_check_answer($this->form->reCAPTCHA_priv,
+		require_once(FormIO::$reCAPTCHA_inc);
+		$resp = recaptcha_check_answer(FormIO::$reCAPTCHA_priv,
 						$_SERVER["REMOTE_ADDR"],
 						$_POST["recaptcha_challenge_field"],
 						$_POST["recaptcha_response_field"]);

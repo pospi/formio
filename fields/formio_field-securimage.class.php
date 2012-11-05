@@ -21,12 +21,12 @@ class FormIOField_Securimage extends FormIOField_Captcha
 	protected function getBuilderVars()
 	{
 		$inputVars = parent::getBuilderVars();
-		if (strpos($this->form->securImage_inc, '/') === 0) {
-			require_once($this->form->securImage_inc);
+		if (strpos(FormIO::$securImage_inc, '/') === 0) {
+			require_once(FormIO::$securImage_inc);
 		} else {
-			require_once(dirname(__FILE__) . '/' . $this->form->securImage_inc);
+			require_once(FORMIO_LIB . FormIO::$securImage_inc);
 		}
-		$inputVars['captchaImage'] = $this->form->securImage_img;
+		$inputVars['captchaImage'] = FormIO::$securImage_img;
 		return $inputVars;
 	}
 
@@ -37,7 +37,7 @@ class FormIOField_Securimage extends FormIOField_Captcha
 		}
 
 		$ok = false;
-		require_once($this->form->securImage_inc);
+		require_once(FormIO::$securImage_inc);
 		$securimage = new Securimage();
 		if ($securimage->check($this->value)) {
 			$ok = true;

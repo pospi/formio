@@ -42,14 +42,14 @@ abstract class FormIOField_Captcha extends FormIOField_Text
 
 	protected function captchaAlreadyPassed()
 	{
-		return isset($_SESSION[$this->form->CAPTCHA_session_var]) ? $_SESSION[$this->form->CAPTCHA_session_var] : false;
+		return isset($_SESSION[FormIO::$CAPTCHA_session_var]) ? $_SESSION[FormIO::$CAPTCHA_session_var] : false;
 	}
 
 	// stores result in session, if available. We only need to authenticate as human once.
 	protected function storeCaptchaPass()
 	{
 		if (session_id()) {
-			$_SESSION[$this->form->CAPTCHA_session_var] = true;
+			$_SESSION[FormIO::$CAPTCHA_session_var] = true;
 		} else {
 			trigger_error("CAPTCHA field unable to save session - user must reauthenticate every refresh", E_USER_NOTICE);
 		}

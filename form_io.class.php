@@ -20,6 +20,7 @@
 	@date		2010-11-01
   ===============================================================================*/
 
+define('FORMIO_LIB', dirname(__FILE__) . '/lib/');
 define('FORMIO_FIELDS', dirname(__FILE__) . '/fields/');
 
 // Important base field classes. Others can be loaded via FormIO::loadFieldByClass()
@@ -97,19 +98,19 @@ class FormIO implements ArrayAccess
 
 	// parameters for T_CAPTCHA. Recommend you set these from your own scripts rather than overriding here.
 
-	public $captchaType		= 'securimage';		// The Field name to instantiate for T_CAPTCHA fields. At present, this means a choice of 'securimage' or 'recaptcha'
+	public static $captchaType		= 'securimage';		// The Field name to instantiate for T_CAPTCHA fields. At present, this means a choice of 'securimage' or 'recaptcha'
 	// Some notes on captcha types and requirements:
 	//	- reCAPTCHA requires that your form be submitted via POST, and that socket connections
 	//	  to external sites are possible. This may be an issue from behind a proxy server.
 	//	- SecurImage requires that GD be installed and running on your server. It also requires sessions to be enabled.
 	// All captchas attempt to use the session to store validation status - this way, a user only need authenticate once.
 
-	public $CAPTCHA_session_var = '__formIO_CAPTCHA_ok';		// once we have authenticated as human, this will be stored in session so we don't have to do it again
-	public $reCAPTCHA_pub	= '';
-	public $reCAPTCHA_priv	= '';
-	public $reCAPTCHA_inc	= 'recaptcha/recaptchalib.php';		// this should point to the reCAPTCHA php include file
-	public $securImage_inc	= 'securimage/securimage.php';		// this should point to the SecurImage php include file
-	public $securImage_img	= 'securimage/securimage_show.php';	// this should point to the SecurImage php image generation file
+	public static $CAPTCHA_session_var = '__formIO_CAPTCHA_ok';		// once we have authenticated as human, this will be stored in session so we don't have to do it again
+	public static $reCAPTCHA_pub	= '';
+	public static $reCAPTCHA_priv	= '';
+	public static $reCAPTCHA_inc	= 'recaptchalib.php';				// this should point to the reCAPTCHA php include file. Paths without leading slashes are assumed to be relative to FORMIO_LIB.
+	public static $securImage_inc	= 'securimage/securimage.php';		// this should point to the SecurImage php include file
+	public static $securImage_img	= 'securimage/securimage_show.php';	// this should point to the SecurImage php image generation file
 
 	//===============================================================================================/\
 
@@ -320,7 +321,7 @@ class FormIO implements ArrayAccess
 	{
 		// mimic old CAPTCHA behaviour by reading class captcha type variable
 		if ($type == FormIO::T_CAPTCHA) {
-			$type = $this->captchaType;
+			$type = self::$captchaType;
 		}
 
 		// create field

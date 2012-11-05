@@ -1,3 +1,6 @@
 [submodule "lib/jquery-tokeninput"]
 	path = lib/jquery-tokeninput
 	url = git://github.com/loopj/jquery-tokeninput.git
+[submodule "lib/securimage"]
+	path = lib/securimage
+	url = git://github.com/dapphp/securimage.git
