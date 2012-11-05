@@ -38,7 +38,12 @@ class FormIOField_Recaptcha extends FormIOField_Captcha
 			return true;
 		}
 
-		require_once(FormIO::$reCAPTCHA_inc);
+		if (strpos(FormIO::$reCAPTCHA_inc, '/') === 0) {
+			require_once(FormIO::$reCAPTCHA_inc);
+		} else {
+			require_once(FORMIO_LIB . FormIO::$reCAPTCHA_inc);
+		}
+
 		$resp = recaptcha_check_answer(FormIO::$reCAPTCHA_priv,
 						$_SERVER["REMOTE_ADDR"],
 						$_POST["recaptcha_challenge_field"],
