@@ -8,8 +8,8 @@ class FormIOField_Passwordchange extends FormIOField_Text
 	public $buildString = '<div class="row pwdchange blck{$alt? alt}{$classes? $classes}" id="{$id}">
 		<label for="{$id}_0">{$desc}{$required? <span class="required">*</span>}</label>
 		<div class="row">
-			<input type="password" name="{$name}[0]" id="{$id}_0"{$validation? data-fio-validation="$validation"} />
-			<input type="password" name="{$name}[1]" id="{$id}_1" /> (verify)
+			<input autocomplete="off" type="password" name="{$name}[0]" id="{$id}_0"{$validation? data-fio-validation="$validation"} />
+			<input autocomplete="off" type="password" name="{$name}[1]" id="{$id}_1" /> (verify)
 		</div>
 		{$error?<p class="err">$error</p>}
 		{$hint? <p class="hint">$hint</p>}
