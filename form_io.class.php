@@ -784,7 +784,7 @@ class FormIO implements ArrayAccess
 
 	public function getField($name)
 	{
-		return $this->fields[$name];
+		return isset($this->fields[$name]) ? $this->fields[$name] : null;
 	}
 
 	public function getLastField()
