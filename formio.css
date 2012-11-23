@@ -75,6 +75,7 @@
 	font-weight: normal;
 	margin: 0;
 }
+.formio .multiple.col1 label { clear:both; }
 .formio .multiple.col2 label { width:50%; }
 .formio .multiple.col3 label { width:33%; }
 .formio .multiple.col4 label { width:25%; }
