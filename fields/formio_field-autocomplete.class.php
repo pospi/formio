@@ -49,7 +49,7 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	{
 		if (!is_array($value)) {
 			// filter out empty entries in the list
-			$value = $this->getArrayValue($value);
+			$value = $this->getValue($value);
 		}
 
 		parent::setValue(implode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $value));
@@ -60,13 +60,13 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	 */
 	public function getHumanReadableValue()
 	{
-		$val = $this->getArrayValue();
+		$val = $this->getValue();
 		return implode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $val);
 	}
 
-	protected function getArrayValue($val = null)
+	public function getValue($val = null)
 	{
-		if (!isset($val)) $val = $this->getValue();
+		if (!isset($val)) $val = parent::getValue();
 
 		if (!is_array($val)) {
 			$val = explode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $val);
