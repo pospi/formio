@@ -42,26 +42,12 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	}
 
 	/**
-	 * override in child classes to set friendly value as appropriate for internal autocomplete workings
-	 * @param array/string $value new value for the field
-	 */
-	public function setValue($value)
-	{
-		if (!is_array($value)) {
-			// filter out empty entries in the list
-			$value = $this->getValue($value);
-		}
-
-		parent::setValue(implode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $value));
-	}
-
-	/**
 	 * Overridden to concatenate if array is stored internally
 	 */
 	public function getHumanReadableValue()
 	{
 		$val = $this->getValue();
-		return implode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $val);
+		return is_array($val) ? implode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $val) : $val;
 	}
 
 	public function getValue($val = null)
