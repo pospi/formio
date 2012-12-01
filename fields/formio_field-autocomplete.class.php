@@ -68,6 +68,10 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	{
 		if (!isset($val)) $val = parent::getValue();
 
+		if (!$this->getAttribute('multiple', false)) {
+			return $val;
+		}
+
 		if (!is_array($val)) {
 			$val = explode($this->getAttribute('delimiter', self::DEFAULT_DELIM), $val);
 			$val = array_filter($val, function($var) {
