@@ -225,7 +225,7 @@ class FormIOField_Text extends FormIOField_Raw
 	public function removeValidator($validatorName)
 	{
 		foreach ($this->validators as $i => $validator) {
-			if ($validator == $validatorName || $validator['func'] == $validatorName) {
+			if ($validator == $validatorName || (is_array($validator) && $validator['func'] == $validatorName)) {
 				unset($this->validators[$i]);
 				return true;
 			}
@@ -236,7 +236,7 @@ class FormIOField_Text extends FormIOField_Raw
 	public function hasValidator($validatorName)
 	{
 		foreach ($this->validators as $validator) {
-			if ($validator == $validatorName || $validator['func'] == $validatorName) {
+			if ($validator == $validatorName || (is_array($validator) && $validator['func'] == $validatorName)) {
 				return true;
 			}
 		}
