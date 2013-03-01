@@ -421,7 +421,7 @@ FormIO.prototype.splitParams = function(str)
 		// may be a string-only value
 		if (parts.length == 1 && parts[0] == v) {
 			params[unescape(v)] = null;	// in which case, set it to be returned in parent scope variable as parameterless
-			return false;	// and abort the loop
+			return true;	// and continue to the next param
 		}
 		var values = parts[1].split(';');
 		if (values.length == 1 && parts[1] == values[0]) {	// may have subvalues or just be a string
