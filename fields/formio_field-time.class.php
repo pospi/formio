@@ -62,20 +62,22 @@ class FormIOField_Time extends FormIOField_Date
 	private function strTimeToArrTime($str)
 	{
 		if (preg_match(FormIOField_Time::timeRegex, $str, $matches)) {
-			$this->value = array();
+			$value = array();
 			if ($matches[1] > 23 || (isset($matches[4]) && $matches[4] > 59) || (isset($matches[7]) && $matches[7] > 59)) {
 				return null;
 			}
 			if ($matches[1] > 11) {
-				$this->value[1] = 'pm';
+				$value[1] = 'pm';
 				$matches[1] -= 12;
 			} else {
-				$this->value[1] = 'am';
+				$value[1] = 'am';
 				if ($matches[1] == 0) {
 					$matches[1] = 12;
 				}
 			}
-			$this->value[0] = $this->normaliseTime($matches[1], isset($matches[4]) ? $matches[4] : null, isset($matches[7]) ? $matches[7] : null);
+			$value[0] = $this->normaliseTime($matches[1], isset($matches[4]) ? $matches[4] : null, isset($matches[7]) ? $matches[7] : null);
+
+			return $value;
 		}
 		return null;
 	}
