@@ -22,8 +22,10 @@ class FormIOField_Repeater extends FormIOField_Group
 
 	private $internals = array();		// internal variables of the repeater (add / remove button submit values, etc)
 
-	// default to a repeating text field
-	protected $attributes = array('fieldtype' => FormIO::T_TEXT);
+	protected $attributes = array(
+		'fieldtype' => FormIO::T_TEXT,	// default to a repeating text field
+		'reserve_empty_input' => true,	// and always place an empty one at the end of the list
+	);
 
 	public function setValue($values)
 	{
@@ -128,8 +130,10 @@ class FormIOField_Repeater extends FormIOField_Group
 
 	private function getMinRequiredInputs($minNum = 1)
 	{
-		if ($minNum < sizeof($this->value) + 1) {
-			return sizeof($this->value) + 1;
+		$extra = $this->getAttribute('reserve_empty_input') ? 1 : 0;
+
+		if ($minNum < sizeof($this->value) + $extra) {
+			return sizeof($this->value) + $extra;
 		}
 		if ($minNum < 1) {
 			return 1;
