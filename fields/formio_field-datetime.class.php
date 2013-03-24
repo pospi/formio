@@ -103,7 +103,10 @@ class FormIOField_Datetime extends FormIOField_Time
 	public function dateTimeToUnix($val)
 	{
 		@list($hr, $min, $sec) = explode(':', $val[1]);
-		if ($hr === null || $min === null) {
+		if ($min === null) {
+			$min = 0;
+		}
+		if ($hr === null) {
 			return null;
 		} else if ($val[2] == 'pm') {
 			if ($hr != 12) {
