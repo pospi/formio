@@ -201,6 +201,10 @@
 	color: #900;
 }
 
+.formio .invalid {
+	background-color: #FFEBE8;
+}
+
 .formio li.sectionErrors { border-color: #E8AEAE; }
 .formio li.sectionErrors a {	color: #A82626; }
 .formio div.tabNav { float: right; }
