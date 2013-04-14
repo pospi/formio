@@ -9,7 +9,7 @@ class FormIOField_Raw
 	public $form;					// form to which this field is attached
 
 	private $name;						// field name (data key)
-	protected $attributes = array();	// field attributes (mainly DOM attributes but subclasses will use it for other stuff)
+	protected $attributes = array('classes' => '');	// field attributes (mainly DOM attributes but subclasses will use it for other stuff)
 
 	public $buildString = '{$desc}';
 

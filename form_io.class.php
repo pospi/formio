@@ -496,6 +496,9 @@ class FormIO implements ArrayAccess
 		} else {
 			$this->errors[$dataKey] = $msg;
 		}
+
+		$this->fields[$dataKey]->addCSSClass('invalid');
+
 		$this->valid = false;
 		return true;
 	}
