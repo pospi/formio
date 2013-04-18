@@ -897,10 +897,11 @@ FormIO.prototype.shouldSkipValidator = function(el, validatorName)
 
 FormIO.prototype.highlightError = function(field)
 {
+	if (!field.hasClass('row')) {
+		field = this.getFieldRowElement(field);
+	}
 	// :TODO: show error messages, replicate the backend functionality
-	field.animate({
-		backgroundColor: "#ff9393",
-	}, 1000 );
+	field.addClass('invalid');
 };
 
 //=============================================================================================================
