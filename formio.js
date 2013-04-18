@@ -150,7 +150,7 @@ FormIO.prototype.setOption = function(k, v) {
 FormIO.prototype.setupForm = function(formEl)
 {
 	var that = this;
-	formEl.submit(function() { return that.onSubmit() });
+	formEl.submit(function(e) { return that.onSubmit(e) });
 };
 
 FormIO.prototype.setupFields = function(inside)
@@ -815,7 +815,7 @@ FormIO.prototype.setValidation = function(el)
 	this.validators[el.attr('id')] = validatorData;
 };
 
-FormIO.prototype.onSubmit = function()
+FormIO.prototype.onSubmit = function(e)
 {
 	var that = this;
 	var allOk = true;
