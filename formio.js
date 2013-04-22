@@ -471,7 +471,7 @@ FormIO.prototype.reorderRepeaterFields = function(el)
 		that = this;
 
 	// strings to replace in subelements
-	var nameBase = this.getFieldName(el.attr('id')),
+	var nameBase = el.data('name-base') || this.getFieldName(el.attr('id')),
 		idFind = new RegExp('^' + el.attr('id') + '_(\\d+)(.*)'),
 		nameFind = new RegExp('^' + nameBase.replace(/\[/g, '\\[').replace(/\]/g, '\\]') + '\\[(\\d+)\\](.*)'),
 		idDepFind = new RegExp('^#' + el.attr('id') + '_(\\d+)(.*)'),
