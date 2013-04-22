@@ -497,7 +497,19 @@ class FormIO implements ArrayAccess
 			$this->errors[$dataKey] = $msg;
 		}
 
-		$this->fields[$dataKey]->addCSSClass('invalid');
+		// add the error to the appropriate field. If field doesn't exist directly under the form, we can assume
+		// a grouped field and move back up the hierarchy until we get the topmost field
+		while (!isset($this->fields[$dataKey])) {
+			$bits = explode('][', $dataKey);
+			if (count($bits) == 1) {
+				break;
+			}
+			array_pop($bits);
+			$dataKey = implode('][', $bits) . ']';
+		}
+		if (isset($this->fields[$dataKey])) {
+			$this->fields[$dataKey]->addCSSClass('invalid');
+		}
 
 		$this->valid = false;
 		return true;
