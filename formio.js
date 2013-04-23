@@ -459,7 +459,7 @@ FormIO.prototype.getNewEmptyField = function(row)
 {
 	var newField = row.clone(false);
 	// reset the value of the new field
-	newField.find(':input:not(:button):not(:submit):not(:reset)').val('');
+	newField.find(':input:not(:button):not(:submit):not(:reset)').val('').removeAttr('checked').removeAttr('selected');
 
 	return newField;
 };
