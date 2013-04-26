@@ -16,7 +16,7 @@ class FormIOField_Readonly extends FormIOField_Text
 	protected function getBuilderVars()
 	{
 		$inputVars = parent::getBuilderVars();
-		$inputVars['escapedvalue'] = htmlentities($this->value);
+		$inputVars['escapedvalue'] = $this->_attr($this->value);
 		return $inputVars;
 	}
 }

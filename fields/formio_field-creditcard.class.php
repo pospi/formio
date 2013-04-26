@@ -59,10 +59,10 @@ class FormIOField_Creditcard extends FormIOField_Dropdown
 	{
 		$inputVars = FormIOField_Text::getBuilderVars();
 		if (is_array($this->value) && !empty($this->value[0]) && !empty($this->value[1]) && !empty($this->value[2])) {
-			$inputVars['cardnumber']	= $this->value['number'];
-			$inputVars['cardname']		= $this->value['name'];
-			$inputVars['cardexpiry']	= $this->value['expiry'];
-			$inputVars['cardccv']		= $this->value['ccv'];
+			$inputVars['cardnumber']	= $this->_attr($this->value['number']);
+			$inputVars['cardname']		= $this->_attr($this->value['name']);
+			$inputVars['cardexpiry']	= $this->_attr($this->value['expiry']);
+			$inputVars['cardccv']		= $this->_attr($this->value['ccv']);
 		}
 
 		// bring option string across from dropdown parent class

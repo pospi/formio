@@ -85,6 +85,9 @@ class FormIOField_Text extends FormIOField_Raw
 	{
 		$vars = parent::getBuilderVars();
 		$vars['value'] = $this->getRawValue();
+		if (is_scalar($vars['value'])) {
+			$vars['value'] = $this->_attr($vars['value']);
+		}
 
 		// add required flag if set
 		if ($this->hasValidator('requiredValidator') || $this->hasValidator('arrayRequiredValidator')) {

@@ -65,10 +65,10 @@ class FormIOField_Timerange extends FormIOField_DateTime
 	{
 		$inputVars = FormIOField_Text::getBuilderVars();
 		unset($inputVars['value']);
-		$inputVars['startdate']	= $this->value[0][0];
-		$inputVars['enddate']	= $this->value[1][0];
-		$inputVars['starttime']	= $this->value[0][1];
-		$inputVars['endtime']	= $this->value[1][1];
+		$inputVars['startdate']	= $this->_attr($this->value[0][0]);
+		$inputVars['enddate']	= $this->_attr($this->value[1][0]);
+		$inputVars['starttime']	= $this->_attr($this->value[0][1]);
+		$inputVars['endtime']	= $this->_attr($this->value[1][1]);
 		$inputVars['startam']	= $this->value[0][2] != 'pm';
 		$inputVars['endam']		= $this->value[1][2] != 'pm';
 		$inputVars['startpm']	= $this->value[0][2] == 'pm';

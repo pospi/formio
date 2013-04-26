@@ -170,6 +170,12 @@ class FormIOField_Raw
 		return $vars;
 	}
 
+	// attribute encoding. some things are unsafe.
+	protected function _attr($string)
+	{
+		return htmlspecialchars($string);
+	}
+
 	// Returns an HTML field ID for this form (form's name is prepended). Field name may be
 	// given when you don't wish to use this field's name for the ID you're generating
 	public function getFieldId($nameToEncode = null)

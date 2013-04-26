@@ -52,8 +52,8 @@ class FormIOField_Daterange extends FormIOField_Date
 	{
 		$vars = parent::getBuilderVars();
 		unset($vars['behaviour']);
-		$vars['value']		= $this->value[0];
-		$vars['valueEnd']	= $this->value[1];
+		$vars['value']		= $this->_attr($this->value[0]);
+		$vars['valueEnd']	= $this->_attr($this->value[1]);
 		return $vars;
 	}
 

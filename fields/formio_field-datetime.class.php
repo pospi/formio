@@ -55,8 +55,8 @@ class FormIOField_Datetime extends FormIOField_Time
 	{
 		$inputVars = FormIOField_Text::getBuilderVars();
 		if (is_array($this->value) && !empty($this->value[0]) && !empty($this->value[1]) && !empty($this->value[2])) {
-			$inputVars['value']		= $this->value[0];
-			$inputVars['valueTime']	= $this->value[1];
+			$inputVars['value']		= $this->_attr($this->value[0]);
+			$inputVars['valueTime']	= $this->_attr($this->value[1]);
 			$inputVars['pm']		= $this->value[2] == 'pm';
 			$inputVars['am']		= $this->value[2] != 'pm';
 		} else {

@@ -53,7 +53,7 @@ class FormIOField_Time extends FormIOField_Date
 	{
 		$inputVars = parent::getBuilderVars();
 		$val = $this->getRawValue();
-		$inputVars['value'] = $val[0];
+		$inputVars['value'] = $this->_attr($val[0]);
 		$inputVars['pm']	= $val[1] == 'pm';
 		$inputVars['am']	= $val[1] != 'pm';
 		return $inputVars;

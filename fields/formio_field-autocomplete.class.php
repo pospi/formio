@@ -82,7 +82,7 @@ class FormIOField_Autocomplete extends FormIOField_Text
 	{
 		$vars = parent::getBuilderVars();
 
-		$vars['friendlyValue'] = $this->getHumanReadableValue();
+		$vars['friendlyValue'] = $this->_attr($this->getHumanReadableValue());
 
 		$name = $this->getName();
 		if (substr($name, -1) == ']') {
@@ -90,7 +90,7 @@ class FormIOField_Autocomplete extends FormIOField_Text
 		} else {
 			$name .= '_friendly';
 		}
-		$vars['friendlyName'] = $name;
+		$vars['friendlyName'] = $this->_attr($name);
 		$vars['behaviour'] = 'autocomplete';
 
 		if (isset($vars['extradata'])) {
