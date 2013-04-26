@@ -3,7 +3,7 @@
  * Credit card input field. Contains separate inputs for card information.
  */
 
-class FormIOField_Creditcard extends FormIOField_Dropdown
+class FormIOField_Creditcard extends FormIOField_Multiple
 {
 	public $buildString = '<div class="row blck credit{$alt? alt}{$classes? $classes}" id="{$id}"{$dependencies? data-fio-depends="$dependencies"}{$validation? data-fio-validation="$validation"}>
 		<label for="{$id}_type">{$desc}{$required? <span class="required">*</span>}</label>
