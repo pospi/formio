@@ -14,7 +14,7 @@ class FormIOField_Checkgroup extends FormIOField_Radiogroup
 		// if a normal array is passed, flip it and use as selection
 		if (is_array($newVal) && count($newVal) && array_keys($newVal) === range(0, count($newVal) - 1)) {
 			$newVal = array_combine($newVal, array_fill(0, count($newVal), true));
-		} else {
+		} else if (is_array($newVal)) {
 			foreach ($newVal as &$v) {
 				$v = !!$v;
 			}
