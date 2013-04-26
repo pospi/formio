@@ -201,7 +201,7 @@
 	color: #900;
 }
 
-.formio .invalid {
+.formio .invalid, .formio .row.invalid {
 	background-color: #FFEBE8;
 }
 
