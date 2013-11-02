@@ -108,7 +108,7 @@ class FormIOField_Datetime extends FormIOField_Time
 		}
 		if ($hr === null) {
 			return null;
-		} else if ($val[2] == 'pm') {
+		} else if (!empty($val[2]) && $val[2] == 'pm') {
 			if ($hr != 12) {
 				$hr += 12;
 			}
