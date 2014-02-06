@@ -15,9 +15,20 @@ if (defined('DID_HEADER') && class_exists('P_Site')) {
 }
 
 $stylesheets = <<<EOT
-	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/cupertino/jquery-ui.css" type="text/css" />
-	<link rel="stylesheet" href="{$localPath}formio.css" type="text/css" />
-	<link rel="stylesheet" href="{$localPath}themes/modern.css" type="text/css" />
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/cupertino/jquery-ui.css" type="text/css" />
+<link rel="stylesheet" href="{$localPath}formio.css" type="text/css" />
+<link rel="stylesheet" href="{$localPath}themes/modern.css" type="text/css" />
+<style type="text/css">
+	div.panel { width: 700px; margin: 2em auto; border: 1px solid #AAA; padding: 1em; background: white; }
+	div#output pre {
+		white-space: pre-wrap; /* css-3 */
+		white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+		white-space: -pre-wrap; /* Opera 4-6 */
+		white-space: -o-pre-wrap; /* Opera 7 */
+		word-wrap: break-word; /* Internet Explorer 5.5+ */
+	}
+	div#output p { font-weight: bold; color: #429BC8; font-size: 1.2em; }
+</style>
 EOT;
 
 if (!defined('DID_HEADER')) :
@@ -30,16 +41,7 @@ if (!defined('DID_HEADER')) :
 <meta name="description" content="FormIO form building and validation library" />
 <meta name="keywords" content="FormIO,PHP forms,PHP form builder,form validation,secure form,pospi" />
 <style type="text/css">
-	html, body { color: #444; font-family: tahoma, verdana, arial, sans-serif; font-size: 12px; }
-	div.panel { width: 700px; margin: 2em auto; border: 1px solid #AAA; padding: 1em; }
-	div#output pre {
-		white-space: pre-wrap; /* css-3 */
-		white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-		white-space: -pre-wrap; /* Opera 4-6 */
-		white-space: -o-pre-wrap; /* Opera 7 */
-		word-wrap: break-word; /* Internet Explorer 5.5+ */
-	}
-	div#output p { font-weight: bold; color: #429BC8; font-size: 1.2em; }
+	html, body { color: #444; font-family: tahoma, verdana, arial, sans-serif; font-size: 12px; background: white; }
 </style>
 
 <?php echo $stylesheets; ?>
