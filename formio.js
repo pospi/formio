@@ -569,18 +569,27 @@ FormIO.prototype.reinitRepeaterFields = function(el)
 
 FormIO.prototype.initTabs = function()
 {
-	var tabs = this.elements.find('.tab:not(.header):not(.footer)');
+	var that = this,
+		tabs = this.elements.find('.tab:not(.header):not(.footer)'),
+		nextBtn, prevBtn, tabsWrap, tabsNav;
+
 	if (tabs.length < 2) {
 		return;
 	}
-	var that = this;
 
 	// add navigation buttons to the base of the form
-	var nextBtn = $("<input type=\"button\" class=\"navNext\" value=\"Next page\" />");
-	var prevBtn = $("<input type=\"button\" class=\"navPrev\" value=\"Previous page\" />");
+	nextBtn = $("<input type=\"button\" class=\"navNext\" value=\"Next page\" />");
+	prevBtn = $("<input type=\"button\" class=\"navPrev\" value=\"Previous page\" />");
+
+	tabs.wrapAll('<div />');
+
+	tabsWrap = tabs.parent();
+	tabsNav = tabsWrap.parent().find('.formnav');
+
+	tabsNav.prependTo(tabsWrap);
 
 	// create the tab handler
-	this.elements.tabs({
+	tabsWrap.tabs({
 		show: function(evt, ui) {
 			that.restripeForm();
 
