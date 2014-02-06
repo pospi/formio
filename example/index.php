@@ -54,7 +54,7 @@ if (!defined('DID_HEADER')) :
 
 <div class="panel">
 <?php
-	require_once('../form_io.class.php');
+	require_once(dirname(__FILE__) . '/../form_io.class.php');
 
 	// create form
 	$form = new FormIO('exampleForm', 'POST');
