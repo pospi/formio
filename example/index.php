@@ -18,6 +18,7 @@ $stylesheets = <<<EOT
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/cupertino/jquery-ui.css" type="text/css" />
 <link rel="stylesheet" href="{$localPath}formio.css" type="text/css" />
 <link rel="stylesheet" href="{$localPath}themes/modern.css" type="text/css" />
+<link rel="stylesheet" href="{$localPath}lib/jquery-tokeninput/styles/token-input.css" type="text/css" />
 <style type="text/css">
 	div.panel { width: 700px; margin: 2em auto; border: 1px solid #AAA; padding: 1em; background: white; }
 	div#output pre {
@@ -165,7 +166,7 @@ if (!defined('DID_HEADER')) :
 			->setHint("This field has a dependency set to trigger a survey field to show when checked")
 		->addField('survey',	"Do you like to:",				FormIO::T_SURVEY)		// :TODO: survey builder
 		->addField('autocom',	"An autocomplete field",		FormIO::T_AUTOCOMPLETE)	// :TODO: mutator to restrict to input array
-			->setAutocompleteURL("autocomplete_data.php")
+			->setAutocompleteURL("{$localPath}example/autocomplete_data.php")
 		->endFieldset()
 
 		->addSubHeader("And now for some other stuff...")
