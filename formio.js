@@ -581,7 +581,7 @@ FormIO.prototype.initTabs = function()
 	nextBtn = $("<input type=\"button\" class=\"navNext\" value=\"Next page\" />");
 	prevBtn = $("<input type=\"button\" class=\"navPrev\" value=\"Previous page\" />");
 
-	tabs.wrapAll('<div />');
+	tabs.wrapAll('<div class="tabset" />');
 
 	tabsWrap = tabs.parent();
 	tabsNav = tabsWrap.parent().find('.formnav');

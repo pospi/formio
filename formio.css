@@ -223,6 +223,10 @@
 	margin: 0.5em 0;
 }
 
+.formio .tabset {
+	margin: 1em 0;
+}
+
 /* Browser-specific style overrides (by which I mean hacks) */
 
 @-moz-document url-prefix() {							/* Gecko overrides */
