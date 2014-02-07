@@ -43,7 +43,10 @@
 	$matches = array();
 	foreach ($possibilities as $p) {
 		if (preg_match('/^' . $term . '/i', $p)) {
-			$matches[] = $p;
+			$matches[] = array(
+				'id' => $term,
+				'name' => $p,
+			);
 		}
 	}
 
