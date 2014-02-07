@@ -53,6 +53,7 @@ if (!defined('DID_HEADER')) :
 <?php endif; ?>
 
 <div class="panel">
+<!-- START DEMO -->
 <?php
 	require_once(dirname(__FILE__) . '/../form_io.class.php');
 
@@ -227,6 +228,7 @@ if (!defined('DID_HEADER')) :
 		return json_encode($field->getValue());
 	}
 ?>
+<!-- /END DEMO -->
 </div>
 <?php if (!(defined('DID_HEADER') && class_exists('P_Site'))) : ?>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
