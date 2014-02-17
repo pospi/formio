@@ -236,8 +236,9 @@ FormIO.prototype.refreshTabs = function()
 FormIO.prototype.nextTab = function()
 {
 	var next = this.getCurrentTab().next();
+
 	if (next.length) {
-		this.elements.tabs('select', next.attr('id'));
+		this.selectTabElement(next);
 	}
 };
 
@@ -245,8 +246,15 @@ FormIO.prototype.prevTab = function()
 {
 	var prev = this.getCurrentTab().prev();
 	if (prev.length) {
-		this.elements.tabs('select', prev.attr('id'));
+		this.selectTabElement(prev);
 	}
+};
+
+// workaround bugs and API changes in jqUI tabs widget
+FormIO.prototype.selectTabElement = function(tabEl)
+{
+	this.elements.find('ul.formnav a[href=#' + tabEl.attr('id') + ']').trigger('click');
+	tabEl.removeClass('ui-tabs-hide').attr('aria-hidden', false).show();
 };
 
 FormIO.prototype.getCurrentTab = function()
@@ -571,24 +579,64 @@ FormIO.prototype.initTabs = function()
 {
 	var that = this,
 		tabs = this.elements.find('.tab:not(.header):not(.footer)'),
-		nextBtn, prevBtn, tabsWrap, tabsNav;
+		tabsWrap = this.elements.find('.tabset'),
+		nextBtn, prevBtn, tabsNav;
 
 	if (tabs.length < 2) {
 		return;
 	}
 
+	// wrap up the tabs in a controller element
+	if (!tabsWrap.length) {
+		tabs.wrapAll('<div class="tabset" />');
+
+		tabsWrap = tabs.parent();
+		tabsNav = tabsWrap.parent().find('.formnav');
+
+		tabsNav.prependTo(tabsWrap);
+	}
+
+	// add a form footer if there isn't one yet
+	if (!this.elements.find('.tab.footer').length) {
+		tabs.last().after($('<div class="tab footer clearfix"></div>'));
+	}
+
 	// add navigation buttons to the base of the form
-	nextBtn = $("<input type=\"button\" class=\"navNext\" value=\"Next page\" />");
-	prevBtn = $("<input type=\"button\" class=\"navPrev\" value=\"Previous page\" />");
+	if (!this.elements.find('.tab.footer .tabNav').length) {
+		nextBtn = $("<input type=\"button\" class=\"navNext\" value=\"Next page\" />");
+		prevBtn = $("<input type=\"button\" class=\"navPrev\" value=\"Previous page\" />");
 
-	tabs.wrapAll('<div class="tabset" />');
+		this.elements.find('.tab.footer').prepend("<div class=\"tabNav\"></div>");
+		this.elements.find('.tab.footer div.tabNav').prepend(nextBtn).prepend(prevBtn);
 
-	tabsWrap = tabs.parent();
-	tabsNav = tabsWrap.parent().find('.formnav');
+		prevBtn.button();
+		nextBtn.button();
 
-	tabsNav.prependTo(tabsWrap);
+		prevBtn.click(function() {
+			that.prevTab();
+		}).button('disable');
+		nextBtn.click(function() {
+			that.nextTab();
+		});
+	} else {
+		nextBtn = this.elements.find("button.navNext");
+		prevBtn = this.elements.find("button.navPrev");
+	}
 
-	// create the tab handler
+	// create the tab handler (compatible with old and new tabs APIs)
+	function handleTabSelection(tabIndex) {
+		if (tabIndex == 0) {
+			nextBtn.button('enable');
+			prevBtn.button('disable');
+		} else if (tabIndex == tabs.length - 1) {
+			nextBtn.button('disable');
+			prevBtn.button('enable');
+		} else {
+			nextBtn.button('enable');
+			prevBtn.button('enable');
+		}
+	}
+
 	tabsWrap.tabs({
 		show: function(evt, ui) {
 			that.restripeForm();
@@ -596,33 +644,12 @@ FormIO.prototype.initTabs = function()
 			// scroll back to the top of the form, focus the first input
 			tabs.filter(':visible').find(':input').get(0).focus();
 		},
-		select: function(event, ui) {
-			if (ui.index == 0) {
-				nextBtn.button('enable');
-				prevBtn.button('disable');
-			} else if (ui.index == tabs.length - 1) {
-				nextBtn.button('disable');
-				prevBtn.button('enable');
-			} else {
-				nextBtn.button('enable');
-				prevBtn.button('enable');
-			}
+		select: function(e, ui) {
+			handleTabSelection(ui.index);
+		},
+		activate: function(e, ui) {
+			handleTabSelection(ui.newTab.index());
 		}
-	});
-
-	if (!this.elements.find('.tab.footer').length) {
-		tabs.last().after($('<div class="tab footer clearfix"></div>'));
-	}
-
-	this.elements.find('.tab.footer').prepend("<div class=\"tabNav\"></div>");
-	this.elements.find('.tab.footer div.tabNav').prepend(nextBtn).prepend(prevBtn);
-	prevBtn.button();
-	nextBtn.button();
-	prevBtn.click(function() {
-		that.prevTab();
-	}).button('disable');
-	nextBtn.click(function() {
-		that.nextTab();
 	});
 
 	this.refreshTabs();
