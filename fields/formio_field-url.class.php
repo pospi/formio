@@ -37,7 +37,7 @@ class FormIOField_Url extends FormIOField_Text
 
 	// ensures a scheme is present
 	protected function normaliseURL($str) {
-		if (!preg_match('/^\w+:\/\//', $str)) {
+		if (!preg_match('/^(\w+:)?\/\//', $str)) {
 			return 'http://' . $str;
 		}
 		return $str;
